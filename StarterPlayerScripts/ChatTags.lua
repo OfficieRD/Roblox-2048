@@ -1,62 +1,78 @@
 local TextChatService = game:GetService("TextChatService")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-print("?? Script de Chat (Estilo Bubblegum) CARGADO")
+local GameData = require(ReplicatedStorage:WaitForChild("GameData"))
 
--- CONFIGURACI”N DE ESTILOS
--- ColorTitle: El color de las letras del rango
--- ColorBracket: El color de los corchetes [ ] (Opcional, si quieres que sean distintos)
-local TITLE_STYLES = {
-	["Novice"] = {Color = "#A0A0A0", Text = "Novice"},
-	["Pro"]    = {Color = "#00AAFF", Text = "Pro"},
-	["Master"] = {Color = "#BF00FF", Text = "Master"},
-	["Legend"] = {Color = "#FF9900", Text = "Legend"},
-	["Hacker"] = {Color = "#00FF00", Text = "Hacker"},
-	["VIP"]    = {Color = "#FFD700", Text = "VIP"},
+-- 1. FUNCI√ìN MATEM√ÅTICA: Obtener color exacto en un punto del degradado
+local function getColorAtTime(colorSequence, t)
+	if t <= 0 then return colorSequence.Keypoints[1].Value end
+	if t >= 1 then return colorSequence.Keypoints[#colorSequence.Keypoints].Value end
 
-	-- TÕTULOS DE FRUTAS
-	["Tutti Frutti ??"] = {Color = "#FF69B4", Text = "Tutti Frutti ??"},
-	["Apple Crisp ??"]  = {Color = "#FF4040", Text = "Apple Crisp ??"},
-	["Golden Orchard ??"] = {Color = "#FFD700", Text = "Golden Orchard ??"},
-
-	-- SEASON 1: HIGH SCORE
-	["S1 #1 Score ??"]   = {Color = "#FFD700", Text = "S1 #1 Score ??"}, -- Oro
-	["S1 #2 Score ??"]   = {Color = "#C0C0C0", Text = "S1 #2 Score ??"}, -- Plata
-	["S1 #3 Score ??"]   = {Color = "#CD7F32", Text = "S1 #3 Score ??"}, -- Bronce
-	["S1 Top 10 Score"]  = {Color = "#A020F0", Text = "S1 Top 10 Score"}, -- Violeta
-	["S1 Top 100 Score"] = {Color = "#0064FF", Text = "S1 Top 100 Score"}, -- Azul Fuerte
-
-
-}
-
-TextChatService.OnIncomingMessage = function(message)
-	local props = Instance.new("TextChatMessageProperties")
-
-	if message.TextSource then
-		local player = Players:GetPlayerByUserId(message.TextSource.UserId)
-
-		if player then
-			-- 1. Obtener el tÌtulo guardado
-			local titleKey = player:GetAttribute("EquippedTitle")
-
-			-- 2. Verificar si tenemos estilo para ese tÌtulo
-			if titleKey and TITLE_STYLES[titleKey] then
-				local style = TITLE_STYLES[titleKey]
-
-				-- 3. CREAR EL TAG ESTILO BUBBLEGUM
-				-- Formato: [Titulo] (en Negrita y Color)
-				-- <b> pone el texto grueso. <font color> le da color.
-				local tagFormat = string.format(
-					"<font color='%s'><b>[%s]</b></font> ", 
-					style.Color, 
-					style.Text
-				)
-
-				-- AÒadimos el tag antes del nombre
-				props.PrefixText = tagFormat .. message.PrefixText
-			end
+	for i = 1, #colorSequence.Keypoints - 1 do
+		local thisKey = colorSequence.Keypoints[i]
+		local nextKey = colorSequence.Keypoints[i + 1]
+		if t >= thisKey.Time and t < nextKey.Time then
+			local alpha = (t - thisKey.Time) / (nextKey.Time - thisKey.Time)
+			return thisKey.Value:Lerp(nextKey.Value, alpha)
 		end
 	end
+	return colorSequence.Keypoints[1].Value
+end
 
-	return props
+-- 2. FUNCI√ìN DE FORMATO: Colorear Letra por Letra (El truco visual)
+local function applyGradientToText(text, colorSequence)
+	local result = ""
+	local length = #text
+
+	for i = 1, length do
+		-- Calcular posici√≥n (0 a 1) para esta letra
+		local step = (i - 1) / math.max(1, length - 1)
+		local charColor = getColorAtTime(colorSequence, step)
+		local hex = charColor:ToHex()
+
+		-- Envolver letra en etiqueta de color
+		local char = string.sub(text, i, i)
+		result = result .. string.format("<font color='#%s'>%s</font>", hex, char)
+	end
+	return result
+end
+
+local function getTitleData(name)
+	if not GameData.TITLES_DATA then return nil end
+	for _, d in pairs(GameData.TITLES_DATA) do
+		if d.Name == name then return d end
+	end
+	return nil
+end
+
+-- 3. CONECTAR AL CHAT
+TextChatService.OnIncomingMessage = function(message)
+	if not message.TextSource then return end
+
+	local player = Players:GetPlayerByUserId(message.TextSource.UserId)
+	if not player then return end
+
+	local equippedTitle = player:GetAttribute("EquippedTitle")
+
+	if equippedTitle then
+		local data = getTitleData(equippedTitle)
+
+		if data then
+			local titleText = ""
+
+			-- ¬øTiene degradado? Usamos la funci√≥n letra por letra
+			if data.Gradient then
+				local gradientText = applyGradientToText(equippedTitle, data.Gradient)
+				titleText = string.format("[%s]", gradientText)
+			else
+				-- Si no tiene degradado, color plano (Fallback)
+				local hex = data.Color and data.Color:ToHex() or "FFFFFF"
+				titleText = string.format("<font color='#%s'>[%s]</font>", hex, equippedTitle)
+			end
+
+			-- Aplicar al chat
+			message.PrefixText = titleText .. " " .. message.PrefixText
+		end
+	end
 end
