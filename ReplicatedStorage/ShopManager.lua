@@ -464,11 +464,11 @@ function ShopManager.populateSkins(currentSkin, callbackColor)
 
 			if item.IsVIP then
 				-- Verificación para VIP (GamePass)
-				-- 1. Mirar si lo compramos en esta sesión
-				if sessionOwnedPasses[VIP_ID] then 
+				-- 1. Mirar si lo compramos en esta sesión o si el servidor cargó el dato (Atributo)
+				if sessionOwnedPasses[VIP_ID] or player:GetAttribute("PassOwned_" .. VIP_ID) then 
 					isOwned = true 
 				else
-					-- 2. Preguntar a Roblox (Esto previene comprarlo 2 veces)
+					-- 2. Preguntar a Roblox (Fallback)
 					local s, h = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, VIP_ID) end)
 					if s and h then isOwned = true end
 				end
@@ -603,9 +603,16 @@ function ShopManager.populatePasses()
 		buyBtn.Font=Enum.Font.FredokaOne; buyBtn.TextScaled=true; Instance.new("UICorner", buyBtn).CornerRadius = UDim.new(0, 8)
 
 		-- 🔎 VERIFICAR SI YA LO TIENE (API + Memoria Local)
-		local isOwned = sessionOwnedPasses[pass.Id] == true -- Revisar memoria local primero
+		local isOwned = false
 
-		if not isOwned then -- Si no está en memoria, preguntar a Roblox
+		-- 1. Revisar si el servidor nos cargó el pase (SISTEMA DE GUARDADO)
+		if player:GetAttribute("PassOwned_" .. pass.Id) then
+			isOwned = true
+			-- 2. Revisar si lo compramos en esta sesión
+		elseif sessionOwnedPasses[pass.Id] then
+			isOwned = true
+		else
+			-- 3. Preguntar a Roblox (Último recurso)
 			local success, result = pcall(function()
 				return MarketplaceService:UserOwnsGamePassAsync(player.UserId, pass.Id)
 			end)
