@@ -9,18 +9,18 @@ local playerGui = player:WaitForChild("PlayerGui")
 -- Verificamos si existe el evento
 local AdminEvent = ReplicatedStorage:WaitForChild("AdminAction", 5)
 if not AdminEvent then
-	warn("🔴 ERROR CRÍTICO: No se encontró el RemoteEvent 'AdminAction'")
+	warn("?? ERROR CR�TICO: No se encontr� el RemoteEvent 'AdminAction'")
 	return
 end
 
-print("🔵 SCRIPT ADMIN CLIENTE: Iniciado para " .. player.Name)
+print("?? SCRIPT ADMIN CLIENTE: Iniciado para " .. player.Name)
 
--- LISTA DE ADMINS (Asegúrate de estar aquí)
+-- LISTA DE ADMINS (Aseg�rate de estar aqu�)
 local ADMINS = {
 	["OFFICIE_ROBLOX"] = true,
 }
 
--- --- CREACIÓN DE UI (REWORK PREMIUM) ---
+-- --- CREACI�N DE UI (REWORK PREMIUM) ---
 if playerGui:FindFirstChild("AdminPanelUI") then playerGui.AdminPanelUI:Destroy() end
 
 local ScreenGui = Instance.new("ScreenGui")
@@ -33,7 +33,7 @@ ScreenGui.Parent = playerGui
 -- 1. MARCO PRINCIPAL (DASHBOARD)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "Panel"
-MainFrame.Size = UDim2.new(0, 450, 0, 650) -- Un poco más alto para que quepa todo
+MainFrame.Size = UDim2.new(0, 450, 0, 650) -- Un poco m�s alto para que quepa todo
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
@@ -54,7 +54,7 @@ Shadow.AnchorPoint = Vector2.new(0.5, 0.5); Shadow.Position = UDim2.new(0.5,0,0.
 -- 2. HEADER
 local Header = Instance.new("Frame", MainFrame)
 Header.Size = UDim2.new(1, 0, 0.1, 0); Header.BackgroundTransparency = 1
-local TitleText = Instance.new("TextLabel", Header); TitleText.Text = "COMMAND CENTER 🛡️"; TitleText.Size = UDim2.new(1, -20, 1, 0); TitleText.Position = UDim2.new(0, 20, 0, 0); TitleText.BackgroundTransparency = 1; TitleText.TextColor3 = Color3.new(1,1,1); TitleText.Font = Enum.Font.FredokaOne; TitleText.TextSize = 26; TitleText.TextXAlignment = Enum.TextXAlignment.Left
+local TitleText = Instance.new("TextLabel", Header); TitleText.Text = "COMMAND CENTER ???"; TitleText.Size = UDim2.new(1, -20, 1, 0); TitleText.Position = UDim2.new(0, 20, 0, 0); TitleText.BackgroundTransparency = 1; TitleText.TextColor3 = Color3.new(1,1,1); TitleText.Font = Enum.Font.FredokaOne; TitleText.TextSize = 26; TitleText.TextXAlignment = Enum.TextXAlignment.Left
 local CloseHint = Instance.new("TextLabel", Header); CloseHint.Text = "[F2] to Close"; CloseHint.Size = UDim2.new(0.3, 0, 1, 0); CloseHint.Position = UDim2.new(0.7, 0, 0, 0); CloseHint.BackgroundTransparency = 1; CloseHint.TextColor3 = Color3.fromRGB(150,150,150); CloseHint.Font = Enum.Font.GothamBold; CloseHint.TextSize = 14
 
 -- 3. CONTENEDOR SCROLL
@@ -102,73 +102,73 @@ local AmountBox = createInput("1000", 4)
 
 createLabel("3. ACTIONS", 5)
 
-createBtn("ADD COINS 🟡", Color3.fromRGB(255, 180, 0), 6, function()
+createBtn("ADD COINS ??", Color3.fromRGB(255, 180, 0), 6, function()
 	AdminEvent:FireServer("AddCoins", TargetBox.Text, AmountBox.Text)
 end)
 
--- NUEVO BOTÓN DE DIAMANTES
-createBtn("ADD DIAMONDS 💎", Color3.fromRGB(0, 180, 255), 7, function()
+-- NUEVO BOT�N DE DIAMANTES
+createBtn("ADD DIAMONDS ??", Color3.fromRGB(0, 180, 255), 7, function()
 	AdminEvent:FireServer("AddDiamonds", TargetBox.Text, AmountBox.Text)
 end)
 
-createBtn("ADD FRUIT GEMS 🍓", Color3.fromRGB(255, 80, 100), 8, function()
+createBtn("ADD FRUIT GEMS ??", Color3.fromRGB(255, 80, 100), 8, function()
 	AdminEvent:FireServer("AddFruits", TargetBox.Text, AmountBox.Text)
 end)
 
-createBtn("SET LEVEL 🆙", Color3.fromRGB(80, 220, 100), 9, function()
+createBtn("SET LEVEL ??", Color3.fromRGB(80, 220, 100), 9, function()
 	AdminEvent:FireServer("SetLevel", TargetBox.Text, AmountBox.Text)
 end)
 
--- BOTÓN DE HIGHSCORE AÑADIDO
-createBtn("SET HIGHSCORE 🏆", Color3.fromRGB(255, 215, 0), 10, function()
+-- BOT�N DE HIGHSCORE A�ADIDO
+createBtn("SET HIGHSCORE ??", Color3.fromRGB(255, 215, 0), 10, function()
 	AdminEvent:FireServer("SetScore", TargetBox.Text, AmountBox.Text)
 end)
 
--- ✅ CORREGIDO: AHORA SÍ FUNCIONA (Con función y orden correcto 11)
-createBtn("SET 5x5 SCORE 🟦", Color3.fromRGB(150, 50, 255), 11, function()
+-- ? CORREGIDO: AHORA S� FUNCIONA (Con funci�n y orden correcto 11)
+createBtn("SET 5x5 SCORE ??", Color3.fromRGB(150, 50, 255), 11, function()
 	AdminEvent:FireServer("SetScore5x5", TargetBox.Text, AmountBox.Text)
 end)
 
 createLabel("4. SPECIALS", 12) -- Movido a 12
 local AttrBox = createInput("Attribute Name (e.g. Title_S1_HS_1)", 13)
 
-createBtn("GIVE ATTRIBUTE 🔓", Color3.fromRGB(160, 50, 255), 14, function()
+createBtn("GIVE ATTRIBUTE ??", Color3.fromRGB(160, 50, 255), 14, function()
 	AdminEvent:FireServer("GiveAttribute", TargetBox.Text, AttrBox.Text)
 end)
 
-createBtn("UNLOCK ALL SKINS/TITLES 🌟", Color3.fromRGB(255, 0, 255), 15, function()
+createBtn("UNLOCK ALL SKINS/TITLES ??", Color3.fromRGB(255, 0, 255), 15, function()
 	AdminEvent:FireServer("UnlockAllTitles", TargetBox.Text, nil)
 end)
 
--- Botón nuevo para Resetear Nivel
-createBtn("RESET LEVEL ONLY 📉", Color3.fromRGB(255, 100, 50), 16, function()
+-- Bot�n nuevo para Resetear Nivel
+createBtn("RESET LEVEL ONLY ??", Color3.fromRGB(255, 100, 50), 16, function()
 	AdminEvent:FireServer("ResetLevel", TargetBox.Text, nil)
 end)
 
 -- CONTROLES DE RACHA
-createBtn("SET STREAK DAYS 🔥", Color3.fromRGB(255, 140, 0), 17, function()
+createBtn("SET STREAK DAYS ??", Color3.fromRGB(255, 140, 0), 17, function()
 	AdminEvent:FireServer("SetStreak", TargetBox.Text, AmountBox.Text)
 end)
 
-createBtn("BREAK STREAK 💔", Color3.fromRGB(100, 100, 100), 18, function()
+createBtn("BREAK STREAK ??", Color3.fromRGB(100, 100, 100), 18, function()
 	AdminEvent:FireServer("BreakStreak", TargetBox.Text, nil)
 end)
 
--- ✅ BOTÓN RESTAURADO: RESETEAR TODO (DATA + LEADERBOARDS)
-createBtn("XXX RESET ALL DATA XXX ☠️", Color3.fromRGB(180, 0, 0), 20, function()
+-- ? BOT�N RESTAURADO: RESETEAR TODO (DATA + LEADERBOARDS)
+createBtn("XXX RESET ALL DATA XXX ??", Color3.fromRGB(180, 0, 0), 20, function()
 	AdminEvent:FireServer("Reset", TargetBox.Text, nil)
 end)
 
 
 -- TOGGLE CON F2
 UserInputService.InputBegan:Connect(function(input, processed)
-	if processed then return end -- Ignorar si estás escribiendo en el chat
+	if processed then return end -- Ignorar si est�s escribiendo en el chat
 	if input.KeyCode == Enum.KeyCode.F2 then
-		-- Verificación de seguridad: Solo abrir si está en la lista ADMINS
+		-- Verificaci�n de seguridad: Solo abrir si est� en la lista ADMINS
 		if ADMINS[player.Name] then
 			MainFrame.Visible = not MainFrame.Visible
 		else
-			warn("⛔ Acceso denegado: No eres administrador.")
+			warn("? Acceso denegado: No eres administrador.")
 		end
 	end
 end)

@@ -4,7 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local GameData = require(ReplicatedStorage:WaitForChild("GameData"))
 
--- 1. FUNCI√ìN MATEM√ÅTICA: Obtener color exacto en un punto del degradado
+-- 1. FUNCI”N MATEM¡TICA: Obtener color exacto en un punto del degradado
 local function getColorAtTime(colorSequence, t)
 	if t <= 0 then return colorSequence.Keypoints[1].Value end
 	if t >= 1 then return colorSequence.Keypoints[#colorSequence.Keypoints].Value end
@@ -20,13 +20,13 @@ local function getColorAtTime(colorSequence, t)
 	return colorSequence.Keypoints[1].Value
 end
 
--- 2. FUNCI√ìN DE FORMATO: Colorear Letra por Letra (El truco visual)
+-- 2. FUNCI”N DE FORMATO: Colorear Letra por Letra (El truco visual)
 local function applyGradientToText(text, colorSequence)
 	local result = ""
 	local length = #text
 
 	for i = 1, length do
-		-- Calcular posici√≥n (0 a 1) para esta letra
+		-- Calcular posiciÛn (0 a 1) para esta letra
 		local step = (i - 1) / math.max(1, length - 1)
 		local charColor = getColorAtTime(colorSequence, step)
 		local hex = charColor:ToHex()
@@ -61,7 +61,7 @@ TextChatService.OnIncomingMessage = function(message)
 		if data then
 			local titleText = ""
 
-			-- ¬øTiene degradado? Usamos la funci√≥n letra por letra
+			-- øTiene degradado? Usamos la funciÛn letra por letra
 			if data.Gradient then
 				local gradientText = applyGradientToText(equippedTitle, data.Gradient)
 				titleText = string.format("[%s]", gradientText)
