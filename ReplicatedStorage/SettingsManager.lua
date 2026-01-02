@@ -14,7 +14,7 @@ local SettingsFrame = nil
 local StatsFrame = nil
 local player = Players.LocalPlayer
 
--- EVENTOS (Los buscamos aquÌ para no ensuciar el cliente)
+-- EVENTOS (Los buscamos aqu√≠ para no ensuciar el cliente)
 local SaveSettingsEvent = ReplicatedStorage:WaitForChild("SaveSettings", 5)
 local GetStatsFunc = ReplicatedStorage:WaitForChild("GetPlayerStats", 5)
 
@@ -35,7 +35,7 @@ function SettingsManager.init(ScreenGui, menuFrame)
 
 	local SettingsHeader = Instance.new("Frame", SettingsFrame)
 	SettingsHeader.Size = UDim2.new(1, 0, 0.15, 0); SettingsHeader.BackgroundTransparency = 1
-	local STitle = Instance.new("TextLabel", SettingsHeader); STitle.Text = "SETTINGS ??"; STitle.Size = UDim2.new(1, 0, 1, 0); STitle.BackgroundTransparency = 1; STitle.TextColor3 = Color3.new(1,1,1); STitle.Font = Enum.Font.FredokaOne; STitle.TextSize = 24; STitle.ZIndex = 1501
+	local STitle = Instance.new("TextLabel", SettingsHeader); STitle.Text = "SETTINGS ‚öôÔ∏è"; STitle.Size = UDim2.new(1, 0, 1, 0); STitle.BackgroundTransparency = 1; STitle.TextColor3 = Color3.new(1,1,1); STitle.Font = Enum.Font.FredokaOne; STitle.TextSize = 24; STitle.ZIndex = 1501
 
 	local SContainer = Instance.new("Frame", SettingsFrame)
 	SContainer.Size = UDim2.new(0.9, 0, 0.7, 0); SContainer.Position = UDim2.new(0.05, 0, 0.15, 0); SContainer.BackgroundTransparency = 1; SContainer.ZIndex = 1501
@@ -54,11 +54,11 @@ function SettingsManager.init(ScreenGui, menuFrame)
 	Instance.new("UICorner", Refs.SCloseBtn).CornerRadius = UDim.new(0, 8)
 	UIUtils.addHoverEffect(Refs.SCloseBtn)
 
-	-- CONEXI”N CERRAR INTERNA
+	-- CONEXI√ìN CERRAR INTERNA
 	Refs.SCloseBtn.MouseButton1Click:Connect(function()
 		UIUtils.closeMenuWithAnim(SettingsFrame)
-		-- AquÌ no podemos restaurar los botones del men˙ principal f·cilmente porque no tenemos referencia
-		-- pero el GameClient se encargar· si detecta que se cerrÛ.
+		-- Aqu√≠ no podemos restaurar los botones del men√∫ principal f√°cilmente porque no tenemos referencia
+		-- pero el GameClient se encargar√° si detecta que se cerr√≥.
 	end)
 
 	-- === 2. FUNCIONES DE UI INTERNAS ===
@@ -100,10 +100,10 @@ function SettingsManager.init(ScreenGui, menuFrame)
 		local knob = Instance.new("Frame", switchBg); knob.Size = UDim2.new(0, 0, 0.85, 0); knob.SizeConstraint = Enum.SizeConstraint.RelativeYY; knob.BackgroundColor3 = Color3.new(1,1,1); Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
 		local btn = Instance.new("TextButton", container); btn.Text = ""; btn.Size = UDim2.new(1,0,1,0); btn.BackgroundTransparency = 1
 
-		-- ? L”GICA DE ESTADO INICIAL (Corregida)
+		-- ‚úÖ L√ìGICA DE ESTADO INICIAL (Corregida)
 		local attrVal = player:GetAttribute(attrName)
 		local isOn = false
-		-- Si es el botÛn de XP y es nil (nunca guardado), lo activamos por defecto
+		-- Si es el bot√≥n de XP y es nil (nunca guardado), lo activamos por defecto
 		if attrName == "SavedShowXP" and attrVal == nil then
 			isOn = true
 		else
@@ -111,7 +111,7 @@ function SettingsManager.init(ScreenGui, menuFrame)
 		end
 
 		local function setVisual(state, animate)
-			-- ? AQUÕ EST¡ LA LÕNEA QUE FALTABA:
+			-- ‚úÖ AQU√ç EST√Å LA L√çNEA QUE FALTABA:
 			local targetColor = state and Color3.fromRGB(50, 205, 50) or Color3.fromRGB(80, 80, 80)
 
 			local targetPos = state and UDim2.new(0.95, 0, 0.5, 0) or UDim2.new(0.05, 0, 0.5, 0)
@@ -138,7 +138,7 @@ function SettingsManager.init(ScreenGui, menuFrame)
 
 	-- CONTROLES (Reajustados para que quepan 4 opciones: 0, 0.25, 0.5, 0.75)
 
-	-- 1. M˙sica
+	-- 1. M√∫sica
 	createModernSlider("MUSIC VOLUME", 0, "SavedVolMusic", function(val) MusicManager.setVolume(val) end)
 
 	-- 2. Efectos
@@ -147,16 +147,16 @@ function SettingsManager.init(ScreenGui, menuFrame)
 	end)
 
 	-- 3. Modo Oscuro
-	createToggle("DARK MODE ??", 0.5, "SavedDarkMode", function(active)
+	createToggle("DARK MODE üåô", 0.5, "SavedDarkMode", function(active)
 		if menuFrame then
 			local targetBg = active and Color3.fromRGB(20, 20, 25) or GameData.DEFAULT_THEME_COLORS.Bg
 			TweenService:Create(menuFrame, TweenInfo.new(0.5), {BackgroundColor3 = targetBg}):Play()
 		end
 	end)
 
-	-- 4. ? NUEVO: Mostrar XP
-	createToggle("SHOW XP TEXT ?", 0.75, "SavedShowXP", function(active)
-		-- No necesitamos lÛgica aquÌ, el GameClient lee el atributo "SavedShowXP" directamente
+	-- 4. ‚úÖ NUEVO: Mostrar XP
+	createToggle("SHOW XP TEXT ‚ú®", 0.75, "SavedShowXP", function(active)
+		-- No necesitamos l√≥gica aqu√≠, el GameClient lee el atributo "SavedShowXP" directamente
 	end)
 
 	-- === 3. CREAR STATS FRAME ===
@@ -185,6 +185,8 @@ function SettingsManager.init(ScreenGui, menuFrame)
 	createStatRow("High Score:", "Loading...")
 	createStatRow("Total Coins:", "Loading...")
 	createStatRow("Total Fruit Gems:", "Loading...")
+	-- ‚úÖ NUEVA FILA VISUAL AQU√ç
+	createStatRow("Robux Spent:", "Loading...") 
 	createStatRow("Titles Unlocked:", "Loading...")
 	createStatRow("Time Played:", "Loading...")
 
@@ -220,8 +222,15 @@ function SettingsManager.updateStats()
 					if nameLbl.Text == "High Score:" then valLbl.Text = formatNumber(myBest) end
 					if nameLbl.Text == "Total Coins:" then valLbl.Text = formatNumber(stats.TotalCoins) end
 					if nameLbl.Text == "Total Fruit Gems:" then valLbl.Text = formatNumber(stats.TotalFruitGems) end
+
+					-- ‚úÖ ACTUALIZAR EL VALOR DE ROBUX
+					if nameLbl.Text == "Robux Spent:" then valLbl.Text = "R$ " .. formatNumber(stats.TotalRobuxSpent or 0) end
+
+					-- ‚úÖ ACTUALIZAR EL VALOR DE T√çTULOS (Ahora real)
+					if nameLbl.Text == "Titles Unlocked:" then valLbl.Text = (stats.TitlesCount or 0) .. " Titles" end
+
 					if nameLbl.Text == "Time Played:" then valLbl.Text = formatTime(stats.TimePlayed) end
-					if nameLbl.Text == "Titles Unlocked:" then valLbl.Text = "..." end
+					
 				end
 			end
 		end
