@@ -14,28 +14,18 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -------------------------------------------------------------------------
--- 1. CONFIGURACI”N GLOBAL Y VISUAL
+-- 1. CONFIGURACI√ìN GLOBAL Y VISUAL
 -------------------------------------------------------------------------
 
 local PADDING = 0.02
--- Variables din·micas para el modo de juego
-local BOARD_SIZE = 4 -- Por defecto 4x4
-local GAME_MODE = "Classic" -- Classic, 5x5, Special
+-- Variables din√°micas para el modo de juego
+local BOARD_SIZE = 4 
+local GAME_MODE = "Classic" 
 local CELL_SIZE = (1 - (PADDING * (BOARD_SIZE + 1))) / BOARD_SIZE
 
+-- CONFIGURACI√ìN DE AUDIO Y ANIMACI√ìN
 local VolMove = 0.5
 local VolMerge = 0.6
-local MuteMove = false
-local MuteMerge = false
-local TWEEN_SPEED = 0.1 
-local POP_SPEED = 0.15
-
-
-local VolMusic = 0.5 -- Volumen por defecto M˙sica
-local VolSFX = 0.5   -- Volumen por defecto Efectos (Move/Merge) VolMove = 0.5
-local VolMerge = 0.6
-local MuteMove = false
-local MuteMerge = false
 local TWEEN_SPEED = 0.1 
 local POP_SPEED = 0.15
 
@@ -44,32 +34,31 @@ local UNDO_PRODUCT_ID = 0
 local MOCK_PURCHASE = true 
 local VIP_GAMEPASS_ID = 1605082468 
 
--- M”DULOS EXTERNOS
+-- M√ìDULOS EXTERNOS (Cargados una sola vez)
 local UIUtils = require(ReplicatedStorage:WaitForChild("UIUtils"))
-local GameData = require(ReplicatedStorage:WaitForChild("GameData"))
--- ?? AGREGA ESTA LÕNEA SI FALTA ??
-local MusicManager = require(ReplicatedStorage:WaitForChild("MusicManager"))
+-- GameData y MusicManager se cargan m√°s abajo, no los dupliques aqu√≠
 
 local function formatNumber(n)
 	
 	return tostring(n):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
 end
 
--- CARGAR DATOS DEL M”DULO (Esto libera memoria del script principal)
+-- CARGAR DATOS DEL M√ìDULO (Esto libera memoria del script principal)
 local GameData = require(ReplicatedStorage:WaitForChild("GameData"))
 
 local DEFAULT_TILES = GameData.DEFAULT_TILES
 local DEFAULT_THEME_COLORS = GameData.DEFAULT_THEME_COLORS
 local THEMES = GameData.THEMES
 local MUSIC_PLAYLIST = GameData.MUSIC_PLAYLIST
-local TITLES_DATA = GameData.TITLES_DATA -- Movemos Titles aquÌ tambiÈn para ordenarlo
+local TITLES_DATA = GameData.TITLES_DATA -- Movemos Titles aqu√≠ tambi√©n para ordenarlo
 
--- ? NUEVA VARIABLE GLOBAL PARA PASES (AquÌ la ven TODOS)
+-- ‚úÖ NUEVA VARIABLE GLOBAL PARA PASES (Aqu√≠ la ven TODOS)
 local localSessionPasses = {} 
 
 local currentSkin = "Classic"
-local currentEquippedTitle = "Novice" -- Variable recuperada
-local currentlySelectedTitle = nil    -- Variable recuperada
+local currentEquippedTitle = "Novice"
+local currentlySelectedTitle = nil
+local currentTitleCategory = "Main" -- ‚úÖ ESTA VARIABLE FALTABA
 
 local BOARD_COLOR = DEFAULT_THEME_COLORS.Board
 local BG_COLOR = DEFAULT_THEME_COLORS.Bg
@@ -85,20 +74,19 @@ local MusicManager = require(ReplicatedStorage:WaitForChild("MusicManager"))
 
 local VolMusic = player:GetAttribute("SavedVolMusic") or 0.5
 local VolSFX = player:GetAttribute("SavedVolSFX") or 0.5
-local isDarkMode = player:GetAttribute("SavedDarkMode") == true -- ?? ESTA ES LA VARIABLE QUE FALTABA
+local isDarkMode = player:GetAttribute("SavedDarkMode") == true -- üü¢ ESTA ES LA VARIABLE QUE FALTABA
 
 local UNDO_ICON_ID = "rbxassetid://110255570642946"
 local SETTINGS_ICON_ID = "rbxassetid://134480740047113"
-local COIN_ICON_ID = "rbxassetid://108796514719654" -- ? ID DE MONEDA CORREGIDO
+local COIN_ICON_ID = "rbxassetid://108796514719654" -- ‚úÖ ID DE MONEDA CORREGIDO
 local SHOP_ICON_ID = "rbxassetid://85619868467544"
-local SHOP_ICON_ID = "rbxassetid://85619868467544" -- ? Nueva Shop
 -------------------------------------------------------------------------
--- 2. DECLARACI”N ANTICIPADA DE UI
+-- 2. DECLARACI√ìN ANTICIPADA DE UI
 -------------------------------------------------------------------------
 local ScreenGui, LoadingFrame, MenuFrame, MainFrame
 local SettingsFrame, LeaderboardFrame, ShopFrame, TitlesFrame, StatsFrame
 local ModeFrame = nil -- Le damos valor 'nil' para que el script no se queje
-local MenuCoinLbl, MenuGemLbl, MenuFruitLbl -- Variables Globales para el Men˙
+local MenuCoinLbl, MenuGemLbl, MenuFruitLbl -- Variables Globales para el Men√∫
 local SettingsBtnMenu, SettingsBtnGame, SettingsBtnGlobal
 
 -- Agregamos StatsButton, StatsCloseBtn y referencias para los Tabs del Leaderboard
@@ -132,7 +120,7 @@ SkinBackground.Visible = false
 SkinBackground.ZIndex = 0 
 SkinBackground.Parent = ScreenGui
 
--- CREACI”N DE SONIDOS
+-- CREACI√ìN DE SONIDOS
 moveSound = Instance.new("Sound"); moveSound.SoundId = SOUND_MOVE_ID; moveSound.Volume = VolSFX; moveSound.Parent = ScreenGui
 mergeSound = Instance.new("Sound"); mergeSound.SoundId = SOUND_MERGE_ID; mergeSound.Volume = VolSFX; mergeSound.Parent = ScreenGui
 clickSound = Instance.new("Sound"); clickSound.SoundId = SOUND_CLICK_ID; clickSound.Volume = 1; clickSound.Parent = ScreenGui
@@ -144,7 +132,7 @@ player:GetAttributeChangedSignal("CurrentSFXVol"):Connect(function()
 	if mergeSound then mergeSound.Volume = newVol end
 end)
 
--- Configurar sonido en el mÛdulo UIUtils
+-- Configurar sonido en el m√≥dulo UIUtils
 task.spawn(function() if clickSound then UIUtils.ClickSound = clickSound end end)
 local function playClick() UIUtils.playClick() end
 
@@ -309,9 +297,9 @@ StatsButton.Image = "rbxassetid://95799613339728"
 StatsButton.ZIndex = 1005
 StatsButton.Parent = MenuFrame
 
--- ? 4. BOT”N CALENDARIO (POSICI”N CORREGIDA + RACHA)
+-- ‚úÖ 4. BOT√ìN CALENDARIO (POSICI√ìN CORREGIDA + RACHA)
 local DailyButton = Instance.new("ImageButton", MenuFrame)
--- PosiciÛn: 0.15 (X) al lado del trofeo, 0.70 (Y) misma altura que trofeo/arriba de info
+-- Posici√≥n: 0.15 (X) al lado del trofeo, 0.70 (Y) misma altura que trofeo/arriba de info
 DailyButton.Position = UDim2.new(0.15, 0, 0.70, 0) 
 DailyButton.Name = "DailyButton"
 DailyButton.Size = UDim2.new(0.08, 0, 0.08, 0)
@@ -322,26 +310,31 @@ DailyButton.Image = "rbxassetid://86257281348163" -- Azul por defecto
 DailyButton.ZIndex = 1005
 DailyButton.Parent = MenuFrame
 
--- GLOBO ROJO DE RACHA (CORREGIDO: ANTI-DUPLICADOS)
--- 1. Si ya existe uno viejo, lo borramos para que no se vea doble
+-- GLOBO DE FUEGO DE RACHA (CORREGIDO CON IDs NUEVOS)
 if DailyButton:FindFirstChild("StreakBadge") then DailyButton.StreakBadge:Destroy() end
 
-local StreakBadge = Instance.new("Frame", DailyButton)
-StreakBadge.Name = "StreakBadge" -- Le ponemos nombre para encontrarlo luego
-StreakBadge.Size = UDim2.new(0.5, 0, 0.5, 0)
-StreakBadge.Position = UDim2.new(0.65, 0, -0.15, 0) 
-StreakBadge.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-Instance.new("UICorner", StreakBadge).CornerRadius = UDim.new(1, 0)
-Instance.new("UIStroke", StreakBadge).Color = Color3.new(1,1,1); Instance.new("UIStroke", StreakBadge).Thickness = 2
+-- Ahora es un ImageLabel (Fuego) en vez de un Frame
+local StreakBadge = Instance.new("ImageLabel", DailyButton)
+StreakBadge.Name = "StreakBadge"
+StreakBadge.Size = UDim2.new(0.6, 0, 0.6, 0) -- Un poco m√°s grande para que luzca el fuego
+StreakBadge.Position = UDim2.new(0.6, 0, -0.2, 0) 
+StreakBadge.BackgroundTransparency = 1
+StreakBadge.Image = "rbxassetid://134763959761180" -- Fuego Rojo por defecto
 
 local StreakNumMenu = Instance.new("TextLabel", StreakBadge)
 StreakNumMenu.Name = "Label"
-StreakNumMenu.Size = UDim2.new(1,0,1,0)
-StreakNumMenu.BackgroundTransparency=1
-StreakNumMenu.TextColor3=Color3.new(1,1,1)
-StreakNumMenu.Font=Enum.Font.FredokaOne
-StreakNumMenu.TextScaled=true
-StreakNumMenu.Text="1"
+StreakNumMenu.Size = UDim2.new(0.6, 0, 0.6, 0)
+StreakNumMenu.Position = UDim2.new(0.2, 0, 0.4, 0) -- Centrado en la base del fuego
+StreakNumMenu.BackgroundTransparency = 1
+StreakNumMenu.TextColor3 = Color3.new(1,1,1)
+StreakNumMenu.Font = Enum.Font.FredokaOne
+StreakNumMenu.TextScaled = true
+StreakNumMenu.Text = "1"
+StreakNumMenu.ZIndex = 2
+-- Sombra al texto para que se lea sobre el fuego
+local txtStroke = Instance.new("UIStroke", StreakNumMenu)
+txtStroke.Thickness = 2
+txtStroke.Color = Color3.new(0,0,0)
 
 -- VENTANA (Ya la tienes, aseguramos referencia)
 local DailyFrame = ScreenGui:FindFirstChild("DailyRewardsFrame") or Instance.new("Frame", ScreenGui)
@@ -363,14 +356,14 @@ local DailyScroll = Instance.new("ScrollingFrame", DailyFrame)
 DailyScroll.Size = UDim2.new(0.95, 0, 0.85, 0); DailyScroll.Position = UDim2.new(0.5, 0, 0.55, 0); DailyScroll.AnchorPoint = Vector2.new(0.5, 0.5); DailyScroll.BackgroundTransparency = 1; DailyScroll.ScrollBarThickness = 6
 local DailyLayout = Instance.new("UIGridLayout", DailyScroll); DailyLayout.CellSize = UDim2.new(0.18, 0, 0, 100); DailyLayout.CellPadding = UDim2.new(0.02, 0, 0.02, 0); DailyLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- ?? INICIAR M⁄SICA (RESTAURADO) ??
+-- üéµ INICIAR M√öSICA (RESTAURADO) üéµ
 if MusicManager then
 	-- Nos aseguramos de pasar el volumen guardado
 	local savedVol = player:GetAttribute("SavedVolMusic") or 0.5
 	MusicManager.init(ScreenGui, MenuFrame, savedVol)
 end
 
--- BOT”N SETTINGS (MENU)
+-- BOT√ìN SETTINGS (MENU)
 SettingsBtnGlobal = Instance.new("ImageButton")
 SettingsBtnGlobal.Name = "SettingsBtn"
 SettingsBtnGlobal.Size = UDim2.new(0.08, 0, 0.08, 0)
@@ -385,7 +378,7 @@ SettingsBtnGlobal.ZIndex = 2000
 SettingsBtnGlobal.Visible = false 
 SettingsBtnGlobal.Parent = ScreenGui 
 
--- M”DULOS DE UI (SHOP, SETTINGS, LEADERBOARD, TITLES)
+-- M√ìDULOS DE UI (SHOP, SETTINGS, LEADERBOARD, TITLES)
 local ShopRefs = {} 
 local toggleMenuButtons = nil 
 local toggleMenu = nil 
@@ -401,75 +394,59 @@ if ShopRefs.CloseBtn then
 	end)
 end
 
--- TITLES FRAME
+-- TITLES FRAME (CON PESTA√ëAS DE CATEGOR√çA)
 do 
-	TitlesFrame = Instance.new("Frame")
+	if ScreenGui:FindFirstChild("TitlesFrame") then ScreenGui.TitlesFrame:Destroy() end
+
+	TitlesFrame = Instance.new("Frame", ScreenGui)
 	TitlesFrame.Name = "TitlesFrame"
-	TitlesFrame.Size = UDim2.new(0.7, 0, 0.7, 0)
-	TitlesFrame.Position = UDim2.new(0.15, 0, 0.15, 0)
-	TitlesFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-	TitlesFrame.BorderSizePixel = 0
-	TitlesFrame.ZIndex = 1300
-	TitlesFrame.Visible = false
-	TitlesFrame.Parent = ScreenGui
+	TitlesFrame.Size = UDim2.new(0.7, 0, 0.7, 0); TitlesFrame.Position = UDim2.new(0.15, 0, 0.15, 0)
+	TitlesFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35); TitlesFrame.Visible = false; TitlesFrame.ZIndex = 1300
 	Instance.new("UICorner", TitlesFrame).CornerRadius = UDim.new(0, 12)
 
-	local TitlesHeader = Instance.new("Frame")
-	TitlesHeader.Size = UDim2.new(1, 0, 0.15, 0)
-	TitlesHeader.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	TitlesHeader.BackgroundTransparency = 0.9
-	TitlesHeader.ZIndex = 1301
-	TitlesHeader.Parent = TitlesFrame
+	-- HEADER
+	local TitlesHeader = Instance.new("Frame", TitlesFrame)
+	TitlesHeader.Size = UDim2.new(1, 0, 0.15, 0); TitlesHeader.BackgroundColor3 = Color3.fromRGB(255, 255, 255); TitlesHeader.BackgroundTransparency = 0.95; TitlesHeader.ZIndex = 1301
 	Instance.new("UICorner", TitlesHeader).CornerRadius = UDim.new(0, 15)
 
-	local WinTitle = Instance.new("TextLabel")
-	WinTitle.Text = "MY TITLES"
-	WinTitle.Size = UDim2.new(1, 0, 1, 0)
-	WinTitle.BackgroundTransparency = 1
-	WinTitle.TextColor3 = Color3.new(1,1,1)
-	WinTitle.Font = Enum.Font.FredokaOne
-	WinTitle.TextScaled = true
-	WinTitle.ZIndex = 1302
-	WinTitle.Parent = TitlesHeader
+	local WinTitle = Instance.new("TextLabel", TitlesHeader)
+	WinTitle.Text = "TITLES"; WinTitle.Size = UDim2.new(1, 0, 1, 0); WinTitle.BackgroundTransparency = 1; WinTitle.TextColor3 = Color3.new(1,1,1); WinTitle.Font = Enum.Font.FredokaOne; WinTitle.TextScaled = true; WinTitle.ZIndex = 1302
 
-	TitleCloseBtn = Instance.new("TextButton")
-	TitleCloseBtn.Text = "X"
-	TitleCloseBtn.AnchorPoint = Vector2.new(1, 0.5)
-	TitleCloseBtn.Position = UDim2.new(0.995, 0, 0.5, 0)
-	TitleCloseBtn.Size = UDim2.new(0.9, 0, 0.9, 0) 
-	local sizeConstraintT = Instance.new("UIAspectRatioConstraint")
-	sizeConstraintT.AspectRatio = 1
-	sizeConstraintT.Parent = TitleCloseBtn
-	TitleCloseBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-	TitleCloseBtn.TextColor3 = Color3.new(1,1,1)
-	TitleCloseBtn.Font = Enum.Font.FredokaOne
-	TitleCloseBtn.TextScaled = true
-	TitleCloseBtn.ZIndex = 1302
-	TitleCloseBtn.Parent = TitlesHeader
-	Instance.new("UICorner", TitleCloseBtn).CornerRadius = UDim.new(0, 10)
+	TitleCloseBtn = Instance.new("TextButton", TitlesHeader)
+	TitleCloseBtn.Text = "X"; TitleCloseBtn.Size = UDim2.new(0.08, 0, 0.8, 0); TitleCloseBtn.Position = UDim2.new(0.99, 0, 0.1, 0); TitleCloseBtn.AnchorPoint = Vector2.new(1, 0); TitleCloseBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80); TitleCloseBtn.TextColor3 = Color3.new(1,1,1); TitleCloseBtn.Font = Enum.Font.FredokaOne; TitleCloseBtn.TextScaled = true; TitleCloseBtn.ZIndex = 1302
+	Instance.new("UICorner", TitleCloseBtn).CornerRadius = UDim.new(0, 8)
 
-	LeftPanel = Instance.new("ScrollingFrame")
-	LeftPanel.Size = UDim2.new(0.35, 0, 0.8, 0)
-	LeftPanel.Position = UDim2.new(0.05, 0, 0.18, 0)
-	LeftPanel.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-	LeftPanel.ScrollBarThickness = 4
-	LeftPanel.ZIndex = 1301
-	LeftPanel.Parent = TitlesFrame
+	-- PESTA√ëAS (TABS) - ¬°AQU√ç EST√ÅN LAS CATEGOR√çAS!
+	local TabsContainer = Instance.new("Frame", TitlesFrame)
+	TabsContainer.Size = UDim2.new(0.9, 0, 0.1, 0); TabsContainer.Position = UDim2.new(0.05, 0, 0.16, 0); TabsContainer.BackgroundTransparency = 1; TabsContainer.ZIndex = 1301
+	local tl = Instance.new("UIListLayout", TabsContainer); tl.FillDirection = Enum.FillDirection.Horizontal; tl.Padding = UDim.new(0.05, 0); tl.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+	local function createTab(name, cat)
+		local b = Instance.new("TextButton", TabsContainer)
+		b.Text = name; b.Size = UDim2.new(0.3, 0, 1, 0); b.BackgroundColor3 = Color3.fromRGB(50, 50, 55); b.TextColor3 = Color3.new(1,1,1); b.Font = Enum.Font.GothamBold; b.TextScaled = true; b.ZIndex = 1302
+		Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+		b.MouseButton1Click:Connect(function()
+			currentTitleCategory = cat
+			populateTitlesList() -- Recarga la lista con la nueva categor√≠a
+		end)
+	end
+	createTab("MAIN", "Main"); createTab("FRUITS", "Fruits"); createTab("OTHERS", "Others")
+
+	-- LISTAS
+	LeftPanel = Instance.new("ScrollingFrame", TitlesFrame)
+	LeftPanel.Size = UDim2.new(0.4, 0, 0.65, 0); LeftPanel.Position = UDim2.new(0.05, 0, 0.3, 0); LeftPanel.BackgroundColor3 = Color3.fromRGB(45, 45, 50); LeftPanel.ScrollBarThickness = 4; LeftPanel.ZIndex = 1301
 	Instance.new("UICorner", LeftPanel).CornerRadius = UDim.new(0, 8)
-	local LeftListLayout = Instance.new("UIListLayout"); LeftListLayout.Padding = UDim.new(0, 5); LeftListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center; LeftListLayout.Parent = LeftPanel
+	local ll = Instance.new("UIListLayout", LeftPanel); ll.Padding = UDim.new(0, 5); ll.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-	local RightPanel = Instance.new("Frame")
-	RightPanel.Size = UDim2.new(0.5, 0, 0.8, 0)
-	RightPanel.Position = UDim2.new(0.45, 0, 0.18, 0)
-	RightPanel.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-	RightPanel.ZIndex = 1301
-	RightPanel.Parent = TitlesFrame
+	local RightPanel = Instance.new("Frame", TitlesFrame)
+	RightPanel.Size = UDim2.new(0.45, 0, 0.65, 0); RightPanel.Position = UDim2.new(0.5, 0, 0.3, 0); RightPanel.BackgroundColor3 = Color3.fromRGB(45, 45, 50); RightPanel.ZIndex = 1301
 	Instance.new("UICorner", RightPanel).CornerRadius = UDim.new(0, 8)
 
-	PreviewTitle = Instance.new("TextLabel"); PreviewTitle.Text = "Select a Title"; PreviewTitle.Size = UDim2.new(0.9, 0, 0.2, 0); PreviewTitle.Position = UDim2.new(0.05, 0, 0.1, 0); PreviewTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30); PreviewTitle.TextColor3 = Color3.new(1,1,1); PreviewTitle.Font = Enum.Font.FredokaOne; PreviewTitle.TextScaled = true; PreviewTitle.ZIndex = 1302; PreviewTitle.Parent = RightPanel; Instance.new("UICorner", PreviewTitle).CornerRadius = UDim.new(0, 6)
-	DescLabel = Instance.new("TextLabel"); DescLabel.Text = "..."; DescLabel.Size = UDim2.new(0.9, 0, 0.3, 0); DescLabel.Position = UDim2.new(0.05, 0, 0.35, 0); DescLabel.BackgroundTransparency = 1; DescLabel.TextColor3 = Color3.fromRGB(200, 200, 200); DescLabel.Font = Enum.Font.GothamMedium; DescLabel.TextScaled = true; DescLabel.TextWrapped = true; DescLabel.ZIndex = 1302; DescLabel.Parent = RightPanel
-	EquipButton = Instance.new("TextButton"); EquipButton.Text = "EQUIP"; EquipButton.Size = UDim2.new(0.8, 0, 0.15, 0); EquipButton.Position = UDim2.new(0.1, 0, 0.75, 0); EquipButton.BackgroundColor3 = Color3.fromHex("f65e3b"); EquipButton.TextColor3 = Color3.new(1,1,1); EquipButton.Font = Enum.Font.GothamBold; EquipButton.TextScaled = true; EquipButton.ZIndex = 1302; EquipButton.Parent = RightPanel; Instance.new("UICorner", EquipButton).CornerRadius = UDim.new(0, 8)
+	PreviewTitle = Instance.new("TextLabel", RightPanel); PreviewTitle.Text = "Select"; PreviewTitle.Size = UDim2.new(0.9, 0, 0.2, 0); PreviewTitle.Position = UDim2.new(0.05, 0, 0.1, 0); PreviewTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30); PreviewTitle.TextColor3 = Color3.new(1,1,1); PreviewTitle.Font = Enum.Font.FredokaOne; PreviewTitle.TextScaled = true; PreviewTitle.ZIndex = 1302; Instance.new("UICorner", PreviewTitle).CornerRadius = UDim.new(0, 6)
+	DescLabel = Instance.new("TextLabel", RightPanel); DescLabel.Text = "..."; DescLabel.Size = UDim2.new(0.9, 0, 0.4, 0); DescLabel.Position = UDim2.new(0.05, 0, 0.35, 0); DescLabel.BackgroundTransparency = 1; DescLabel.TextColor3 = Color3.fromRGB(200, 200, 200); DescLabel.Font = Enum.Font.GothamMedium; DescLabel.TextScaled = true; DescLabel.TextWrapped = true; DescLabel.ZIndex = 1302; DescLabel.Parent = RightPanel
+	EquipButton = Instance.new("TextButton", RightPanel); EquipButton.Text = "EQUIP"; EquipButton.Size = UDim2.new(0.8, 0, 0.15, 0); EquipButton.Position = UDim2.new(0.1, 0, 0.8, 0); EquipButton.BackgroundColor3 = Color3.fromHex("f65e3b"); EquipButton.TextColor3 = Color3.new(1,1,1); EquipButton.Font = Enum.Font.GothamBold; EquipButton.TextScaled = true; EquipButton.ZIndex = 1302; Instance.new("UICorner", EquipButton).CornerRadius = UDim.new(0, 8)
 end
+
 
 local SettingsManager = require(ReplicatedStorage:WaitForChild("SettingsManager"))
 local SettingsFrame, StatsFrame, StRefs = SettingsManager.init(ScreenGui, MenuFrame)
@@ -630,6 +607,38 @@ FruitLabel.TextScaled = true
 FruitLabel.TextXAlignment = Enum.TextXAlignment.Left
 FruitLabel.ZIndex = 506
 FruitLabel.Parent = FruitContainer
+
+-- REAL FRUIT GEMS DISPLAY (Para el Modo Frutas)
+local FruitGemContainer = Instance.new("Frame")
+FruitGemContainer.Size = UDim2.new(0.18, 0, 0.12, 0)
+FruitGemContainer.Position = UDim2.new(0.02, 0, 0.65, 0) -- Un poco m√°s abajo
+FruitGemContainer.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+FruitGemContainer.ZIndex = 505
+FruitGemContainer.Visible = false -- Oculto por defecto
+FruitGemContainer.Parent = MainFrame
+Instance.new("UICorner", FruitGemContainer).CornerRadius = UDim.new(0, 8)
+local FStroke = Instance.new("UIStroke", FruitGemContainer); FStroke.Color = Color3.fromRGB(200, 50, 50); FStroke.Thickness = 3
+
+local FruitGemIcon = Instance.new("ImageLabel", FruitGemContainer)
+FruitGemIcon.Size = UDim2.new(0.6, 0, 0.6, 0)
+FruitGemIcon.AnchorPoint = Vector2.new(0, 0.5)
+FruitGemIcon.Position = UDim2.new(0.05, 0, 0.5, 0)
+FruitGemIcon.SizeConstraint = Enum.SizeConstraint.RelativeYY
+FruitGemIcon.BackgroundTransparency = 1
+FruitGemIcon.Image = "rbxassetid://128100423386205" -- Fresa
+FruitGemIcon.ZIndex = 506
+
+local FruitGemLabel = Instance.new("TextLabel", FruitGemContainer)
+FruitGemLabel.Text = "0"
+FruitGemLabel.Size = UDim2.new(0.6, 0, 0.8, 0)
+FruitGemLabel.AnchorPoint = Vector2.new(0, 0.5)
+FruitGemLabel.Position = UDim2.new(0.35, 0, 0.5, 0)
+FruitGemLabel.BackgroundTransparency = 1
+FruitGemLabel.TextColor3 = Color3.new(0.2, 0.2, 0.2)
+FruitGemLabel.Font = Enum.Font.FredokaOne
+FruitGemLabel.TextScaled = true
+FruitGemLabel.TextXAlignment = Enum.TextXAlignment.Left
+FruitGemLabel.ZIndex = 506
 
 -- LEVEL BAR (RIGHT)
 local LevelContainer = Instance.new("Frame")
@@ -838,7 +847,7 @@ NoButton.Parent = ConfirmFrame
 Instance.new("UICorner", NoButton).CornerRadius = UDim.new(0, 6)
 RunService.RenderStepped:Connect(function(dt)
 	if currentSkin == "Rainbow" and MainFrame.Visible then
-		local time = tick() * 0.5 -- Velocidad de la animaciÛn
+		local time = tick() * 0.5 -- Velocidad de la animaci√≥n
 
 		-- 1. Animar el borde del tablero suavemente
 		local boardF = MainFrame:FindFirstChild("Frame")
@@ -847,20 +856,20 @@ RunService.RenderStepped:Connect(function(dt)
 		end
 
 		-- 2. ANIMAR FICHAS (Efecto Ola Diagonal)
-		-- Recorremos la matriz visual para pintar cada ficha seg˙n su posiciÛn
+		-- Recorremos la matriz visual para pintar cada ficha seg√∫n su posici√≥n
 		for r = 1, BOARD_SIZE do
 			if tileVisuals[r] then
 				for c = 1, BOARD_SIZE do
 					local tile = tileVisuals[r][c]
 					if tile then
-						-- La magia: El color depende del tiempo Y de la posiciÛn (r+c)
+						-- La magia: El color depende del tiempo Y de la posici√≥n (r+c)
 						-- Esto crea una diagonal de colores que se mueve
 						local waveHue = (time + (r + c) * 0.15) % 1
 						local rgbColor = Color3.fromHSV(waveHue, 0.85, 1) -- Color brillante
 
 						tile.BackgroundColor3 = rgbColor
 
-						-- Si tiene borde (UIStroke), lo ponemos blanco o m·s brillante
+						-- Si tiene borde (UIStroke), lo ponemos blanco o m√°s brillante
 						local s = tile:FindFirstChild("UIStroke")
 						if s then 
 							s.Color = Color3.new(1,1,1) -- Borde blanco para resaltar el RGB
@@ -897,13 +906,13 @@ end
 local function clearVisuals()
 	TilesLayer:ClearAllChildren()
 	tileVisuals = {}
-	-- CORRECCI”N: Usar BOARD_SIZE en lugar de 4
+	-- CORRECCI√ìN: Usar BOARD_SIZE en lugar de 4
 	for r=1, BOARD_SIZE do 
 		tileVisuals[r]={} 
 	end
 end
 
--- VFX: EXPLOSI”N DE CONFETI (SOPORTA IM¡GENES)
+-- VFX: EXPLOSI√ìN DE CONFETI (SOPORTA IM√ÅGENES)
 local function spawnConfetti(centerPos, colorOrId, isImage)
 	for i = 1, 8 do 
 		local p
@@ -938,7 +947,7 @@ local function spawnConfetti(centerPos, colorOrId, isImage)
 	end
 end
 
--- ? NUEVA FUNCI”N: TEXTO FLOTANTE DE XP (V11.0 - Arriba de la Barra)
+-- ‚ú® NUEVA FUNCI√ìN: TEXTO FLOTANTE DE XP (V11.0 - Arriba de la Barra)
 local function spawnFloatingXP(ignoredPos, amount, isDouble)
 	local showXP = player:GetAttribute("SavedShowXP")
 	if showXP == false then return end 
@@ -946,8 +955,8 @@ local function spawnFloatingXP(ignoredPos, amount, isDouble)
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.new(0.20, 0, 0.08, 0)
 
-	-- 1. POSICI”N: ARRIBA DE LA BARRA
-	-- La barra est· en Y=0.5. Nosotros nos ponemos en Y=0.42 (Arriba).
+	-- 1. POSICI√ìN: ARRIBA DE LA BARRA
+	-- La barra est√° en Y=0.5. Nosotros nos ponemos en Y=0.42 (Arriba).
 	-- En X nos ponemos en 0.88 para estar centrados sobre la barra.
 	local randomX = math.random(-20, 20) / 1000 
 	local randomY = math.random(-10, 10) / 1000 
@@ -980,15 +989,15 @@ local function spawnFloatingXP(ignoredPos, amount, isDouble)
 	if isDouble then
 		label.TextStrokeColor3 = Color3.fromRGB(255, 215, 0)
 		label.TextStrokeTransparency = 0
-		label.Text = "? +" .. amount .. " XP" 
+		label.Text = "‚ú® +" .. amount .. " XP" 
 	else
 		label.TextStrokeColor3 = strokeColor
 		label.TextStrokeTransparency = 0.3
 		label.Text = "+" .. amount .. " XP" 
 	end
 
-	-- 4. ANIMACI”N R¡PIDA
-	-- Sube un poco m·s hacia arriba
+	-- 4. ANIMACI√ìN R√ÅPIDA
+	-- Sube un poco m√°s hacia arriba
 	local targetPos = label.Position - UDim2.new(0, 0, 0.08, 0) 
 
 	local tweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
@@ -1006,7 +1015,7 @@ local function spawnFloatingXP(ignoredPos, amount, isDouble)
 end
 
 
--- 1. FUNCI”N VISUAL NE”N (Esta es la que te faltaba)
+-- 1. FUNCI√ìN VISUAL NE√ìN (Esta es la que te faltaba)
 local function UpdateTileVisuals(frame, value)
 	local neonColor
 	if value == 2 or value == 4 or value == 128 or value == 256 then
@@ -1035,7 +1044,7 @@ local function UpdateTileVisuals(frame, value)
 	softGlow.AnchorPoint = Vector2.new(0.5, 0.5)
 	softGlow.ZIndex = 0 
 
-	-- Borde NeÛn
+	-- Borde Ne√≥n
 	local stroke = frame:FindFirstChild("UIStroke") or Instance.new("UIStroke", frame)
 	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	stroke.Color = neonColor
@@ -1073,7 +1082,7 @@ local function UpdateTileVisuals(frame, value)
 	pad.PaddingBottom = UDim.new(0.15, 0)
 end
 
--- 2. FUNCI”N VISUAL ROBOT
+-- 2. FUNCI√ìN VISUAL ROBOT
 local function UpdateTileVisuals_Robot(frame, value, theme)
 	frame.ClipsDescendants = true
 	-- Usamos color de la tabla o gris si falla
@@ -1115,8 +1124,8 @@ local function UpdateTileVisuals_Robot(frame, value, theme)
 	pad.PaddingBottom = UDim.new(0.15, 0)
 end
 
--- 3. FUNCI”N VISUAL VOLCANIC
--- 3. FUNCI”N VISUAL VOLCANIC (VersiÛn Final: N˙meros de Fuego con Color Variable + Profundidad 3D)
+-- 3. FUNCI√ìN VISUAL VOLCANIC
+-- 3. FUNCI√ìN VISUAL VOLCANIC (Versi√≥n Final: N√∫meros de Fuego con Color Variable + Profundidad 3D)
 local function UpdateTileVisuals_Volcanic(frame, value)
 	-- [LIMPIEZA Y BASE]
 	frame:ClearAllChildren()
@@ -1133,7 +1142,7 @@ local function UpdateTileVisuals_Volcanic(frame, value)
 	rockTex.Name = "RockTexture"
 	rockTex.Size = UDim2.new(1, 0, 1, 0)
 	rockTex.BackgroundTransparency = 1
-	-- Aseg˙rate de que este ID sea correcto para tu textura de roca
+	-- Aseg√∫rate de que este ID sea correcto para tu textura de roca
 	rockTex.Image = "rbxassetid://120246405984277" 
 	rockTex.ImageColor3 = Color3.fromRGB(180, 180, 180)
 	rockTex.ScaleType = Enum.ScaleType.Tile
@@ -1147,7 +1156,7 @@ local function UpdateTileVisuals_Volcanic(frame, value)
 	outerStroke.Color = Color3.fromRGB(10, 5, 5)
 	outerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-	-- [CAPA 3: EL CR¡TER (Contenedor)]
+	-- [CAPA 3: EL CR√ÅTER (Contenedor)]
 	local craterFrame = Instance.new("Frame", frame)
 	craterFrame.Name = "Crater"
 	craterFrame.Size = UDim2.new(0.85, 0, 0.85, 0)
@@ -1157,13 +1166,13 @@ local function UpdateTileVisuals_Volcanic(frame, value)
 	craterFrame.ZIndex = 12
 	Instance.new("UICorner", craterFrame).CornerRadius = UDim.new(0.25, 0)
 
-	-- Sombra interna del cr·ter
+	-- Sombra interna del cr√°ter
 	local innerShadow = Instance.new("UIStroke", craterFrame)
 	innerShadow.Thickness = 4
 	innerShadow.Color = Color3.fromRGB(20, 5, 0)
 	innerShadow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-	-- [CAPA 4: LA LAVA (Fondo del n˙mero)]
+	-- [CAPA 4: LA LAVA (Fondo del n√∫mero)]
 	local lavaFill = Instance.new("ImageLabel", craterFrame)
 	lavaFill.Size = UDim2.new(1, -6, 1, -6)
 	lavaFill.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -1173,7 +1182,7 @@ local function UpdateTileVisuals_Volcanic(frame, value)
 	lavaFill.ZIndex = 13
 	Instance.new("UICorner", lavaFill).CornerRadius = UDim.new(0.22, 0)
 
-	-- SelecciÛn de textura y color base de lava seg˙n valor
+	-- Selecci√≥n de textura y color base de lava seg√∫n valor
 	local lavaColor
 	if value <= 8 then
 		lavaFill.Image = "rbxassetid://92214905274314"
@@ -1203,7 +1212,7 @@ local function UpdateTileVisuals_Volcanic(frame, value)
 	heatStroke.Transparency = 0.5
 	heatStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-	-- [CAPA 7: TEXTO FLOTANTE DE FUEGO VARIABLE] -> °CAMBIOS AQUÕ!
+	-- [CAPA 7: TEXTO FLOTANTE DE FUEGO VARIABLE] -> ¬°CAMBIOS AQU√ç!
 	local label = Instance.new("TextLabel", frame)
 	label.Size = UDim2.new(1, 0, 1, 0)
 	label.BackgroundTransparency = 1
@@ -1218,24 +1227,24 @@ local function UpdateTileVisuals_Volcanic(frame, value)
 	local textGradient = Instance.new("UIGradient", label)
 	textGradient.Rotation = 90 -- Gradiente vertical
 
-	-- L”GICA DE COLOR DEL TEXTO SEG⁄N VALOR
+	-- L√ìGICA DE COLOR DEL TEXTO SEG√öN VALOR
 	local colorSeq
 	if value <= 4 then
-		-- WHITE HOT (N˙meros bajos: Muy caliente, blanco/amarillo brillante)
+		-- WHITE HOT (N√∫meros bajos: Muy caliente, blanco/amarillo brillante)
 		colorSeq = ColorSequence.new{
-			ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 255, 180)), -- Amarillo p·lido
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)), -- Blanco n˙cleo
+			ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 255, 180)), -- Amarillo p√°lido
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)), -- Blanco n√∫cleo
 			ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 220, 100))  -- Amarillo dorado
 		}
 	elseif value <= 32 then
-		-- MAGMA ORANGE (N˙meros medios: Naranja intenso cl·sico)
+		-- MAGMA ORANGE (N√∫meros medios: Naranja intenso cl√°sico)
 		colorSeq = ColorSequence.new{
 			ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 160, 0)),   -- Naranja
 			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 100)), -- Amarillo brillante
 			ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 60, 0))     -- Rojo naranja
 		}
 	else
-		-- DEEP RED HEAT (N˙meros altos: Rojo profundo e intenso)
+		-- DEEP RED HEAT (N√∫meros altos: Rojo profundo e intenso)
 		colorSeq = ColorSequence.new{
 			ColorSequenceKeypoint.new(0.0, Color3.fromRGB(220, 60, 0)),    -- Rojo oscuro
 			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 120, 0)),   -- Naranja intenso
@@ -1260,7 +1269,7 @@ local function UpdateTileVisuals_Volcanic(frame, value)
 	pad.PaddingRight = UDim.new(0.1, 0)
 end
 
--- 4. FUNCI”N CREATETILE PRINCIPAL (CONECTA TODO)
+-- 4. FUNCI√ìN CREATETILE PRINCIPAL (CONECTA TODO)
 local function createTile(r, c, val, isSpawnAnim)
 	local t = Instance.new("Frame")
 	t.Name = "Tile_"..r.."_"..c
@@ -1272,25 +1281,46 @@ local function createTile(r, c, val, isSpawnAnim)
 	local theme = THEMES[currentSkin] or THEMES["Classic"]
 
 	if theme.IsNeonStyle then
-		UpdateTileVisuals(t, val) -- ? AHORA SÕ EXISTE
+		UpdateTileVisuals(t, val) -- ‚úÖ AHORA S√ç EXISTE
 
 	elseif theme.IsRobotStyle then
-		UpdateTileVisuals_Robot(t, val, theme) -- ? AHORA SÕ EXISTE
+		UpdateTileVisuals_Robot(t, val, theme) -- ‚úÖ AHORA S√ç EXISTE
 
 	elseif theme.IsVolcanicStyle then
-		UpdateTileVisuals_Volcanic(t, val) -- ? AHORA SÕ EXISTE
+		UpdateTileVisuals_Volcanic(t, val) -- ‚úÖ AHORA S√ç EXISTE
 
 	elseif theme.IsImageBased then
 		Instance.new("UICorner", t).CornerRadius = UDim.new(0, theme.CornerRadius or 4)
 		t.BackgroundColor3 = Color3.new(1,1,1); t.BackgroundTransparency = 1 
-		local img = Instance.new("ImageLabel", t); img.Size = UDim2.new(1,0,1,0); img.BackgroundTransparency = 1; img.ScaleType = Enum.ScaleType.Fit
+
+		-- La Imagen
+		local img = Instance.new("ImageLabel", t); 
+		img.Size = UDim2.new(1,0,1,0); 
+		img.BackgroundTransparency = 1; 
+		img.ScaleType = Enum.ScaleType.Fit
 		img.Image = theme.Images[val] or theme.Images["SUPER"]
-		if val > 32 then
-			local num = Instance.new("TextLabel", t); num.Text = tostring(val); num.Size = UDim2.new(0.5,0,0.3,0); num.Position = UDim2.new(0.5,0,0.7,0); num.BackgroundTransparency = 1; num.TextColor3 = Color3.new(1,1,1); num.Font = Enum.Font.FredokaOne; num.TextStrokeTransparency = 0.5; num.TextScaled = true; num.ZIndex = 22
-		end
+		img.ZIndex = 21
+
+		-- ‚úÖ CAMBIO: TEXTO SIEMPRE VISIBLE (Encima de la fruta)
+		local num = Instance.new("TextLabel", t)
+		num.Text = tostring(val)
+		num.Size = UDim2.new(0.6, 0, 0.4, 0)
+		num.Position = UDim2.new(0.5, 0, 0.5, 0) -- Centrado
+		num.AnchorPoint = Vector2.new(0.5, 0.5)
+		num.BackgroundTransparency = 1
+		num.TextColor3 = Color3.new(1, 1, 1) -- Blanco
+		num.Font = Enum.Font.FredokaOne
+		num.TextScaled = true
+		num.ZIndex = 22
+
+		-- Borde negro para que se lea bien sobre cualquier fruta
+		local stroke = Instance.new("UIStroke", num)
+		stroke.Color = Color3.new(0, 0, 0)
+		stroke.Thickness = 2
+		stroke.Transparency = 0
 
 	else
-		-- ESTILO CL¡SICO
+		-- ESTILO CL√ÅSICO
 		Instance.new("UICorner", t).CornerRadius = UDim.new(0, theme.CornerRadius or 4)
 		local paletteColor = theme.Tiles[val] or theme.Tiles["SUPER"] or Color3.new(0,0,0)
 		t.BackgroundColor3 = paletteColor
@@ -1321,7 +1351,7 @@ end
 local function redrawBoard(mergedMap)
 	clearVisuals()
 
-	-- ProtecciÛn 1: Verificar datos lÛgicos
+	-- Protecci√≥n 1: Verificar datos l√≥gicos
 	if not board or #board < BOARD_SIZE then return end 
 
 	for r = 1, BOARD_SIZE do
@@ -1331,7 +1361,7 @@ local function redrawBoard(mergedMap)
 			if val ~= 0 then 
 				local isMerged = mergedMap and mergedMap[r] and mergedMap[r][c]
 
-				-- ProtecciÛn 2: Asegurar que la matriz visual existe antes de escribir
+				-- Protecci√≥n 2: Asegurar que la matriz visual existe antes de escribir
 				if not tileVisuals[r] then tileVisuals[r] = {} end
 
 				tileVisuals[r][c] = createTile(r, c, val, isMerged) 
@@ -1373,7 +1403,7 @@ local function applySkinColors()
 		-- MOSTRAR SOLO SI ESTAMOS JUGANDO
 		if MainFrame.Visible then
 			bgImg.Visible = true
-			-- ?? FORZAMOS TRANSPARENCIA PARA QUE SE VEA LA IMAGEN
+			-- ‚ö†Ô∏è FORZAMOS TRANSPARENCIA PARA QUE SE VEA LA IMAGEN
 			MainFrame.BackgroundTransparency = 1 
 			MainFrame.BackgroundColor3 = Color3.new(1,1,1) 
 		else
@@ -1384,16 +1414,16 @@ local function applySkinColors()
 		-- SI NO HAY IMAGEN (Classic, Blue, etc)
 		if bgImg then bgImg.Visible = false end
 
-		-- Restauramos el color sÛlido
+		-- Restauramos el color s√≥lido
 		MainFrame.BackgroundTransparency = 0 
 		MainFrame.BackgroundColor3 = BG_COLOR 
 	end
 
 	-- Aplicar colores a los otros frames
-	-- ?? CORRECCI”N: El men˙ SIEMPRE mantiene el color original (Default), no cambia con la skin.
+	-- üÜï CORRECCI√ìN: El men√∫ SIEMPRE mantiene el color original (Default), no cambia con la skin.
 	if MenuFrame then MenuFrame.BackgroundColor3 = DEFAULT_THEME_COLORS.Bg end
 
-	-- El tablero sÌ cambia
+	-- El tablero s√≠ cambia
 	if BoardFrame then BoardFrame.BackgroundColor3 = BOARD_COLOR end
 
 	redrawBoard()
@@ -1455,12 +1485,18 @@ local function applyUndo()
 
 	redrawBoard()
 	GameOverFrame.Visible = false
+
+	-- Actualizamos visualmente
 	undoCount = undoCount - 1
 	updateUndoButton()
+
+	-- ‚úÖ ESTA ES LA L√çNEA QUE FALTA (AVISAR AL SERVIDOR)
+	local event = ReplicatedStorage:FindFirstChild("UseUndo")
+	if event then event:FireServer() end
 end
 
 local function buyUndo()
-	-- ? TU ID REAL DE 3 UNDOS
+	-- ‚úÖ TU ID REAL DE 3 UNDOS
 	local UNDO_PRODUCT_ID = 3472578365 
 	
 	if UNDO_PRODUCT_ID > 0 then
@@ -1476,7 +1512,7 @@ end
 
 -- === CONEXIONES DE LA TIENDA (LIMPIO Y CORREGIDO) ===
 
--- 1. Definir la funciÛn para cambiar skins (Sin local para que sea global)
+-- 1. Definir la funci√≥n para cambiar skins (Sin local para que sea global)
 skinChangeCallback = function(skinName)
 	currentSkin = skinName
 	applySkinColors()
@@ -1491,12 +1527,16 @@ local function checkGameOver()
 		end
 	end
 	GameOverFrame.Visible = true
+
 	local event = ReplicatedStorage:FindFirstChild("SaveScore")
-	if event then event:FireServer(score) end
+	if event then 
+		-- ‚úÖ CAMBIO: Enviamos el BOARD_SIZE al servidor para saber si es 5x5
+		event:FireServer(score, BOARD_SIZE) 
+	end
 end
 
 local function initGame()
-	-- Crear tablero din·mico
+	-- Crear tablero din√°mico
 	board = {}
 	for i=1, BOARD_SIZE do
 		board[i] = {}
@@ -1510,7 +1550,7 @@ local function initGame()
 	TilesLayerNew.Size = UDim2.new(1, 0, 1, 0); TilesLayerNew.BackgroundTransparency = 1; TilesLayerNew.ZIndex = 10; TilesLayerNew.Parent = BoardFrame
 	TilesLayer = TilesLayerNew -- Actualizar referencia
 
-	-- Crear celdas de fondo seg˙n BOARD_SIZE
+	-- Crear celdas de fondo seg√∫n BOARD_SIZE
 	for r = 1, BOARD_SIZE do
 		for c = 1, BOARD_SIZE do
 			local bg = Instance.new("Frame")
@@ -1534,15 +1574,34 @@ local function initGame()
 	spawnRandom()
 	spawnRandom()
 
-	-- ? ESTA LÕNEA ES LA CLAVE: Aplica la skin y la transparencia al empezar
+	-- GESTI√ìN DE VISIBILIDAD (Solo mostrar la moneda del modo actual)
+	if CoinContainer then CoinContainer.Visible = false end
+	if FruitContainer then FruitContainer.Visible = false end -- (Este es el de Diamantes)
+	if FruitGemContainer then FruitGemContainer.Visible = false end -- (Este es el de Frutas)
+
+	if GAME_MODE == "Classic" or GAME_MODE == "5x5" then
+		if CoinContainer then CoinContainer.Visible = true end
+
+	elseif GAME_MODE == "Special" then
+		-- Modo Diamante
+		if FruitContainer then FruitContainer.Visible = true end 
+		if FruitContainer then FruitContainer.Position = UDim2.new(0.02, 0, 0.39, 0) end -- Mover a posici√≥n principal
+
+	elseif GAME_MODE == "Fruit" then
+		-- Modo Fruta
+		if FruitGemContainer then FruitGemContainer.Visible = true end
+		if FruitGemContainer then FruitGemContainer.Position = UDim2.new(0.02, 0, 0.39, 0) end -- Mover a posici√≥n principal
+	end
+
+	-- ? ESTA L√çNEA ES LA CLAVE: Aplica la skin y la transparencia al empezar
 	applySkinColors()
 end
 
 local function move(dx, dy)
-	-- 1. Si hay men˙s abiertos o animaciones, no mover
+	-- 1. Si hay men√∫s abiertos o animaciones, no mover
 	if isAnimating or GameOverFrame.Visible or ConfirmFrame.Visible or SettingsFrame.Visible or ShopFrame.Visible or TitlesFrame.Visible or (ModeFrame and ModeFrame.Visible) then return end
 
-	-- 2. PROTECCI”N ANTI-CRASH (BLINDAJE TOTAL)
+	-- 2. PROTECCI√ìN ANTI-CRASH (BLINDAJE TOTAL)
 	if not board then return end
 	if #board ~= BOARD_SIZE then return end 
 
@@ -1584,10 +1643,11 @@ local function move(dx, dy)
 	if dx == 1 then cStart, cEnd, cStep = BOARD_SIZE, 1, -1 end
 	if dy == 1 then rStart, rEnd, rStep = BOARD_SIZE, 1, -1 end
 
-	-- VARIABLES DE ECONOMÕA
+	-- VARIABLES DE ECONOM√çA
 	local xpGained = 0
 	local diamondsGained = 0
 	local coinsGained = 0
+	local fruitGained = 0 -- ?? AGREGADO: Acumulador para frutas
 
 	for r = rStart, rEnd, rStep do
 		for c = cStart, cEnd, cStep do
@@ -1614,21 +1674,21 @@ local function move(dx, dy)
 
 						-- === SISTEMA DE RECOMPENSAS ===
 
-						-- 1. C¡LCULO DE XP CON VISUALIZACI”N
+						-- 1. C√ÅLCULO DE XP CON VISUALIZACI√ìN
 						local baseXP = (val * 2) -- La XP base es el valor de la nueva ficha
 
 						-- Detectar GamePass x2 XP (ID: 1609347878)
 						local hasXpPass = false
-						-- Revisamos memoria local (r·pida) o Marketplace (lenta)
+						-- Revisamos memoria local (r√°pida) o Marketplace (lenta)
 						if localSessionPasses[1609347878] then 
 							hasXpPass = true 
 						else
-							-- VerificaciÛn asÌncrona r·pida (pcall inline) para no frenar el juego
+							-- Verificaci√≥n as√≠ncrona r√°pida (pcall inline) para no frenar el juego
 							task.spawn(function()
 								local s, h = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, 1609347878) end)
 								if s and h then localSessionPasses[1609347878] = true end
 							end)
-							-- Si ya lo tenÌas cacheado de antes, ˙salo
+							-- Si ya lo ten√≠as cacheado de antes, √∫salo
 							if localSessionPasses[1609347878] then hasXpPass = true end
 						end
 
@@ -1638,30 +1698,36 @@ local function move(dx, dy)
 						-- Acumulamos para enviar al servidor (el servidor vuelve a verificar el pase, no te preocupes)
 						xpGained = xpGained + baseXP 
 
-						-- ? LANZAR TEXTO FLOTANTE
+						-- ‚ú® LANZAR TEXTO FLOTANTE
 						spawnFloatingXP(getCenterPosition(nr, nc), finalShowXP, hasXpPass)
-
-						-- 2. ECONOMÕA POR MODO
+						-- 2. ECONOM√çA POR MODO
 						if GAME_MODE == "Special" then
-							-- NUEVA L”GICA: Solo da diamantes al crear fichas altas
-							local tileCreated = val * 2 -- 'val' es la ficha que se fusionÛ (ej: 16), tileCreated es el resultado (32)
-
+							-- MODO DIAMANTES
+							local tileCreated = val * 2 
 							if tileCreated >= 32 then
 								local reward = 0
-								if tileCreated == 32 then reward = 1        -- 16+16
-								elseif tileCreated == 64 then reward = 2    -- 32+32
-								elseif tileCreated == 128 then reward = 3   -- 64+64
-								elseif tileCreated == 256 then reward = 5   -- 128+128 (Bonus!)
-								elseif tileCreated >= 512 then reward = 10  -- Grandes recompensas
+								if tileCreated == 32 then reward = 1
+								elseif tileCreated == 64 then reward = 2
+								elseif tileCreated == 128 then reward = 3
+								elseif tileCreated == 256 then reward = 5
+								elseif tileCreated >= 512 then reward = 10
 								end
-
-								if reward > 0 then
-									diamondsGained = diamondsGained + reward
-									-- Efecto visual opcional: Sonido especial o brillo aquÌ
-								end
+								if reward > 0 then diamondsGained = diamondsGained + reward end
 							end
+
+						elseif GAME_MODE == "Fruit" then
+							-- ?? MODO FRUTAS
+							local tileCreated = val * 2
+							local reward = 1 -- 1 Gema por fusi√≥n base
+
+							-- Bonus por fusiones grandes
+							if tileCreated >= 64 then reward = 3 end
+							if tileCreated >= 256 then reward = 8 end
+
+							fruitGained = fruitGained + reward
+
 						else
-							-- Modos Classic y 5x5: Dan Monedas (1 por fusiÛn)
+							-- Modos Classic y 5x5: Dan Monedas (1 por fusi√≥n)
 							coinsGained = coinsGained + 1
 						end
 
@@ -1717,9 +1783,9 @@ local function move(dx, dy)
 				local dEvt = ReplicatedStorage:FindFirstChild("AddDiamond")
 				if dEvt then 
 					dEvt:FireServer(diamondsGained) 
-					print("?? CLIENTE: Enviando " .. diamondsGained .. " diamantes al servidor.")
+					print("üíé CLIENTE: Enviando " .. diamondsGained .. " diamantes al servidor.")
 				else
-					warn("?? ERROR CRÕTICO: No se encuentra el evento 'AddDiamond' en ReplicatedStorage")
+					warn("üî¥ ERROR CR√çTICO: No se encuentra el evento 'AddDiamond' en ReplicatedStorage")
 				end
 			end
 
@@ -1727,6 +1793,12 @@ local function move(dx, dy)
 			if coinsGained > 0 then
 				local cEvt = ReplicatedStorage:FindFirstChild("AddCurrency")
 				if cEvt then cEvt:FireServer(coinsGained) end
+			end
+
+			-- 4. FRUTAS (Modo Fruit) ??
+			if fruitGained > 0 then
+				local fEvt = ReplicatedStorage:FindFirstChild("AddFruitPoint")
+				if fEvt then fEvt:FireServer(fruitGained) end
 			end
 
 		else 
@@ -1762,7 +1834,7 @@ end
 	if ShopRefs.CurrencyContainer then ShopRefs.CurrencyContainer.Visible = false end
 	if ShopRefs.SkinsPageContainer then ShopRefs.SkinsPageContainer.Visible = false end
 	if ShopRefs.PassesContainer then ShopRefs.PassesContainer.Visible = false end
-	-- Intentamos ocultar el viejo por si acaso quedÛ referencia
+	-- Intentamos ocultar el viejo por si acaso qued√≥ referencia
 	if ShopRefs.LevelPackContainer then ShopRefs.LevelPackContainer.Visible = false end
 
 	-- 2. RESETEAR COLORES DE BOTONES
@@ -1771,41 +1843,56 @@ end
 	if ShopRefs.TabPassesBtn then ShopRefs.TabPassesBtn.BackgroundColor3 = Color3.fromRGB(200, 80, 200) end
 
 
--- Variable nueva para recordar compras en GameClient (PÈgalo justo encima de la funciÛn)
+-- Variable nueva para recordar compras en GameClient (P√©galo justo encima de la funci√≥n)
  
 
 local function checkIsUnlocked(data)
-	-- 1. TÌtulos Especiales
+	-- 0. CHEQUEO ADMIN / GUARDADO (SIN ESPACIOS)
+	-- Quitamos los espacios para que coincida con el servidor (Ej: "Berry Picker" -> "BerryPicker")
+	local safeName = string.gsub(data.Name, " ", "")
+	if player:GetAttribute("Title_" .. safeName) == true then
+		return true
+	end
+
+	-- 1. T√≠tulos Especiales (Staff, Rachas)
 	if data.ReqAttribute then
 		return player:GetAttribute(data.ReqAttribute) == true
 	end
 
-	-- 2. Chequeo VIP (CORREGIDO)
+	-- 2. Chequeo VIP
 	if data.IsVIP then
-		-- A. Revisar memoria local primero (Instant·neo)
 		if localSessionPasses[VIP_GAMEPASS_ID] == true then return true end
-
-		-- B. Si no est· en memoria, preguntar a Roblox
 		local success, hasPass = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, VIP_GAMEPASS_ID) end)
 		return success and hasPass
 	end
 
-	-- 3. Chequeo Skin EspecÌfica
+	-- 3. Chequeo Skin Espec√≠fica
 	if data.ReqSkin then
-		return player:GetAttribute("OwnedSkin_" .. data.ReqSkin) == true
+		-- Quitamos espacios tambi√©n para las skins
+		local safeSkin = string.gsub(data.ReqSkin, " ", "")
+		return player:GetAttribute("OwnedSkin_" .. safeSkin) == true
 	end
 
-	-- 4. Chequeo Gemas Totales
+	-- 4. Chequeo Gemas Totales (Fruits)
 	if data.ReqTotalGems then
 		local total = player:GetAttribute("TotalFruitGems") or 0
 		return total >= data.ReqTotalGems
 	end
 
-	-- 5. Chequeo Score Normal (Por defecto)
+	-- 5. Chequeo Robux Spent (Others)
+	if data.ReqRobux then
+		local total = player:GetAttribute("TotalRobuxSpent") or 0
+		return total >= data.ReqRobux
+	end
+
+	-- 6. Chequeo Score Normal (Main)
 	if data.Req then
+		-- ARREGLO NOVICE: Si requiere 0 puntos, siempre es true
+		if data.Req == 0 then return true end
+
 		local leaderstats = player:FindFirstChild("leaderstats")
 		local bestScore = (leaderstats and leaderstats:FindFirstChild("HighScore")) and leaderstats.HighScore.Value or 0
-		if bestScore >= data.Req then return true end
+		return bestScore >= data.Req
 	end
 
 	return false
@@ -1828,17 +1915,19 @@ local function updateRightPanel(data)
 			local current = player:GetAttribute("TotalFruitGems") or 0
 			DescLabel.Text = "Collect " .. data.ReqTotalGems .. " total Fruit Gems. (You have: " .. current .. ")"
 		elseif data.ReqAttribute then
-			-- ? CORRECCI”N: Si es un tÌtulo de Season, mostrar su descripciÛn, no buscar un Score que no existe
 			DescLabel.Text = data.Desc .. " (Locked)"
+		elseif data.ReqRobux then
+			-- ‚úÖ CORRECCI√ìN: Mostrar texto de Robux
+			local currentSpent = player:GetAttribute("TotalRobuxSpent") or 0
+			DescLabel.Text = "Spend " .. formatNumber(data.ReqRobux) .. " Robux. (You: " .. formatNumber(currentSpent) .. ")"
 		else 
-			-- Solo entra aquÌ si tiene un requisito de Score numÈrico
 			local reqScore = data.Req or 0
-			DescLabel.Text = "Reach score " .. reqScore .. " to unlock." 
+			DescLabel.Text = "Reach score " .. formatNumber(reqScore) .. " to unlock." 
 		end
 	end
 
 	if not isUnlocked then
-		EquipButton.Text = data.IsVIP and "BUY VIP" or "LOCKED ??"
+		EquipButton.Text = data.IsVIP and "BUY VIP" or "LOCKED üîí"
 		EquipButton.BackgroundColor3 = data.IsVIP and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(80, 80, 80)
 		EquipButton.Active = data.IsVIP 
 	elseif currentEquippedTitle == data.Name then
@@ -1852,30 +1941,64 @@ local function updateRightPanel(data)
 	end
 end
 
-local function populateTitlesList()
-	for _, child in pairs(LeftPanel:GetChildren()) do
-		if child:IsA("TextButton") then child:Destroy() end
-	end
+populateTitlesList = function()
+	if not LeftPanel then return end
+	for _, child in pairs(LeftPanel:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
+
 	for _, data in ipairs(TITLES_DATA) do
-		local isUnlocked = checkIsUnlocked(data)
-		local btn = Instance.new("TextButton")
-		btn.Name = data.Name
-		btn.Text = isUnlocked and data.Name or "?? " .. data.Name
-		btn.TextColor3 = data.Color 
-		btn.Size = UDim2.new(0.9, 0, 0, 40)
-		btn.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
-		btn.Font = Enum.Font.GothamBold
-		btn.TextSize = 18
-		btn.ZIndex = 1302
-		btn.Parent = LeftPanel
-		Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-		btn.MouseButton1Click:Connect(function() 
-			playClick()
-			updateRightPanel(data) 
-		end)
+		if data.Category == currentTitleCategory then
+			local isUnlocked = checkIsUnlocked(data)
+
+			local btn = Instance.new("TextButton")
+			btn.Name = data.Name
+			btn.Size = UDim2.new(0.9, 0, 0, 45)
+			btn.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
+			btn.Font = Enum.Font.FredokaOne
+			btn.TextSize = 20
+			btn.ZIndex = 1302
+			btn.Parent = LeftPanel
+			Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+			-- === APLICAR COLOR SIEMPRE (Desbloqueado o Bloqueado) ===
+			btn.TextColor3 = Color3.new(1, 1, 1) -- Blanco base para que el gradiente funcione
+
+			if isUnlocked then
+				btn.Text = data.Name
+			else
+				btn.Text = "üîí " .. data.Name -- Solo cambia el texto, no el color
+			end
+
+			-- Crear Gradiente (Se ve en ambos casos)
+			if data.Gradient then
+				local gradient = Instance.new("UIGradient")
+				gradient.Color = data.Gradient
+				gradient.Rotation = 0
+				gradient.Parent = btn
+			end
+
+			btn.MouseButton1Click:Connect(function() 
+				playClick()
+				updateRightPanel(data) 
+
+				-- Aplicar al preview tambi√©n
+				if PreviewTitle then
+					PreviewTitle.Text = data.Name
+					PreviewTitle.TextColor3 = Color3.new(1, 1, 1)
+					local old = PreviewTitle:FindFirstChildOfClass("UIGradient"); if old then old:Destroy() end
+
+					if data.Gradient then -- Sin condici√≥n 'isUnlocked'
+						local g = Instance.new("UIGradient")
+						g.Color = data.Gradient
+						g.Parent = PreviewTitle
+					end
+				end
+			end)
+		end
 	end
 end
--- L”GICA DAILY REWARDS (COLORES: AZUL -> VERDE)
+
+
+-- L√ìGICA DAILY REWARDS (COLORES: AZUL -> VERDE)
 local function openDailyRewards()
 	UIUtils.playClick(); DailyScroll:ClearAllChildren()
 	local uiGrid = Instance.new("UIGridLayout", DailyScroll); uiGrid.CellSize = UDim2.new(0.18, 0, 0, 100); uiGrid.CellPadding = UDim2.new(0.02, 0, 0.02, 0); uiGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -1883,28 +2006,36 @@ local function openDailyRewards()
 	local isVip = localSessionPasses[VIP_GAMEPASS_ID] == true
 	if isVip then DailyButton.Image = "rbxassetid://80848827945021" else DailyButton.Image = "rbxassetid://86257281348163" end
 
-	local currentStreak = player:GetAttribute("CurrentStreak") or 1
-	local displayDay = ((currentStreak - 1) % 30) + 1 
+	-- OBTENCI√ìN DE RACHA SEGURA
+	local rawStreak = player:GetAttribute("CurrentStreak") or 1
+	if rawStreak < 1 then rawStreak = 1 end -- Protecci√≥n por si es 0
+
+	-- F√ìRMULA DEL CICLO 30 D√çAS
+	-- Ejemplo: Racha 1 -> D√≠a 1. Racha 30 -> D√≠a 30. Racha 31 -> D√≠a 1.
+	local displayDay = ((rawStreak - 1) % 30) + 1 
+
 	local alreadyClaimed = player:GetAttribute("DailyClaimed") == true
 
 	for day = 1, 30 do
 		local frame = Instance.new("TextButton", DailyScroll)
 		frame.Text = ""; frame.AutoButtonColor = false 
 
-		-- === L”GICA DE COLORES EXACTA ===
-		if day < displayDay then
-			-- DÌas pasados -> VERDE
-			frame.BackgroundColor3 = Color3.fromRGB(40, 200, 100)
-		elseif day == displayDay then
-			-- DÌa de HOY
+		-- === L√ìGICA DE ESTADO (CORREGIDA) ===
+		local isPastDay = day < displayDay -- D√≠as anteriores en este ciclo (ej: si hoy es 5, 1-4 son pasados)
+		local isToday = day == displayDay
+		local isFuture = day > displayDay
+
+		-- 1. COLOR DE FONDO
+		if isPastDay then
+			frame.BackgroundColor3 = Color3.fromRGB(40, 200, 100) -- Verde (Reclamado Hist√≥rico)
+		elseif isToday then
 			if alreadyClaimed then
-				frame.BackgroundColor3 = Color3.fromRGB(40, 200, 100) -- Ya cobrado -> VERDE
+				frame.BackgroundColor3 = Color3.fromRGB(40, 200, 100) -- Verde (Reclamado Hoy)
 			else
-				frame.BackgroundColor3 = Color3.fromRGB(0, 170, 255) -- Falta cobrar -> AZUL
+				frame.BackgroundColor3 = Color3.fromRGB(0, 170, 255) -- Azul (¬°RECL√ÅMAME!)
 			end
 		else
-			-- DÌas futuros -> GRIS
-			frame.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
+			frame.BackgroundColor3 = Color3.fromRGB(60, 60, 65) -- Gris (Futuro)
 		end
 
 		-- Borde brillante solo si toca hoy y falta cobrar
@@ -1923,31 +2054,52 @@ local function openDailyRewards()
 		if day % 7 == 0 then rewardType="Gems"; rewardAmt=day*50; iconId="rbxassetid://111308733495717" end
 		if day == 30 then rewardType="Skin"; rewardAmt=1; iconId="rbxassetid://85619868467544" end
 
+		-- ETIQUETA VIP MEJORADA (Esquina superior derecha + Inclinaci√≥n)
 		if isVip and rewardType ~= "Skin" then 
 			rewardAmt = rewardAmt * 2
-			local vipTag = Instance.new("TextLabel", frame); vipTag.Text = "VIP x2"; vipTag.Size=UDim2.new(0.5,0,0.2,0); vipTag.Position=UDim2.new(0.5,0,0,0); vipTag.BackgroundTransparency=1; vipTag.TextColor3=Color3.fromRGB(255,220,50); vipTag.Font=Enum.Font.FredokaOne; vipTag.TextScaled=true; vipTag.ZIndex=5
+			local vipTag = Instance.new("TextLabel", frame)
+			vipTag.Text = "VIP x2"
+			vipTag.Size = UDim2.new(0.6, 0, 0.25, 0)
+			vipTag.Position = UDim2.new(1, -2, 0, -2) -- Esquina superior derecha
+			vipTag.AnchorPoint = Vector2.new(1, 0)
+			vipTag.Rotation = 15 -- Inclinaci√≥n estilizada
+			vipTag.BackgroundTransparency = 1
+			vipTag.TextColor3 = Color3.fromRGB(255, 215, 0) -- Dorado puro
+			vipTag.Font = Enum.Font.FredokaOne
+			vipTag.TextScaled = true
+			vipTag.ZIndex = 5
+			-- Borde negro para que se lea mejor
+			local st = Instance.new("UIStroke", vipTag); st.Color = Color3.new(0,0,0); st.Thickness = 2
 		end
 
 		local icon = Instance.new("ImageLabel", frame); icon.Image = iconId; icon.Size = UDim2.new(0.4,0,0.4,0); icon.Position=UDim2.new(0.3,0,0.3,0); icon.BackgroundTransparency=1; icon.ScaleType=Enum.ScaleType.Fit; icon.ZIndex=2
 
-		local txtContent = (day==30) and "MYSTERY" or formatNumber(rewardAmt)
-		if day == displayDay and alreadyClaimed then txtContent = "CLAIMED!" end
+		-- L√ìGICA DE TEXTO Y ESTADO VISUAL CORREGIDA
+		local txtContent = formatNumber(rewardAmt)
+		if day == 30 then txtContent = "MYSTERY" end
+
+		-- Texto "CLAIMED!" para d√≠as pasados O el actual si ya cobraste
+		if isPastDay or (isToday and alreadyClaimed) then 
+			txtContent = "CLAIMED!" 
+		end
 
 		local amtLbl = Instance.new("TextLabel", frame); amtLbl.Text = txtContent; amtLbl.Size=UDim2.new(1,0,0.25,0); amtLbl.Position=UDim2.new(0,0,0.75,0); amtLbl.BackgroundTransparency=1; amtLbl.TextColor3=Color3.new(1,1,1); amtLbl.Font=Enum.Font.FredokaOne; amtLbl.TextScaled=true; amtLbl.ZIndex=2
 
-		-- CLICK RECLAMAR (De Azul a Verde)
+		-- EVENTO CLICK (Solo para el d√≠a actual si no est√° reclamado)
 		if day == displayDay and not alreadyClaimed then
-			frame.MouseButton1Click:Connect(function()
-				if frame.Active == false then return end
-				frame.Active = false
+			frame.AutoButtonColor = true 
 
-				-- Sonido
+			frame.MouseButton1Click:Connect(function()
+				if frame:GetAttribute("IsProcessing") then return end
+				frame:SetAttribute("IsProcessing", true)
+
 				local s = Instance.new("Sound", workspace); s.SoundId="rbxassetid://2865227271"; s:Play(); game.Debris:AddItem(s, 2)
 
-				-- CAMBIO VISUAL INMEDIATO: AZUL -> VERDE
+				-- Cambio visual inmediato
 				frame.BackgroundColor3 = Color3.fromRGB(40, 200, 100) 
 				amtLbl.Text = "CLAIMED!"
 				local s = frame:FindFirstChild("UIStroke"); if s then s:Destroy() end
+				frame.AutoButtonColor = false
 
 				-- Enviar al Server
 				local event = ReplicatedStorage:FindFirstChild("ClaimDaily")
@@ -1965,7 +2117,7 @@ local function toggleMenu(frame)
 		-- Solo mostramos botones si no estamos jugando
 		if not MainFrame.Visible then toggleMenuButtons(true) end
 	else
-		-- Cerrar TODO lo dem·s antes de abrir
+		-- Cerrar TODO lo dem√°s antes de abrir
 		if ShopFrame.Visible then UIUtils.closeMenuWithAnim(ShopFrame) end
 		if TitlesFrame.Visible then UIUtils.closeMenuWithAnim(TitlesFrame) end
 		if SettingsFrame.Visible then UIUtils.closeMenuWithAnim(SettingsFrame) end
@@ -1983,7 +2135,7 @@ local function toggleMenu(frame)
 	end
 end
 
--- CONEXI”N CORRECTA DEL BOT”N (Usando Toggle)
+-- CONEXI√ìN CORRECTA DEL BOT√ìN (Usando Toggle)
 if DailyButton then 
 	DailyButton.MouseButton1Click:Connect(function()
 		toggleMenu(DailyFrame) 
@@ -1994,26 +2146,26 @@ end
 -- 7. BUTTON ANIMATION LOGIC (OPTIMIZADO PARA MEMORIA)
 -------------------------------------------------------------------------
 
--- L”GICA DE UI CENTRALIZADA
+-- L√ìGICA DE UI CENTRALIZADA
 toggleMenuButtons = function(visible)
 	if PlayButton then PlayButton.Visible = visible end
 	if LeaderboardButton then LeaderboardButton.Visible = visible end
 	if MenuTitle then MenuTitle.Visible = visible end
 
-	-- NUEVO: Ocultar la barra de estadÌsticas global (Monedas/Diamantes/Frutas)
+	-- NUEVO: Ocultar la barra de estad√≠sticas global (Monedas/Diamantes/Frutas)
 	local gStats = ScreenGui:FindFirstChild("GlobalStats")
 	if gStats then gStats.Visible = visible end
 end
 
--- L”GICA DE MEN⁄S (CORREGIDA PARA CALENDARIO)
+-- L√ìGICA DE MEN√öS (CORREGIDA PARA CALENDARIO)
 toggleMenu = function(frameToToggle)
 	if frameToToggle.Visible then
-		-- SI YA EST¡ ABIERTO -> CERRAR
+		-- SI YA EST√Å ABIERTO -> CERRAR
 		UIUtils.closeMenuWithAnim(frameToToggle)
 		-- Solo restaurar botones si no estamos jugando
 		if not MainFrame.Visible then toggleMenuButtons(true) end
 	else
-		-- SI EST¡ CERRADO -> ABRIR (Y CERRAR LOS DEM¡S)
+		-- SI EST√Å CERRADO -> ABRIR (Y CERRAR LOS DEM√ÅS)
 
 		-- Cerrar Shop, Titles, Settings, Leaderboard, Stats
 		if ShopFrame.Visible then UIUtils.closeMenuWithAnim(ShopFrame) end
@@ -2022,7 +2174,7 @@ toggleMenu = function(frameToToggle)
 		if LeaderboardFrame.Visible then UIUtils.closeMenuWithAnim(LeaderboardFrame) end
 		if StatsFrame.Visible then UIUtils.closeMenuWithAnim(StatsFrame) end
 
-		-- ? IMPORTANTE: Cerrar Daily si est· abierto y estamos abriendo otra cosa
+		-- ‚úÖ IMPORTANTE: Cerrar Daily si est√° abierto y estamos abriendo otra cosa
 		if DailyFrame and DailyFrame.Visible and frameToToggle ~= DailyFrame then 
 			UIUtils.closeMenuWithAnim(DailyFrame) 
 		end
@@ -2030,10 +2182,10 @@ toggleMenu = function(frameToToggle)
 		toggleMenuButtons(false)
 		UIUtils.openMenuWithAnim(frameToToggle)
 
-		-- LÛgica especÌfica al abrir
+		-- L√≥gica espec√≠fica al abrir
 		if frameToToggle == TitlesFrame then populateTitlesList() end
 		if frameToToggle == ShopFrame and ShopRefs.switchShopTab then ShopRefs.switchShopTab("Currency") end
-		-- ? ABRIR DAILY REWARDS SI TOCA
+		-- ‚úÖ ABRIR DAILY REWARDS SI TOCA
 		if frameToToggle == DailyFrame then openDailyRewards() end
 	end
 end
@@ -2058,12 +2210,12 @@ TryAgainButton.MouseButton1Click:Connect(function()
 	initGame()
 end)
 
--- ESTA ES LA FUNCI”N QUE TE FALTABA (showMenu)
+-- ESTA ES LA FUNCI√ìN QUE TE FALTABA (showMenu)
 local function showMenu()
 	-- 1. Reproducir sonido si existe
 	if typeof(playClick) == "function" then playClick() end
 
-	-- 2. Ocultar todos los contenedores de juego y men˙s secundarios
+	-- 2. Ocultar todos los contenedores de juego y men√∫s secundarios
 	if MainFrame then MainFrame.Visible = false end
 	if GameOverFrame then GameOverFrame.Visible = false end
 	if ConfirmFrame then ConfirmFrame.Visible = false end
@@ -2072,10 +2224,10 @@ local function showMenu()
 	if ShopFrame then ShopFrame.Visible = false end
 	if TitlesFrame then TitlesFrame.Visible = false end
 
-	-- 3. Mostrar el Men˙ Principal
+	-- 3. Mostrar el Men√∫ Principal
 	if MenuFrame then MenuFrame.Visible = true end
 
-	-- 4. Asegurar que los botones del men˙ (Settings, etc.) estÈn visibles
+	-- 4. Asegurar que los botones del men√∫ (Settings, etc.) est√©n visibles
 	if SettingsBtnGlobal then SettingsBtnGlobal.Visible = true end
 	if SettingsBtnGame then SettingsBtnGame.Visible = false end -- Ocultar el del juego
 
@@ -2083,10 +2235,10 @@ local function showMenu()
 	local bgSkin = ScreenGui:FindFirstChild("SkinBackground")
 	if bgSkin then bgSkin.Visible = false end
 
-	-- Restaurar botones del men˙ (Play, Leaderboard, etc.)
+	-- Restaurar botones del men√∫ (Play, Leaderboard, etc.)
 	toggleMenuButtons(true)
 
-	-- 5. === L”GICA DE DESAPARICI”N DE PANTALLA DE CARGA ===
+	-- 5. === L√ìGICA DE DESAPARICI√ìN DE PANTALLA DE CARGA ===
 	-- (Esta es la parte que faltaba)
 	if LoadingFrame and LoadingFrame.Visible then
 		local fadeTime = 1.0 
@@ -2108,7 +2260,7 @@ local function showMenu()
 			end
 		end
 
-		-- Esperar a que termine la animaciÛn y apagar el Frame
+		-- Esperar a que termine la animaci√≥n y apagar el Frame
 		task.delay(fadeTime, function()
 			LoadingFrame.Visible = false
 		end)
@@ -2116,16 +2268,45 @@ local function showMenu()
 end
 
 GameOverMenuButton.MouseButton1Click:Connect(showMenu)
--- CONEXI”N DE UNDO BUTTON
+-- CONEXI√ìN DE UNDO BUTTON
 UndoButton.MouseButton1Click:Connect(function()
 	playClick()
 	if undoCount > 0 then applyUndo() else buyUndo() end
 end)
 
+-- ==============================================================
+-- ‚úÖ SINCRONIZACI√ìN VISUAL DE UNDOS (SILENCIOSO)
+-- ==============================================================
+local function syncUndoVisuals()
+	local serverUndos = player:GetAttribute("Undos") or 0
+	undoCount = serverUndos 
+
+	if UndoCountLabel then
+		if undoCount > 0 then
+			UndoCountLabel.Text = tostring(undoCount)
+			UndoButton.BackgroundColor3 = Color3.fromHex("8f7a66") 
+		else
+			UndoCountLabel.Text = "+"
+			UndoButton.BackgroundColor3 = Color3.fromHex("f67c5f")
+		end
+	end
+end
+
+player:GetAttributeChangedSignal("Undos"):Connect(syncUndoVisuals)
+task.delay(1, syncUndoVisuals)
+
+-- CONECTAMOS LA SE√ëAL:
+-- Cada vez que el PurchaseHandler cambie el atributo "Undos", esta funci√≥n se activa sola.
+player:GetAttributeChangedSignal("Undos"):Connect(syncUndoVisuals)
+
+-- LLAMADA INICIAL:
+-- Para que al entrar al juego cargue los Undos que ten√≠as guardados
+task.delay(1, syncUndoVisuals)
+
 local loadingActive = true
 local TOTAL_LOAD_TIME = 15
 
--- L”GICA DEL SELECTOR DE MODOS (RESTAURADA)
+-- L√ìGICA DEL SELECTOR DE MODOS (RESTAURADA)
 local function openModeSelector()
 	UIUtils.playClick()
 
@@ -2168,7 +2349,7 @@ local function openModeSelector()
 			local st = Instance.new("TextLabel", btn); st.Size = UDim2.new(0.3, 0, 0.6, 0); st.Position = UDim2.new(0.65, 0, 0.2, 0); st.BackgroundTransparency = 1; st.Font = Enum.Font.FredokaOne; st.TextScaled = true
 
 			if locked then
-				btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); st.Text = "Lvl "..reqLvl.." ??"; st.TextColor3 = Color3.fromRGB(255, 80, 80)
+				btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); st.Text = "Lvl "..reqLvl.." üîí"; st.TextColor3 = Color3.fromRGB(255, 80, 80)
 			else
 				st.Text = "PLAY"; st.TextColor3 = Color3.fromRGB(100, 255, 100)
 				btn.MouseButton1Click:Connect(function()
@@ -2188,16 +2369,56 @@ local function openModeSelector()
 				end)
 			end
 		end
+		-- BOTONES NORMALES (Classic, Big Board, Diamond Rush)
 		addBtn("Classic", "The original 4x4 experience.", 0, 4, "Classic")
 		addBtn("Big Board", "More space, 5x5 grid.", 10, 5, "5x5")
-		addBtn("Diamond Rush ??", "Merge 16+16 to earn Gems!", 15, 4, "Special")
+		-- ‚úÖ AQU√ç PUSE EL DIAMANTE üíé
+		addBtn("Diamond Rush üíé", "Merge 16+16 to earn Gems!", 15, 4, "Special")
+
+		-- NUEVO BOT√ìN: FRUIT MODE (Personalizado)
+		local btnFruit = Instance.new("TextButton", container); btnFruit.Size = UDim2.new(1, 0, 0.25, 0); btnFruit.BackgroundColor3 = Color3.fromRGB(60, 60, 65); btnFruit.Text = ""; Instance.new("UICorner", btnFruit).CornerRadius = UDim.new(0, 8)
+
+		-- ‚úÖ AQU√ç PUSE LA FRESA üçì EN EL T√çTULO
+		local t = Instance.new("TextLabel", btnFruit); t.Text = "Fruit Harvest üçì"; t.Size = UDim2.new(0.4, 0, 0.5, 0); t.Position = UDim2.new(0.05, 0, 0.1, 0); t.BackgroundTransparency = 1; t.TextColor3 = Color3.new(1,1,1); t.Font = Enum.Font.GothamBold; t.TextScaled = true; t.TextXAlignment = Enum.TextXAlignment.Left
+
+		local d = Instance.new("TextLabel", btnFruit); d.Text = "Farm Fruit Gems! (Req: Lvl 30 + Fruit Skin)"; d.Size = UDim2.new(0.45, 0, 0.3, 0); d.Position = UDim2.new(0.05, 0, 0.6, 0); d.BackgroundTransparency = 1; d.TextColor3 = Color3.fromRGB(180,180,180); d.Font = Enum.Font.Gotham; d.TextScaled = true; d.TextXAlignment = Enum.TextXAlignment.Left
+
+		-- Verificaci√≥n de requisitos
+		local myLvl = 1; local ls = player:FindFirstChild("leaderstats"); if ls then myLvl = ls.Level.Value end
+		local currentThemeData = THEMES[currentSkin]
+		local hasFruitSkin = currentThemeData and currentThemeData.IsFruitSkin == true
+
+		local status = Instance.new("TextLabel", btnFruit); status.Size = UDim2.new(0.3, 0, 0.6, 0); status.Position = UDim2.new(0.65, 0, 0.2, 0); status.BackgroundTransparency = 1; status.Font = Enum.Font.FredokaOne; status.TextScaled = true
+
+		if myLvl < 30 then
+			btnFruit.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			status.Text = "Lvl 30 üîí"; status.TextColor3 = Color3.fromRGB(255, 80, 80) -- Candado para nivel
+		elseif not hasFruitSkin then
+			btnFruit.BackgroundColor3 = Color3.fromRGB(40, 30, 30)
+			-- ‚úÖ AQU√ç PUSE LA FRESA üçì PARA EL REQUISITO DE SKIN
+			status.Text = "Need Fruit Skin üçì"; status.TextColor3 = Color3.fromRGB(255, 140, 0)
+			d.Text = "Equip a Fruit Skin (Shop) to enter!" 
+		else
+			status.Text = "PLAY"; status.TextColor3 = Color3.fromRGB(100, 255, 100)
+			btnFruit.MouseButton1Click:Connect(function()
+				UIUtils.playClick()
+				GAME_MODE = "Fruit"
+				BOARD_SIZE = 4
+				CELL_SIZE = (1 - (PADDING * (BOARD_SIZE + 1))) / BOARD_SIZE
+
+				frame.Visible = false; MenuFrame.Visible = false; MainFrame.Visible = true
+				if SettingsBtnGlobal then SettingsBtnGlobal.Visible = false end
+				if ReplicatedStorage:FindFirstChild("StartGame") then ReplicatedStorage.StartGame:FireServer() end
+				initGame()
+			end)
+		end
 	end
 
 	toggleMenuButtons(false)
 	UIUtils.openMenuWithAnim(frame)
 end
 
--- CONEXI”N DEL BOT”N PLAY (AquÌ es donde revivimos el botÛn)
+-- CONEXI√ìN DEL BOT√ìN PLAY (Aqu√≠ es donde revivimos el bot√≥n)
 if PlayButton then PlayButton.MouseButton1Click:Connect(openModeSelector) end
 
 -- SKIP BUTTON
@@ -2220,21 +2441,21 @@ TitleCloseBtn.MouseButton1Click:Connect(function() UIUtils.closeMenuWithAnim(Tit
 
 
 
--- ... (cÛdigo anterior) ...
+-- ... (c√≥digo anterior) ...
 
 -- CONEXIONES DE LA TIENDA
-if ShopButton then  -- ?? ESTE IF SE ABRI” AQUÕ
+if ShopButton then  -- üî¥ ESTE IF SE ABRI√ì AQU√ç
 
 	-- CONEXIONES DE LA TIENDA (Corregidas)
 	ShopButton.MouseButton1Click:Connect(function() 
 		toggleMenu(ShopFrame) 
-		-- Al abrir, cargamos la pestaÒa de monedas y pasamos el callback
+		-- Al abrir, cargamos la pesta√±a de monedas y pasamos el callback
 		if ShopFrame.Visible then 
 			ShopManager.switchTab("Currency", currentSkin, skinChangeCallback) 
 		end
 	end)
 
-	-- PESTA—AS DE LA TIENDA
+	-- PESTA√ëAS DE LA TIENDA
 	if ShopRefs.TabCurrencyBtn then 
 		ShopRefs.TabCurrencyBtn.MouseButton1Click:Connect(function() 
 			ShopManager.switchTab("Currency", currentSkin, skinChangeCallback) 
@@ -2247,7 +2468,7 @@ if ShopButton then  -- ?? ESTE IF SE ABRI” AQUÕ
 		end)
 	end
 
-	-- ? CONEXI”N DE LA PESTA—A SKINS (ESTO FALTABA)
+	-- ‚úÖ CONEXI√ìN DE LA PESTA√ëA SKINS (ESTO FALTABA)
 	if ShopRefs.TabSkinsBtn then
 		ShopRefs.TabSkinsBtn.MouseButton1Click:Connect(function()
 			ShopManager.switchTab("Skins", currentSkin, skinChangeCallback)
@@ -2257,7 +2478,7 @@ if ShopButton then  -- ?? ESTE IF SE ABRI” AQUÕ
 end 
 
 
--- NUEVA L”GICA DE SETTINGS (UNIFICADA)
+-- NUEVA L√ìGICA DE SETTINGS (UNIFICADA)
 
 local function toggleSettings()
 	UIUtils.playClick()
@@ -2266,7 +2487,7 @@ local function toggleSettings()
 		-- CASO 1: CERRAR SETTINGS
 		UIUtils.closeMenuWithAnim(SettingsFrame)
 
-		-- Solo volvemos a mostrar los botones del men˙ (Play/Leaderboard)
+		-- Solo volvemos a mostrar los botones del men√∫ (Play/Leaderboard)
 		-- SI NO estamos dentro de una partida.
 		if not MainFrame.Visible then 
 			toggleMenuButtons(true) 
@@ -2274,14 +2495,14 @@ local function toggleSettings()
 	else
 		-- CASO 2: ABRIR SETTINGS
 
-		-- A. Cerrar cualquier otro men˙ que estorbe
+		-- A. Cerrar cualquier otro men√∫ que estorbe
 		if ShopFrame and ShopFrame.Visible then UIUtils.closeMenuWithAnim(ShopFrame) end
 		if LeaderboardFrame and LeaderboardFrame.Visible then UIUtils.closeMenuWithAnim(LeaderboardFrame) end
 		if TitlesFrame and TitlesFrame.Visible then UIUtils.closeMenuWithAnim(TitlesFrame) end
 		if StatsFrame and StatsFrame.Visible then UIUtils.closeMenuWithAnim(StatsFrame) end
 		if ModeFrame and ModeFrame.Visible then UIUtils.closeMenuWithAnim(ModeFrame) end
 
-		-- B. Ocultar botones del men˙ principal para que no se vean detr·s
+		-- B. Ocultar botones del men√∫ principal para que no se vean detr√°s
 		toggleMenuButtons(false)
 
 		-- C. Abrir Settings
@@ -2300,10 +2521,10 @@ if SettingsBtnGame then
 	SettingsBtnGame.MouseButton1Click:Connect(toggleSettings) 
 end
 
--- ConexiÛn extra para el botÛn Stats (que tambiÈn abre un men˙ similar)
+-- Conexi√≥n extra para el bot√≥n Stats (que tambi√©n abre un men√∫ similar)
 if StatsButton then
 	StatsButton.MouseButton1Click:Connect(function()
-		-- Usamos lÛgica similar: cerrar otros men˙s primero
+		-- Usamos l√≥gica similar: cerrar otros men√∫s primero
 		if ShopFrame.Visible then UIUtils.closeMenuWithAnim(ShopFrame) end
 		if LeaderboardFrame.Visible then UIUtils.closeMenuWithAnim(LeaderboardFrame) end
 
@@ -2312,20 +2533,20 @@ if StatsButton then
 		SettingsManager.updateStats() 
 	end)
 end
--- El botÛn cerrar de stats tambiÈn est· en el mÛdulo
+-- El bot√≥n cerrar de stats tambi√©n est√° en el m√≥dulo
 if StatsButton then UIUtils.addHoverEffect(StatsButton) end
 
 -- ... (LTab Connections se mantienen igual porque no usaban closeMenuWithAnim) ...
 
--- 4. BotÛn Leaderboard Principal
+-- 4. Bot√≥n Leaderboard Principal
 LeaderboardButton.MouseButton1Click:Connect(function()
 	toggleMenu(LeaderboardFrame)
 	LeaderboardManager.switchTab("HighScore") 
 end)
 
--- Nota: Los botones internos de las pestaÒas (High, Time, etc) y el botÛn Cerrar
--- ya se conectaron autom·ticamente dentro del mÛdulo LeaderboardManager.init().
--- No necesitas conectarlos aquÌ de nuevo.
+-- Nota: Los botones internos de las pesta√±as (High, Time, etc) y el bot√≥n Cerrar
+-- ya se conectaron autom√°ticamente dentro del m√≥dulo LeaderboardManager.init().
+-- No necesitas conectarlos aqu√≠ de nuevo.
 
 EquipButton.MouseButton1Click:Connect(function()
 	playClick()
@@ -2357,23 +2578,23 @@ end)
 
 
 -- ==========================================================
--- ? DETECTOR DE COMPRA DE GAMEPASS (ARREGLADO REAL + TITULOS)
+-- ‚úÖ DETECTOR DE COMPRA DE GAMEPASS (ARREGLADO REAL + TITULOS)
 -- ==========================================================
 MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(playerWhoPurchased, passId, wasPurchased)
 
 	if playerWhoPurchased == player and wasPurchased == true then
-		print("? GamePass Comprado ID: " .. tostring(passId))
+		print("‚úÖ GamePass Comprado ID: " .. tostring(passId))
 
-		-- Sonido de Èxito
+		-- Sonido de √©xito
 		local s = Instance.new("Sound", workspace); s.SoundId="rbxassetid://2865227271"; s:Play(); game.Debris:AddItem(s, 2)
 
-		-- 1. GUARDAR EN MEMORIA DE SHOP (MÛdulo)
+		-- 1. GUARDAR EN MEMORIA DE SHOP (M√≥dulo)
 		ShopManager.registerLocalPurchase(passId)
 
-		-- 2. GUARDAR EN MEMORIA DE GAMECLIENT (Para TÌtulos)
+		-- 2. GUARDAR EN MEMORIA DE GAMECLIENT (Para T√≠tulos)
 		localSessionPasses[passId] = true 
 
-		-- 3. REFRESCAR TIENDA SI EST¡ ABIERTA
+		-- 3. REFRESCAR TIENDA SI EST√Å ABIERTA
 		if ShopFrame.Visible then
 			if ShopRefs.PassesContainer and ShopRefs.PassesContainer.Visible then
 				ShopManager.switchTab("Passes", currentSkin, skinChangeCallback)
@@ -2383,10 +2604,10 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(playerWhoPurc
 			end
 		end
 
-		-- 4. REFRESCAR MEN⁄ DE TÕTULOS SI EST¡ ABIERTO (Para desbloquear VIP al instante)
+		-- 4. REFRESCAR MEN√ö DE T√çTULOS SI EST√Å ABIERTO (Para desbloquear VIP al instante)
 		if TitlesFrame and TitlesFrame.Visible then
 			populateTitlesList() -- Recargar lista izquierda
-			-- Si tenÌas seleccionado el VIP, refrescar el panel derecho
+			-- Si ten√≠as seleccionado el VIP, refrescar el panel derecho
 			if currentlySelectedTitle == "VIP" then
 				local vipData = nil
 				for _, d in ipairs(TITLES_DATA) do if d.Name == "VIP" then vipData = d break end end
@@ -2395,11 +2616,11 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(playerWhoPurc
 		end
 
 	else
-		print("? Compra cancelada o fallida para ID:", passId)
+		print("‚ùå Compra cancelada o fallida para ID:", passId)
 	end
 end)
 
--- CONTROLES (AISLADOS EN FUNCI”N PARA EVITAR ERROR DE MEMORIA)
+-- CONTROLES (AISLADOS EN FUNCI√ìN PARA EVITAR ERROR DE MEMORIA)
 local function setupControls()
 	local function disableControls(actionName, inputState, inputObject)
 		if inputState == Enum.UserInputState.Begin and MainFrame.Visible and not ConfirmFrame.Visible and not LeaderboardFrame.Visible and not SettingsFrame.Visible and not ShopFrame.Visible and not TitlesFrame.Visible then
@@ -2424,14 +2645,14 @@ RunService.Stepped:Connect(function()
 	if player and player.Character then local h = player.Character:FindFirstChild("Humanoid"); if h then h.WalkSpeed = 0; h.JumpPower = 0 end end
 end)
 
--- CONEXI”N DE LA X (DAILY REWARDS)
+-- CONEXI√ìN DE LA X (DAILY REWARDS)
 if DailyClose then 
 	DailyClose.MouseButton1Click:Connect(function()
 		-- 1. Reproducir sonido click
 		UIUtils.playClick()
-		-- 2. Cerrar la ventana con animaciÛn
+		-- 2. Cerrar la ventana con animaci√≥n
 		UIUtils.closeMenuWithAnim(DailyFrame)
-		-- 3. IMPORTANTE: Volver a mostrar los botones del men˙ (Play, Leaderboard, etc)
+		-- 3. IMPORTANTE: Volver a mostrar los botones del men√∫ (Play, Leaderboard, etc)
 		toggleMenuButtons(true) 
 	end) 
 end
@@ -2447,7 +2668,7 @@ task.spawn(function()
 			if elapsed >= TOTAL_LOAD_TIME then loadingActive = false; showMenu() end
 		end
 
-		-- 2. ACTUALIZACI”N DE UI
+		-- 2. ACTUALIZACI√ìN DE UI
 		if player then
 			local ls = player:FindFirstChild("leaderstats")
 			if ls then
@@ -2456,19 +2677,48 @@ task.spawn(function()
 				local f = ls:FindFirstChild("FruitGems") and ls.FruitGems.Value or 0
 				local sc, sd, sf = formatNumber(c), formatNumber(d), formatNumber(f)
 
-				-- Actualizar etiquetas de monedas
-				if CoinLabel then CoinLabel.Text = sc end; if FruitLabel then FruitLabel.Text = sd end
+				-- Actualizar etiquetas
+				if CoinLabel then CoinLabel.Text = sc end       -- Monedas
+				if FruitLabel then FruitLabel.Text = sd end     -- Diamantes (Variable vieja)
+				if FruitGemLabel then FruitGemLabel.Text = sf end -- Frutas (Nueva)
 				if MenuCoinLbl then MenuCoinLbl.Text = sc end; if MenuGemLbl then MenuGemLbl.Text = sd end; if MenuFruitLbl then MenuFruitLbl.Text = sf end
 				if ShopRefs.CoinLbl then ShopRefs.CoinLbl.Text = sc end; if ShopRefs.GemLbl then ShopRefs.GemLbl.Text = sd end; if ShopRefs.FruitLbl then ShopRefs.FruitLbl.Text = sf end
 
-				-- ? ACTUALIZAR N⁄MERO DE RACHA (ESTO FALTABA)
-				if StreakNumMenu then
+				-- ? ACTUALIZAR N√öMERO DE RACHA E ICONO DE FUEGO
+				if StreakNumMenu and StreakBadge then
 					local st = player:GetAttribute("CurrentStreak") or 1
 					StreakNumMenu.Text = tostring(st)
 
-					-- Color del Badge seg˙n racha
-					if st >= 5 then StreakBadge.BackgroundColor3 = Color3.fromRGB(255, 140, 0) -- Naranja (Racha alta)
-					else StreakBadge.BackgroundColor3 = Color3.fromRGB(255, 60, 60) end -- Rojo (Normal)
+					-- IDs DE FUEGO (Seg√∫n d√≠as)
+					if st >= 150 then
+						StreakBadge.Image = "rbxassetid://132241895741787" -- Morado
+					elseif st >= 50 then
+						StreakBadge.Image = "rbxassetid://85252887341379" -- Verde
+					else
+						StreakBadge.Image = "rbxassetid://134763959761180" -- Rojo (Normal)
+					end
+				end
+
+				-- ? ACTUALIZAR CALENDARIO DORADO (VIP)
+				-- Revisamos si tenemos el VIP en cache o en atributo
+				local hasVip = localSessionPasses[VIP_GAMEPASS_ID] == true
+
+				-- Si no est√° en cache, intentamos una vez leerlo (sin spamear API)
+				if not hasVip and not player:GetAttribute("CheckedVipOnce") then
+					player:SetAttribute("CheckedVipOnce", true)
+					task.spawn(function()
+						local s, r = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, VIP_GAMEPASS_ID) end)
+						if s and r then 
+							localSessionPasses[VIP_GAMEPASS_ID] = true 
+						end
+					end)
+				end
+
+				-- Aplicar imagen si encontramos el VIP
+				if localSessionPasses[VIP_GAMEPASS_ID] then
+					DailyButton.Image = "rbxassetid://80848827945021" -- Dorado
+				else
+					DailyButton.Image = "rbxassetid://86257281348163" -- Azul Normal
 				end
 
 				-- NIVEL Y XP
@@ -2485,7 +2735,7 @@ task.spawn(function()
 						TweenService:Create(LevelBarFill, TweenInfo.new(0.2), {Size = UDim2.new(pct, 0, 1, 0)}):Play() 
 					end
 
-					-- ? TEXTO COMBINADO: "59% | 0 / 1434 XP"
+					-- ‚úÖ TEXTO COMBINADO: "59% | 0 / 1434 XP"
 					if LevelProgressText then 
 						local percentText = math.floor(pct * 100) .. "%"
 						local xpText = formatNumber(cur) .. " / " .. formatNumber(max) .. " XP"
