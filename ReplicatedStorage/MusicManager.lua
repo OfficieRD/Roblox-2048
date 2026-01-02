@@ -30,7 +30,7 @@ function MusicManager.init(screenGui, parentFrame, startVolume)
 	MusicFrame.Parent = parentFrame
 
 	songLabel = Instance.new("TextLabel")
-	songLabel.Text = "?? " .. GameData.MUSIC_PLAYLIST[currentSongIndex].Name
+	songLabel.Text = "🎵 " .. GameData.MUSIC_PLAYLIST[currentSongIndex].Name
 	songLabel.Size = UDim2.new(1, 0, 0.4, 0)
 	songLabel.Position = UDim2.new(0, 0, -0.1, 0)
 	songLabel.BackgroundTransparency = 1
@@ -52,7 +52,7 @@ function MusicManager.init(screenGui, parentFrame, startVolume)
 	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	layout.Padding = UDim.new(0, 15)
 
-	-- Funci�n auxiliar interna para botones
+	-- Función auxiliar interna para botones
 	local function createBtn(text, symbol, callback)
 		local btn = Instance.new("TextButton")
 		btn.Text = symbol
@@ -65,7 +65,7 @@ function MusicManager.init(screenGui, parentFrame, startVolume)
 		btn.Parent = ControlsContainer
 		Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
 
-		UIUtils.addHoverEffect(btn) -- Usamos el m�dulo de UI
+		UIUtils.addHoverEffect(btn) -- Usamos el módulo de UI
 
 		btn.MouseButton1Click:Connect(function()
 			UIUtils.playClick()
@@ -75,19 +75,19 @@ function MusicManager.init(screenGui, parentFrame, startVolume)
 	end
 
 	-- Botones
-	createBtn("Prev", "?", function() MusicManager.changeSong(-1) end)
+	createBtn("Prev", "⏮", function() MusicManager.changeSong(-1) end)
 
-	playBtn = createBtn("Play", "?", function(self)
+	playBtn = createBtn("Play", "⏸", function(self)
 		if musicSound.IsPlaying then
 			musicSound:Pause()
-			self.Text = "?"
+			self.Text = "▶"
 		else
 			musicSound:Resume()
-			self.Text = "?"
+			self.Text = "⏸"
 		end
 	end)
 
-	createBtn("Next", "?", function() MusicManager.changeSong(1) end)
+	createBtn("Next", "⏭", function() MusicManager.changeSong(1) end)
 end
 
 function MusicManager.changeSong(direction)
@@ -102,9 +102,9 @@ function MusicManager.loadCurrentSong()
 	if not musicSound then return end
 	musicSound:Stop()
 	musicSound.SoundId = GameData.MUSIC_PLAYLIST[currentSongIndex].Id
-	if songLabel then songLabel.Text = "?? " .. GameData.MUSIC_PLAYLIST[currentSongIndex].Name end
+	if songLabel then songLabel.Text = "🎵 " .. GameData.MUSIC_PLAYLIST[currentSongIndex].Name end
 	musicSound:Play()
-	if playBtn then playBtn.Text = "?" end
+	if playBtn then playBtn.Text = "⏸" end
 end
 
 function MusicManager.setVolume(vol)
