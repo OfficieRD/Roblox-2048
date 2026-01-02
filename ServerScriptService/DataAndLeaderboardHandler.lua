@@ -1,14 +1,9 @@
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local MarketplaceService = game:GetService("MarketplaceService") -- ? ARREGLADO: Faltaba esta lÌnea
+local MarketplaceService = game:GetService("MarketplaceService") -- ‚úÖ ARREGLADO: Faltaba esta l√≠nea
 
--- ? VARIABLES PARA LEADERBOARDS (ESTO FALTA)
-local coinODS = DataStoreService:GetOrderedDataStore("GlobalCoins")
-local timeODS = DataStoreService:GetOrderedDataStore("GlobalTime")
-local streakODS = DataStoreService:GetOrderedDataStore("GlobalStreaks")
-
--- 1. CONFIGURACI”N DE EVENTOS
+-- 1. CONFIGURACI√ìN DE EVENTOS
 local ClaimLevelRewardEvent = ReplicatedStorage:FindFirstChild("ClaimLevelReward")
 if not ClaimLevelRewardEvent then
 	ClaimLevelRewardEvent = Instance.new("RemoteEvent")
@@ -45,20 +40,29 @@ if not GetStatsFunc then
 	GetStatsFunc.Parent = ReplicatedStorage
 end
 
--- 2. DATASTORES
-local DATASTORE_NAME = "2048_PlayerData_V4_Stats" 
+-- VARIABLES DE DATASTORE (¬°ESTA ES LA QUE FALTA!)
+local PlayerDataStore = DataStoreService:GetDataStore("2048_PlayerData_V4_Stats")
+
+-- VARIABLES DE LEADERBOARD (OrderedDataStore)
 local LEADERBOARD_KEY_SCORE = "GlobalScore_V4"
 local LEADERBOARD_KEY_TIME = "GlobalTime_V4"
-local LEADERBOARD_KEY_STREAK = "GlobalStreak_V4" -- ? Nuevo DataStore para Rachas
+local LEADERBOARD_KEY_STREAK = "GlobalStreak_V4"
+local LEADERBOARD_KEY_SPENT = "GlobalSpent_V4"
+-- ‚úÖ NUEVAS CLAVES
+local LEADERBOARD_KEY_LEVEL = "GlobalLevel_V4"
+local LEADERBOARD_KEY_5X5 = "GlobalScore5x5_V4"
 
-local PlayerDataStore = DataStoreService:GetDataStore(DATASTORE_NAME)
 local HighScoreStore = DataStoreService:GetOrderedDataStore(LEADERBOARD_KEY_SCORE)
 local TimePlayedStore = DataStoreService:GetOrderedDataStore(LEADERBOARD_KEY_TIME)
 local StreakStore = DataStoreService:GetOrderedDataStore(LEADERBOARD_KEY_STREAK)
+local RobuxSpentStore = DataStoreService:GetOrderedDataStore(LEADERBOARD_KEY_SPENT)
+-- ‚úÖ NUEVAS STORES
+local LevelStore = DataStoreService:GetOrderedDataStore(LEADERBOARD_KEY_LEVEL)
+local Score5x5Store = DataStoreService:GetOrderedDataStore(LEADERBOARD_KEY_5X5)
 
 -- 3. TABLA DE PRECIOS 
 local ITEM_PRICES = {
-	-- B¡SICAS
+	-- B√ÅSICAS
 	["Classic"] = {Price = 0, Currency = "Coins"},
 	["Blue"] = {Price = 500, Currency = "Coins"},
 	["Red"] = {Price = 1000, Currency = "Coins"},
@@ -77,22 +81,28 @@ local ITEM_PRICES = {
 	["Pink Pro"] = {Price = 40000, Currency = "Coins"},
 	["Cyan Pro"] = {Price = 50000, Currency = "Coins"},
 
-	-- SPECIALS
+	-- SPECIALS (DIAMANTES)
 	["Neon"] = {Price = 1500, Currency = "Diamonds"},
 	["Classic 2048"] = {Price = 500, Currency = "Diamonds"},
 	["Fruit Mix"] = {Price = 2000, Currency = "Diamonds"},
 	["Robot"] = {Price = 1000, Currency = "Diamonds"},
-	["Volcanic"] = {Price = 2500, Currency = "Diamonds"}
+	["Volcanic"] = {Price = 2500, Currency = "Diamonds"},
+
+	-- FRUIT SHOP (FRUIT GEMS) - ¬°ESTO FALTABA!
+	["Fruit Mix 2"] = {Price = 15000, Currency = "FruitGems"},
+	["Fruit Mix 3"] = {Price = 35000, Currency = "FruitGems"},
+	["Fruits Green"] = {Price = 75000, Currency = "FruitGems"},
+	["Fruits Red"] = {Price = 150000, Currency = "FruitGems"}
 }
 local sessionJoinTime = {}
 
 -------------------------------------------------------------------------
--- FUNCI”N DE GUARDADO (Centralizada)
+-- FUNCI√ìN DE GUARDADO (Centralizada)
 -------------------------------------------------------------------------
 local function savePlayerData(player)
 	if not player:FindFirstChild("leaderstats") then return end
 
-	-- Evitar guardar dos veces si ya se procesÛ
+	-- Evitar guardar dos veces si ya se proces√≥
 	if player:GetAttribute("DataSaved") then return end
 	player:SetAttribute("DataSaved", true)
 
@@ -115,8 +125,18 @@ local function savePlayerData(player)
 		end
 	end
 
+	-- ‚úÖ RECOLECTAR GAMEPASSES (Para Player1/Studio)
+	local savedPasses = {}
+	for attrName, val in pairs(player:GetAttributes()) do
+		if string.sub(attrName, 1, 10) == "PassOwned_" and val == true then
+			local id = tonumber(string.sub(attrName, 11))
+			if id then table.insert(savedPasses, id) end
+		end
+	end
+
 	-- DATOS A GUARDAR
 	local data = {
+		SavedGamePasses = savedPasses, -- <--- ESTA L√çNEA GUARDA LOS PASES
 		HighScore = leaderstats.HighScore.Value,
 		Coins = leaderstats.Coins.Value,
 		FruitGems = leaderstats.FruitGems.Value,
@@ -126,17 +146,35 @@ local function savePlayerData(player)
 
 		TotalFruitGems = player:GetAttribute("TotalFruitGems") or 0,
 		TotalCoins = player:GetAttribute("TotalCoins") or 0,
+		TotalRobuxSpent = player:GetAttribute("TotalRobuxSpent") or 0,
 		GamesPlayed = player:GetAttribute("GamesPlayed") or 0,
 		TimePlayed = totalTime,
-		-- ? NUEVOS DATOS DE RACHA Y RECLAMO
+		Undos = player:GetAttribute("Undos") or 0,
+
+		-- ‚úÖ AGREGA ESTA L√çNEA PARA QUE EL 5x5 SE GUARDE SIEMPRE:
+		HighScore5x5 = player:GetAttribute("HighScore5x5") or 0,
+
+		-- ... (El resto de tus datos: racha, skins, etc)
 		CurrentStreak = player:GetAttribute("CurrentStreak") or 0,
 		LastLoginDay = player:GetAttribute("LastLoginDay") or 0,
-		LastClaimedDay = player:GetAttribute("LastClaimedDay") or 0, -- <--- A—ADIR ESTO
+		LastClaimedDay = player:GetAttribute("LastClaimedDay") or 0,
 
 		OwnedSkins = ownedSkins,
 		ClaimedLevelRewards = claimedRewardsList,
 
-		-- CONFIGURACI”N (Settings)
+		-- ‚úÖ NUEVO: GUARDAR T√çTULOS OBTENIDOS
+		UnlockedTitles = (function()
+			local t = {}
+			for attrName, val in pairs(player:GetAttributes()) do
+				-- Guardamos cualquier atributo que empiece por "Title_"
+				if string.sub(attrName, 1, 6) == "Title_" and val == true then
+					table.insert(t, attrName)
+				end
+			end
+			return t
+		end)(),
+
+		-- CONFIGURACI√ìN (Settings)
 		VolMusic = player:GetAttribute("SavedVolMusic"),
 		VolSFX = player:GetAttribute("SavedVolSFX"),
 		IsDarkMode = player:GetAttribute("SavedDarkMode")
@@ -163,12 +201,12 @@ local function savePlayerData(player)
 		return math.max(tonumber(old) or 0, totalTime) 
 	end)
 
-	-- ? GUARDAR EN LEADERBOARD DE RACHAS
+	-- ‚úÖ GUARDAR EN LEADERBOARD DE RACHAS
 	StreakStore:UpdateAsync(player.UserId, function(old)
 		return player:GetAttribute("CurrentStreak") or 0
 	end)
 
-	print("?? Datos guardados para: " .. player.Name)
+	print("üíæ Datos guardados para: " .. player.Name)
 end
 
 -------------------------------------------------------------------------
@@ -200,44 +238,62 @@ local function playerAdded(player)
 		player:SetAttribute("MaxXP", (data.Level or 1) * 500)
 		player:SetAttribute("TotalFruitGems", data.TotalFruitGems or 0)
 		player:SetAttribute("TotalCoins", data.TotalCoins or 0)
+		player:SetAttribute("TotalRobuxSpent", data.TotalRobuxSpent or 0)
 		player:SetAttribute("GamesPlayed", data.GamesPlayed or 0)
 		player:SetAttribute("TimePlayedSaved", data.TimePlayed or 0)
+		player:SetAttribute("HighScore5x5", data.HighScore5x5 or 0)
+		player:SetAttribute("Undos", data.Undos or 0)
 
-		-- ? L”GICA DE RECOMPENSA DIARIA
+		-- ‚úÖ L√ìGICA DE RECOMPENSA DIARIA
 		local currentStreak = data.CurrentStreak or 0
 		local lastLoginDay = data.LastLoginDay or 0
-		local today = math.floor(os.time() / 86400) -- DÌa actual (n˙mero entero)
+		local today = math.floor(os.time() / 86400) -- D√≠a actual (n√∫mero entero)
 
-		-- ?? L”GICA CORREGIDA: NO MARCAR COMO RECLAMADO AUTOM¡TICAMENTE ??
-		local lastClaimedDay = data.LastClaimedDay or 0 -- Cargamos cu·ndo reclamÛ por ˙ltima vez
+		-- ‚¨áÔ∏è L√ìGICA CORREGIDA: NO MARCAR COMO RECLAMADO AUTOM√ÅTICAMENTE ‚¨áÔ∏è
+		local lastClaimedDay = data.LastClaimedDay or 0 -- Cargamos cu√°ndo reclam√≥ por √∫ltima vez
 
 		if lastClaimedDay == today then
-			player:SetAttribute("DailyClaimed", true) -- Ya cobrÛ hoy
+			player:SetAttribute("DailyClaimed", true) -- Ya cobr√≥ hoy
 		else
-			player:SetAttribute("DailyClaimed", false) -- A˙n no cobra hoy
+			player:SetAttribute("DailyClaimed", false) -- A√∫n no cobra hoy
 		end
 
 		if lastLoginDay == today then
-			-- Ya entrÛ hoy, no sumamos racha pero mantenemos estado
+			-- Ya entr√≥ hoy, no sumamos racha pero mantenemos estado
 		elseif lastLoginDay == (today - 1) then
-			-- Nuevo dÌa consecutivo
+			-- Nuevo d√≠a consecutivo
 			currentStreak = currentStreak + 1
 			player:SetAttribute("DailyClaimed", false) -- <--- AGREGAR ESTO (Permite reclamar)
-			-- BORRA LA LÕNEA QUE DABA DINERO AUTOM¡TICO AQUÕ PARA QUE NO TE DE DOBLE
+			-- BORRA LA L√çNEA QUE DABA DINERO AUTOM√ÅTICO AQU√ç PARA QUE NO TE DE DOBLE
 		else
-			-- PerdiÛ racha
+			-- Perdi√≥ racha
 			currentStreak = 1
 			player:SetAttribute("DailyClaimed", false) -- <--- AGREGAR ESTO
-			-- BORRA LA LÕNEA QUE DABA DINERO AUTOM¡TICO AQUÕ
+			-- BORRA LA L√çNEA QUE DABA DINERO AUTOM√ÅTICO AQU√ç
 		end
 
 		player:SetAttribute("CurrentStreak", currentStreak)
 		player:SetAttribute("LastLoginDay", today)
 
-		local ownedSkins = data.OwnedSkins or {"Classic"} 
+		local ownedSkins = data.OwnedSkins or {"Classic"}
 		for _, skinName in ipairs(ownedSkins) do
 			local safeName = string.gsub(skinName, " ", "")
 			player:SetAttribute("OwnedSkin_" .. safeName, true)
+		end
+
+		-- ‚úÖ NUEVO: CARGAR T√çTULOS
+		if data.UnlockedTitles then
+			for _, titleAttr in pairs(data.UnlockedTitles) do
+				player:SetAttribute(titleAttr, true)
+			end
+		end
+
+		-- ‚úÖ CARGAR GAMEPASSES GUARDADOS (Fix Player1)
+		if data.SavedGamePasses then
+			for _, passId in ipairs(data.SavedGamePasses) do
+				player:SetAttribute("PassOwned_" .. passId, true)
+				print("üíæ GamePass cargado: " .. passId)
+			end
 		end
 
 		local claimedRewards = data.ClaimedLevelRewards or {}
@@ -250,9 +306,9 @@ local function playerAdded(player)
 		player:SetAttribute("SavedVolSFX", data.VolSFX or 0.5)
 		player:SetAttribute("SavedDarkMode", data.IsDarkMode or false)
 
-		-- ? L”GICA CORREGIDA PARA XP DEFAULT:
-		-- Si data.IsShowXP es nil, significa que nunca lo guardÛ -> Ponemos TRUE.
-		-- Solo ponemos false si explÌcitamente guardÛ 'false'.
+		-- ‚úÖ L√ìGICA CORREGIDA PARA XP DEFAULT:
+		-- Si data.IsShowXP es nil, significa que nunca lo guard√≥ -> Ponemos TRUE.
+		-- Solo ponemos false si expl√≠citamente guard√≥ 'false'.
 		if data.IsShowXP == nil then
 			player:SetAttribute("SavedShowXP", true)
 		else
@@ -273,7 +329,7 @@ end
 -- CONEXIONES Y EVENTOS
 -------------------------------------------------------------------------
 
--- 1. Compra de Skins (L”GICA ARREGLADA)
+-- 1. Compra de Skins (L√ìGICA ARREGLADA)
 if PurchaseEvent then
 	PurchaseEvent.OnServerEvent:Connect(function(player, itemName)
 		local leaderstats = player:FindFirstChild("leaderstats")
@@ -283,14 +339,14 @@ if PurchaseEvent then
 		local safeName = string.gsub(itemName, " ", "")
 		if player:GetAttribute("OwnedSkin_" .. safeName) then return end
 
-		-- L”GICA INTELIGENTE: Busca el precio en la tabla ITEM_PRICES
+		-- L√ìGICA INTELIGENTE: Busca el precio en la tabla ITEM_PRICES
 		local itemData = ITEM_PRICES[itemName]
 
 		if itemData then
 			local basePrice = itemData.Price
 			local currency = itemData.Currency
 
-			-- ?? L”GICA VIP (15% DE DESCUENTO)
+			-- üíé L√ìGICA VIP (15% DE DESCUENTO)
 			local hasVip = false
 			local success, result = pcall(function()
 				return MarketplaceService:UserOwnsGamePassAsync(player.UserId, 1605082468) -- TU ID VIP
@@ -309,9 +365,9 @@ if PurchaseEvent then
 			if currencyStore and currencyStore.Value >= finalPrice then
 				currencyStore.Value = currencyStore.Value - finalPrice
 				player:SetAttribute("OwnedSkin_" .. safeName, true)
-				print("? Compra exitosa: " .. itemName .. " por " .. finalPrice .. " " .. currency .. (hasVip and " (VIP -15%)" or ""))
+				print("‚úÖ Compra exitosa: " .. itemName .. " por " .. finalPrice .. " " .. currency .. (hasVip and " (VIP -15%)" or ""))
 			else
-				warn("? No tienes suficiente dinero para: " .. itemName)
+				warn("‚ùå No tienes suficiente dinero para: " .. itemName)
 			end
 		else
 			warn("Item no encontrado en la tabla de precios: " .. tostring(itemName))
@@ -319,24 +375,44 @@ if PurchaseEvent then
 	end)
 end
 
--- 2. Guardar Score (CORREGIDO)
+-- 2. Guardar Score (SEPARADO: NORMAL vs 5x5)
 if SaveScoreEvent then
-	SaveScoreEvent.OnServerEvent:Connect(function(player, newScore)
+	SaveScoreEvent.OnServerEvent:Connect(function(player, newScore, boardSize)
 		if type(newScore) ~= "number" then return end
+		local finalScore = newScore 
 
+		local bSize = boardSize or 4 
 		local leaderstats = player:FindFirstChild("leaderstats")
+
 		local gp = player:GetAttribute("GamesPlayed") or 0
 		player:SetAttribute("GamesPlayed", gp + 1)
 
-		if leaderstats and newScore > leaderstats.HighScore.Value then
-			leaderstats.HighScore.Value = newScore
+		if bSize == 5 then
+			-- === L√ìGICA 5x5 ===
+			local current5x5 = player:GetAttribute("HighScore5x5") or 0
+			if finalScore > current5x5 then
+				player:SetAttribute("HighScore5x5", finalScore)
 
-			-- ACTUALIZACI”N SEGURA DEL LEADERBOARD
-			HighScoreStore:UpdateAsync(player.UserId, function(old) 
-				local previousValue = tonumber(old) or 0 
-				local currentValue = tonumber(newScore) or 0 
-				return math.max(previousValue, currentValue)
-			end)
+				Score5x5Store:UpdateAsync(tostring(player.UserId), function(old) 
+					local oldValue = tonumber(old) or 0
+					-- ‚úÖ FIX DEFINITIVO: Convertimos aqu√≠ dentro para que el editor no marque error
+					local valueToSave = tonumber(finalScore) or 0
+					return math.max(oldValue, valueToSave)
+				end)
+			end
+
+		else
+			-- === L√ìGICA CL√ÅSICA (4x4) ===
+			if leaderstats and finalScore > leaderstats.HighScore.Value then
+				leaderstats.HighScore.Value = finalScore
+
+				HighScoreStore:UpdateAsync(tostring(player.UserId), function(old) 
+					local oldValue = tonumber(old) or 0
+					-- ‚úÖ FIX DEFINITIVO: Convertimos aqu√≠ dentro tambi√©n
+					local valueToSave = tonumber(finalScore) or 0
+					return math.max(oldValue, valueToSave)
+				end)
+			end
 		end
 	end)
 end
@@ -368,13 +444,13 @@ if ClaimLevelRewardEvent then
 	end)
 end
 
--- 4. Guardar ConfiguraciÛn al vuelo
+-- 4. Guardar Configuraci√≥n al vuelo
 if SaveSettingsEvent then
 	SaveSettingsEvent.OnServerEvent:Connect(function(player, settingName, value)
 		if settingName == "VolMusic" then player:SetAttribute("SavedVolMusic", value)
 		elseif settingName == "VolSFX" then player:SetAttribute("SavedVolSFX", value)
 		elseif settingName == "DarkMode" then player:SetAttribute("SavedDarkMode", value)
-		elseif settingName == "SavedShowXP" then player:SetAttribute("SavedShowXP", value) -- ? Conectado
+		elseif settingName == "SavedShowXP" then player:SetAttribute("SavedShowXP", value) -- ‚úÖ Conectado
 		end
 	end)
 end
@@ -382,9 +458,15 @@ end
 -- 5. Leaderboard Request
 if GetTopScoresFunc then
 	GetTopScoresFunc.OnServerInvoke = function(player, category)
-		local store = HighScoreStore
+		local store = HighScoreStore -- Default
+
 		if category == "TimePlayed" then store = TimePlayedStore 
-		elseif category == "Streaks" then store = StreakStore end -- ? A—ADIDO
+		elseif category == "Streaks" then store = StreakStore
+		elseif category == "RobuxSpent" then store = RobuxSpentStore
+			-- ‚úÖ NUEVAS CATEGOR√çAS
+		elseif category == "Level" then store = LevelStore
+		elseif category == "Score5x5" then store = Score5x5Store
+		end
 
 		local topScores = {}
 		local success, pages = pcall(store.GetSortedAsync, store, false, 50)
@@ -401,21 +483,32 @@ if GetTopScoresFunc then
 	end
 end
 
--- 6. Stats Request
+-- 6. Stats Request (CON ROBUX SPENT)
 if GetStatsFunc then
 	GetStatsFunc.OnServerInvoke = function(player)
 		local sessionTime = os.time() - (sessionJoinTime[player.UserId] or os.time())
 		local totalTime = (player:GetAttribute("TimePlayedSaved") or 0) + sessionTime
+
 		return {
 			GamesPlayed = player:GetAttribute("GamesPlayed") or 0,
 			TimePlayed = totalTime,
 			TotalCoins = player:GetAttribute("TotalCoins") or 0,
-			TotalFruitGems = player:GetAttribute("TotalFruitGems") or 0
+			TotalFruitGems = player:GetAttribute("TotalFruitGems") or 0,
+			-- ‚úÖ AGREGADO: Enviar Robux y conteo de t√≠tulos real
+			TotalRobuxSpent = player:GetAttribute("TotalRobuxSpent") or 0,
+			HighScore5x5 = player:GetAttribute("HighScore5x5") or 0,
+			TitlesCount = (function() 
+				local c = 0
+				for n,v in pairs(player:GetAttributes()) do 
+					if string.sub(n,1,6)=="Title_" and v==true then c+=1 end 
+				end
+				return c
+			end)()
 		}
 	end
 end
 
--- 7. L”GICA DE MULTIPLICADORES (GAMEPASSES)
+-- 7. L√ìGICA DE MULTIPLICADORES (GAMEPASSES)
 local PASS_IDS = {
 	Coins = 1612413325,
 	Gems = 1613811032,
@@ -426,15 +519,42 @@ local PASS_IDS = {
 -- Detectar compra en el SERVIDOR para activarlo al instante
 MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, wasPurchased)
 	if wasPurchased then
-		print("?? SERVER: Compra detectada ID: " .. passId .. " para " .. player.Name)
-		-- Guardamos una "marca" temporal en el jugador
-		player:SetAttribute("TempPass_" .. passId, true)
+		print("üü¢ SERVER: Compra detectada ID: " .. passId .. " para " .. player.Name)
+
+		-- ‚úÖ MARCAR PARA GUARDAR (Atributo permanente)
+		player:SetAttribute("PassOwned_" .. passId, true)
+
+		-- ‚úÖ NUEVO: REGISTRAR GASTO DE ROBUX (GAMEPASS)
+		-- Necesitamos saber el precio. Como no viene en el evento, lo buscamos en una tabla o usamos un valor estimado/fijo si no quieres hacer una llamada API lenta.
+		-- Opci√≥n A (R√°pida): Definir precios aqu√≠ manual
+		local prices = { [1612413325]=149, [1613811032]=249, [1609347878]=249, [1614668850]=149, [1605082468]=199 } -- TUS IDs y Precios
+
+		local price = prices[passId] or 0
+		if price > 0 then
+			local current = player:GetAttribute("TotalRobuxSpent") or 0
+			player:SetAttribute("TotalRobuxSpent", current + price)
+		else
+			-- API CORREGIDA Y BLINDADA (Async + pcall)
+			task.spawn(function()
+				local success, info = pcall(function()
+					return MarketplaceService:GetProductInfoAsync(passId, Enum.InfoType.GamePass)
+				end)
+
+				if success and info and info.PriceInRobux then
+					local current = player:GetAttribute("TotalRobuxSpent") or 0
+					player:SetAttribute("TotalRobuxSpent", current + info.PriceInRobux)
+					print("üí∏ Robux (GamePass) registrados: +" .. info.PriceInRobux)
+				else
+					warn("‚ö†Ô∏è Error obteniendo precio del GamePass: " .. tostring(passId))
+				end
+			end)
+		end
 	end
 end)
 
 local function hasPass(player, passId)
-	-- 1. Revisar si lo acaba de comprar en esta sesiÛn (Instant·neo)
-	if player:GetAttribute("TempPass_" .. passId) == true then
+	-- 1. Revisar si est√° guardado en DataStore (Para Player1/Studio)
+	if player:GetAttribute("PassOwned_" .. passId) == true then
 		return true
 	end
 
@@ -450,13 +570,9 @@ if AddDiamondEvent then
 	AddDiamondEvent.OnServerEvent:Connect(function(player, amount)
 		if type(amount) ~= "number" or amount <= 0 then return end
 
-		-- Print de depuraciÛn para saber que llegÛ
-		print("?? SERVER: Recibidos " .. amount .. " diamantes de " .. player.Name)
-
 		-- Verificar GamePass x2 Gems
 		if hasPass(player, PASS_IDS.Gems) then 
 			amount = amount * 2 
-			print("? x2 GEMS APLICADO! Total: " .. amount)
 		end
 
 		local leaderstats = player:FindFirstChild("leaderstats")
@@ -474,7 +590,6 @@ if AddCurrencyEvent then
 		-- Verificar GamePass x2 Coins
 		if hasPass(player, PASS_IDS.Coins) then 
 			amount = amount * 2 
-			print("?? x2 COINS APLICADO A: " .. player.Name) -- °MENSAJE DE CONFIRMACI”N!
 		end
 
 		local leaderstats = player:FindFirstChild("leaderstats")
@@ -498,7 +613,6 @@ AddXPEvent.OnServerEvent:Connect(function(player, amount)
 	-- Verificar GamePass x2 XP
 	if hasPass(player, PASS_IDS.XP) then 
 		amount = amount * 2 
-		print("?? x2 XP APLICADO A: " .. player.Name) -- °MENSAJE DE CONFIRMACI”N!
 	end
 
 	local currentXP = player:GetAttribute("CurrentXP") or 0
@@ -536,13 +650,30 @@ if AddFruitEvent then
 	end)
 end
 
+-- ... (otros eventos arriba)
+
+-- ‚úÖ NUEVO EVENTO: GASTAR UNDO (OPTIMIZADO)
+local UseUndoEvent = ReplicatedStorage:FindFirstChild("UseUndo")
+if not UseUndoEvent then
+	UseUndoEvent = Instance.new("RemoteEvent", ReplicatedStorage)
+	UseUndoEvent.Name = "UseUndo"
+end
+
+UseUndoEvent.OnServerEvent:Connect(function(player)
+	local current = player:GetAttribute("Undos") or 0
+	if current > 0 then
+		player:SetAttribute("Undos", current - 1)
+		-- Sin print aqu√≠ para evitar spam cada vez que usan el bot√≥n
+	end
+end)
+
 -- INICIAR
 Players.PlayerAdded:Connect(playerAdded)
 Players.PlayerRemoving:Connect(savePlayerData)
 
 -- CIERRE DEL SERVIDOR
 game:BindToClose(function()
-	print("?? Cerrando servidor, guardando datos...")
+	print("‚ö†Ô∏è Cerrando servidor, guardando datos...")
 	for _, player in pairs(Players:GetPlayers()) do
 		task.spawn(function() savePlayerData(player) end)
 	end
@@ -561,29 +692,34 @@ if not claimEvent then
 	claimEvent.Parent = ReplicatedStorage
 end
 
--- FunciÛn para dar el premio
+-- Funci√≥n para dar el premio
 claimEvent.OnServerEvent:Connect(function(player)
-	-- Verificar si ya reclamÛ hoy (Seguridad)
+	-- Verificar si ya reclam√≥ hoy (Seguridad)
 	if player:GetAttribute("DailyClaimed") == true then
-		print(player.Name .. " intentÛ reclamar doble.")
+		print(player.Name .. " intent√≥ reclamar doble.")
 		return
 	end
 
 	local currentStreak = player:GetAttribute("CurrentStreak") or 1
-	-- Calculamos el dÌa del ciclo (1-30)
+	-- Calculamos el d√≠a del ciclo (1-30)
 	local day = ((currentStreak - 1) % 30) + 1 
 
-	-- C¡LCULO DE RECOMPENSA (IGUAL QUE EL CLIENTE)
+	-- C√ÅLCULO DE RECOMPENSA (IGUAL QUE EL CLIENTE)
 	local rewardAmt = day * 1500 -- Buff masivo
 	local rewardType = "Coins"
 
 	if day % 7 == 0 then rewardType = "Gems"; rewardAmt = day * 50 end
 	if day == 30 then rewardType = "Skin"; rewardAmt = 1 end
 
-	-- Bonus VIP
+	-- Bonus VIP (ID CORREGIDO: 1605082468)
 	local hasVip = false
-	pcall(function() hasVip = MarketplaceService:UserOwnsGamePassAsync(player.UserId, 1609347878) end) -- ID VIP
-	if hasVip and rewardType ~= "Skin" then rewardAmt = rewardAmt * 2 end
+	-- Usamos el ID correcto del VIP, no el de XP
+	pcall(function() hasVip = MarketplaceService:UserOwnsGamePassAsync(player.UserId, 1605082468) end) 
+
+	if hasVip and rewardType ~= "Skin" then 
+		rewardAmt = rewardAmt * 2 
+		print("?? VIP BONUS APLICADO (x2 Daily)")
+	end
 
 	-- ENTREGAR PREMIO
 	local ls = player:FindFirstChild("leaderstats")
@@ -594,16 +730,16 @@ claimEvent.OnServerEvent:Connect(function(player)
 		elseif rewardType == "Gems" then
 			ls.Diamonds.Value = ls.Diamonds.Value + rewardAmt
 		elseif rewardType == "Skin" then
-			-- AquÌ irÌa la lÛgica de dar skin (pendiente)
-			print("Skin entregada (LÛgica pendiente)")
+			-- Aqu√≠ ir√≠a la l√≥gica de dar skin (pendiente)
+			print("Skin entregada (L√≥gica pendiente)")
 		end
 	end
 
-	-- Marcar como reclamado hoy Y GUARDAR EL DÕA
+	-- Marcar como reclamado hoy Y GUARDAR EL D√çA
 	player:SetAttribute("DailyClaimed", true)
-	player:SetAttribute("LastClaimedDay", math.floor(os.time() / 86400)) -- Guardamos que hoy ya cobrÛ
+	player:SetAttribute("LastClaimedDay", math.floor(os.time() / 86400)) -- Guardamos que hoy ya cobr√≥
 
-	print("? " .. player.Name .. " reclamÛ DÌa " .. day .. ": " .. rewardAmt .. " " .. rewardType)
+	print("‚úÖ " .. player.Name .. " reclam√≥ D√≠a " .. day .. ": " .. rewardAmt .. " " .. rewardType)
 end)
 
 -- RESETEAR ESTADO DIARIO AL ENTRAR
@@ -618,30 +754,55 @@ local function checkDailyReset(player, data)
 	end
 end
 
--- ? BUCLE DE ACTUALIZACI”N DE LEADERBOARDS (AL FINAL Y CON SPAWN)
+-- ? BUCLE DE ACTUALIZACI√ìN DE LEADERBOARDS (EFICIENTE)
+-- Guarda Score, Tiempo, Rachas y Robux de TODOS los jugadores cada 60 segundos.
 task.spawn(function()
 	while true do
-		task.wait(60) -- Esperar 60s
-		print("?? Guardando Leaderboards Globales...")
-		
+		task.wait(60) -- Espera 1 minuto
+
 		for _, p in pairs(Players:GetPlayers()) do
 			pcall(function()
-				-- Guardar Monedas
-				local coins = p:GetAttribute("TotalCoins") or 0
-				coinODS:SetAsync(p.UserId, coins)
-	
-				-- Guardar Tiempo
-				local timeP = p:GetAttribute("TimePlayedSaved") or 0 -- Ojo: Usar TimePlayedSaved
-				-- Sumamos la sesiÛn actual para que sea preciso
-				if sessionJoinTime[p.UserId] then
-					timeP = timeP + (os.time() - sessionJoinTime[p.UserId])
+				local userId = p.UserId
+
+				-- 1. SCORE (GlobalScore_V4)
+				-- Solo actualizamos si el score actual es mayor al guardado
+				if p:FindFirstChild("leaderstats") then
+					local currentScore = p.leaderstats.HighScore.Value
+					HighScoreStore:UpdateAsync(userId, function(old) 
+						return math.max(tonumber(old) or 0, currentScore) 
+					end)
 				end
-				timeODS:SetAsync(p.UserId, timeP)
-	
-				-- Guardar Racha
+
+				-- 2. TIEMPO JUGADO (GlobalTime_V4)
+				-- Calculamos el tiempo total real incluyendo la sesi√≥n actual
+				local savedTime = p:GetAttribute("TimePlayedSaved") or 0
+				local sessionTime = 0
+				if sessionJoinTime[userId] then
+					sessionTime = os.time() - sessionJoinTime[userId]
+				end
+				TimePlayedStore:SetAsync(userId, savedTime + sessionTime)
+
+				-- 3. RACHAS (GlobalStreak_V4)
 				local streak = p:GetAttribute("CurrentStreak") or 1
-				streakODS:SetAsync(p.UserId, streak)
+				StreakStore:SetAsync(userId, streak)
+
+				-- 4. ROBUX GASTADOS
+				local spent = p:GetAttribute("TotalRobuxSpent") or 0
+				RobuxSpentStore:SetAsync(userId, spent)
+
+				-- 5. NIVEL (GlobalLevel_V4)
+				if p:FindFirstChild("leaderstats") then
+					local lvl = p.leaderstats.Level.Value
+					LevelStore:SetAsync(userId, lvl)
+				end
+
+				-- ‚úÖ 6. SCORE 5x5 (GlobalScore5x5_V4) - ¬°ESTO FALTABA!
+				local s5 = p:GetAttribute("HighScore5x5") or 0
+				Score5x5Store:SetAsync(userId, s5)
 			end)
 		end
+
+		-- Opcional: Imprimir en consola para saber que ocurri√≥ el ciclo
+		-- print("üîÑ Leaderboards globales actualizados.")
 	end
 end)
