@@ -2,7 +2,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 
 local PRODUCTS = {
-	
+	-- AsegÃºrate de que este ID sea un DEVELOPER PRODUCT, no un GamePass.
 	[3472578365] = {Type = "Undos", Amount = 3},
 
 	-- MONEDAS
@@ -12,7 +12,6 @@ local PRODUCTS = {
 	[3467195950] = {Type = "Coins", Amount = 25000},
 	[9240572528] = {Type = "Coins", Amount = 50000},
 	[3467196400] = {Type = "Coins", Amount = 100000},
-
 
 	-- DIAMANTES
 	[3467196622] = {Type = "Diamonds", Amount = 20},
@@ -31,50 +30,61 @@ local PRODUCTS = {
 	[3467283985] = {Type = "FruitGems", Amount = 50000},
 }
 
--- FUNCIÓN DE PROCESO DE COMPRA
+-- FUNCIÃ“N DE PROCESO DE COMPRA
 MarketplaceService.ProcessReceipt = function(receiptInfo)
 	local player = Players:GetPlayerByUserId(receiptInfo.PlayerId)
+
 	if not player then
-		-- El jugador se fue, Roblox intentará cobrar luego
-		return Enum.ProductPurchaseDecision.NotProcessedYet
+		return Enum.ProductPurchaseDecision.NotProcessed
 	end
 
+	-- 1. REGISTRAR ROBUX GASTADOS (Global)
+	local spent = receiptInfo.CurrencySpent or 0
+	if spent == 0 then
+		local s, info = pcall(function()
+			return MarketplaceService:GetProductInfoAsync(receiptInfo.ProductId, Enum.InfoType.Product)
+		end)
+		if s and info then spent = info.PriceInRobux or 0 end
+	end
+
+	local currentTotal = player:GetAttribute("TotalRobuxSpent") or 0
+	player:SetAttribute("TotalRobuxSpent", currentTotal + spent)
+	print("ðŸ’¸ Gasto registrado: +" .. spent .. " Robux.")
+
+	-- 2. ENTREGAR PRODUCTO
 	local productData = PRODUCTS[receiptInfo.ProductId]
 
 	if productData then
 		local leaderstats = player:FindFirstChild("leaderstats")
+
 		if leaderstats then
-			-- 1. Entregar Moneda
+			-- A) Monedas
 			if productData.Type == "Coins" then
 				leaderstats.Coins.Value += productData.Amount
 				player:SetAttribute("TotalCoins", (player:GetAttribute("TotalCoins") or 0) + productData.Amount)
 
+				-- B) Diamantes
 			elseif productData.Type == "Diamonds" then
-				-- Asegurar que existe la stat Diamonds
 				if leaderstats:FindFirstChild("Diamonds") then
 					leaderstats.Diamonds.Value += productData.Amount
 				end
 
+				-- C) Fruit Gems
 			elseif productData.Type == "FruitGems" then
 				leaderstats.FruitGems.Value += productData.Amount
 				player:SetAttribute("TotalFruitGems", (player:GetAttribute("TotalFruitGems") or 0) + productData.Amount)
 
-				-- ? VALIDACIÓN DE UNDOS (Solo confirmamos el pago, el cliente da los undos visuales)
+				-- D) âœ… UNDOS (MODO REFILL: SIEMPRE 3 - SIN LAG)
 			elseif productData.Type == "Undos" then
-				print("? Compra de Undos validada para: " .. player.Name)
+				local fixedAmount = productData.Amount or 3
+
+				-- Asignamos el valor fijo sin imprimir nada en consola
+				player:SetAttribute("Undos", fixedAmount) 
 			end
 
-			print("? VENTA EXITOSA: " .. player.Name .. " compró " .. productData.Amount .. " " .. productData.Type)
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end
 	end
 
-	return Enum.ProductPurchaseDecision.NotProcessedYet
+	return Enum.ProductPurchaseDecision.PurchaseGranted
 end
-
--- TABLA DE PRODUCTOS DE DEV (IDs Reales)
-local DEV_PRODUCTS = {
-	-- [TU_ID_DE_UNDOS] = {Type = "Undos", Amount = 3},
-	-- Ejemplo:
-	-- [12345678] = {Type = "Undos", Amount = 3}
-}
