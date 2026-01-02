@@ -1,6 +1,6 @@
 --[[ 
-    LISTA DE CÓDIGOS PARA DESBLOQUEAR TÍTULOS (ADMIN PANEL):
-    (Copia el texto de la derecha y pégalo en el cuadro "Attribute Name")
+    LISTA DE CÃ“DIGOS PARA DESBLOQUEAR TÃTULOS (ADMIN PANEL):
+    (Copia el texto de la derecha y pÃ©galo en el cuadro "Attribute Name")
 
     --- HIGH SCORE SEASON 1 ---
     Top 1 Score:    Title_S1_HS_1
@@ -18,14 +18,42 @@
 ]]
  	
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GameData = require(ReplicatedStorage:WaitForChild("GameData"))
+
+-- FUNCIÃ“N CORREGIDA PARA DAR TODOS LOS TÃTULOS
+local function GiveAllTitles(player)
+	-- Forzamos la carga del mÃ³dulo actualizado
+	local GameData = require(game.ReplicatedStorage:WaitForChild("GameData"))
+
+	local function checkIsUnlocked(data)
+		-- 0. CHEQUEO ADMIN (CORREGIDO: SIN ESPACIOS)
+		local safeName = string.gsub(data.Name, " ", "")
+		if player:GetAttribute("Title_" .. safeName) == true then
+			return true
+		end
+	end
+end
+
+-- CONECTA ESTA FUNCIÃ“N A TU BOTÃ“N O EVENTO DEL ADMIN PANEL
+-- Ejemplo:
+-- AdminEvent.OnServerEvent:Connect(function(player, action)
+--     if action == "GiveAllTitles" then
+--         GiveAllTitles(player)
+--     end
+-- end)
 local Players = game:GetService("Players")
 local DataStoreService = game:GetService("DataStoreService")
 
 local AdminEvent = ReplicatedStorage:WaitForChild("AdminAction")
-local DATASTORE_NAME = "2048_PlayerData_V4_Stats" -- Asegúrate de que coincida con tu DataHandler
+local DATASTORE_NAME = "2048_PlayerData_V4_Stats" 
 local PlayerDataStore = DataStoreService:GetDataStore(DATASTORE_NAME)
 
--- ?? PON TU NOMBRE AQUÍ
+-- REFERENCIAS A LEADERBOARDS (Para forzar actualizaciÃ³n)
+local StreakStore = DataStoreService:GetOrderedDataStore("GlobalStreak_V4")
+local HighScoreStore = DataStoreService:GetOrderedDataStore("GlobalScore_V4")
+local Score5x5Store = DataStoreService:GetOrderedDataStore("GlobalScore5x5_V4") -- âœ… ESTA ES LA QUE FALTABA
+
+
 local ADMINS = {
 	["OFFICIE_ROBLOX"] = true
 }
@@ -33,7 +61,7 @@ local ADMINS = {
 AdminEvent.OnServerEvent:Connect(function(player, action, targetName, value)
 	-- Seguridad: Verificar si es admin
 	if not ADMINS[player.Name] then 
-		warn(player.Name .. " intentó usar admin panel sin permiso.")
+		warn(player.Name .. " intentÃ³ usar admin panel sin permiso.")
 		return 
 	end
 
@@ -52,7 +80,7 @@ AdminEvent.OnServerEvent:Connect(function(player, action, targetName, value)
 
 	local leaderstats = targetPlayer:FindFirstChild("leaderstats")
 
-	print("?? ADMIN ACTION:", action, "on", targetPlayer.Name, "val:", value)
+	print("ðŸ”§ ADMIN ACTION:", action, "on", targetPlayer.Name, "val:", value)
 
 	if action == "AddCoins" then
 		if leaderstats then
@@ -66,31 +94,56 @@ AdminEvent.OnServerEvent:Connect(function(player, action, targetName, value)
 			leaderstats.Diamonds.Value = leaderstats.Diamonds.Value + (tonumber(value) or 0)
 		end
 
-	elseif action == "SetScore" then -- ASEGURAMOS QUE ESTÉ AQUÍ
+	elseif action == "SetScore" then
 		if leaderstats then
-			leaderstats.HighScore.Value = (tonumber(value) or 0)
+			local newScore = tonumber(value) or 0
+			leaderstats.HighScore.Value = newScore
+
+			-- âœ… FORZAR ACTUALIZACIÃ“N EN LEADERBOARD (SetAsync sobrescribe lo que sea)
+			task.spawn(function()
+				pcall(function()
+					HighScoreStore:SetAsync(targetPlayer.UserId, newScore)
+				end)
+			end)
+			print("ðŸ† Score forzado a " .. newScore .. " en Leaderboard para " .. targetPlayer.Name)
 		end
+		-- ... (fin del bloque SetScore normal)
+
+		-- âœ… NUEVO COMANDO: SET SCORE 5x5
+	elseif action == "SetScore5x5" then
+		local newScore = tonumber(value) or 0
+
+		-- 1. Guardar en el atributo del jugador
+		targetPlayer:SetAttribute("HighScore5x5", newScore)
+
+		-- 2. Forzar actualizaciÃ³n inmediata en Leaderboard
+		task.spawn(function()
+			pcall(function()
+				Score5x5Store:SetAsync(targetPlayer.UserId, newScore)
+			end)
+		end)
+		print("ðŸŸ¦ 5x5 Score forzado a " .. newScore .. " para " .. targetPlayer.Name)
 
 	elseif action == "AddFruits" then
 		if leaderstats and leaderstats:FindFirstChild("FruitGems") then
 			local amount = tonumber(value) or 0
 			leaderstats.FruitGems.Value = leaderstats.FruitGems.Value + amount
-			-- IMPORTANTE: Actualizar el histórico para los títulos
+			-- IMPORTANTE: Actualizar el histÃ³rico para los tÃ­tulos
 			local currentTotal = targetPlayer:GetAttribute("TotalFruitGems") or 0
 			targetPlayer:SetAttribute("TotalFruitGems", currentTotal + amount)
 		end
 
-		-- ? NUEVO: LÓGICA PARA "SET LEVEL" (Esto faltaba)
+		-- âœ… NUEVO: LÃ“GICA PARA "SET LEVEL" (Esto faltaba)
 	elseif action == "SetLevel" then
 		if leaderstats then
 			local newLvl = tonumber(value) or 1
 			leaderstats.Level.Value = newLvl
 
-			-- Ajustar la XP Máxima para que la barra no se rompa visualmente
+			-- Ajustar la XP MÃ¡xima para que la barra no se rompa visualmente
 			targetPlayer:SetAttribute("CurrentXP", 0) 
 			targetPlayer:SetAttribute("MaxXP", newLvl * 500) 
 
-			print("?? Admin: Nivel cambiado a " .. newLvl .. " para " .. targetPlayer.Name)
+			print("ðŸ†™ Admin: Nivel cambiado a " .. newLvl .. " para " .. targetPlayer.Name)
 		end
 
 	elseif action == "ResetLevel" then
@@ -98,70 +151,74 @@ AdminEvent.OnServerEvent:Connect(function(player, action, targetName, value)
 			leaderstats.Level.Value = 1
 			targetPlayer:SetAttribute("CurrentXP", 0)
 			targetPlayer:SetAttribute("MaxXP", 500) 
-			print("?? Nivel reseteado a 1 para " .. targetPlayer.Name)
+			print("ðŸ“‰ Nivel reseteado a 1 para " .. targetPlayer.Name)
 		end
 
-		-- ? NUEVO: CONTROL DE RACHAS
+		-- ? CONTROL DE RACHAS (Con actualizaciÃ³n inmediata de Leaderboard)
 	elseif action == "SetStreak" then
 		local days = tonumber(value) or 1
 		targetPlayer:SetAttribute("CurrentStreak", days)
-		-- Ajustamos el "LastLoginDay" a hoy para que no se rompa sola mañana
+		-- Ajustamos el "LastLoginDay" a hoy para que no se rompa sola maÃ±ana
 		targetPlayer:SetAttribute("LastLoginDay", math.floor(os.time() / 86400))
-		print("?? Racha establecida a " .. days .. " días para " .. targetPlayer.Name)
+
+		-- ? FORZAR ACTUALIZACIÃ“N EN LEADERBOARD AHORA MISMO
+		task.spawn(function()
+			pcall(function()
+				StreakStore:UpdateAsync(targetPlayer.UserId, function()
+					return days
+				end)
+			end)
+		end)
+
+		print("?? Racha establecida a " .. days .. " dÃ­as para " .. targetPlayer.Name .. " (Leaderboard actualizado)")
 
 	elseif action == "BreakStreak" then
-		-- Para romper la racha, ponemos el último login en el año 2000
+		-- Para romper la racha, ponemos el Ãºltimo login en el aÃ±o 2000
 		targetPlayer:SetAttribute("LastLoginDay", 0)
-		print("?? Racha ROTA para " .. targetPlayer.Name .. " (Simulando inactividad)")
+		print("ðŸ’” Racha ROTA para " .. targetPlayer.Name .. " (Simulando inactividad)")
 
 	elseif action == "GiveAttribute" then
-		-- ESTA ES LA FUNCIÓN PARA DAR TÍTULOS DE SEASON
+		-- ESTA ES LA FUNCIÃ“N PARA DAR TÃTULOS DE SEASON
 		-- value debe ser el nombre del atributo, ej: "Title_S1_HS_1"
 		if value and value ~= "" then
 			targetPlayer:SetAttribute(value, true)
-			print("? Atributo otorgado: " .. value)
+			print("âœ… Atributo otorgado: " .. value)
 
 			-- Feedback visual simple (opcional, enviamos mensaje al chat del target)
-			-- Esto es solo para que sepas que funcionó
+			-- Esto es solo para que sepas que funcionÃ³
 			-- Feedback visual simple
 		end
 
-	elseif action == "UnlockAllTitles" then
-		print("?? Desbloqueando TODOS los títulos para: " .. targetPlayer.Name)
+	elseif action == "UnlockAllTitles" or action == "GiveAllTitles" then
+		print("ðŸŒŸ Desbloqueando TODOS los tÃ­tulos (DinÃ¡mico) para: " .. targetPlayer.Name)
 
-		-- 1. Lista de Atributos de Season 1
-		local allAttributes = {
-			"Title_S1_HS_1", "Title_S1_HS_2", "Title_S1_HS_3", "Title_S1_HS_10", "Title_S1_HS_100",
-			"Title_S1_TM_1", "Title_S1_TM_2", "Title_S1_TM_3", "Title_S1_TM_10", "Title_S1_TM_100"
-		}
+		-- Forzamos carga fresca de GameData
+		local success, GameData = pcall(function() return require(ReplicatedStorage:WaitForChild("GameData")) end)
 
-		-- Dar todos los atributos de Season
-		for _, attr in ipairs(allAttributes) do
-			targetPlayer:SetAttribute(attr, true)
-		end
+		if success and GameData.TITLES_DATA then
+			local count = 0
+			for _, data in pairs(GameData.TITLES_DATA) do
+				-- ARREGLO DE ESPACIOS: "Berry Picker" -> "BerryPicker"
+				local safeName = string.gsub(data.Name, " ", "")
+				local attrName = "Title_" .. safeName
 
-		-- 2. Dar Skin "Fruit Mix" (Para título Tutti Frutti)
-		targetPlayer:SetAttribute("OwnedSkin_FruitMix", true)
-
-		-- 3. Dar Gemas Totales (Para título Golden Orchard - requiere 10k)
-		-- Solo subimos el histórico, no las monedas gastables actuales
-		local currentGems = targetPlayer:GetAttribute("TotalFruitGems") or 0
-		if currentGems < 10000 then
-			targetPlayer:SetAttribute("TotalFruitGems", 10000)
-		end
-
-		-- 4. Setear High Score suficiente (Para título Hacker - requiere 16384)
-		if leaderstats then
-			if leaderstats.HighScore.Value < 16384 then
-				leaderstats.HighScore.Value = 16384
+				targetPlayer:SetAttribute(attrName, true)
+				count = count + 1
 			end
+			print("âœ… ADMIN: Se dieron " .. count .. " tÃ­tulos a " .. targetPlayer.Name)
+
+			-- Sonido confirmaciÃ³n
+			local s = Instance.new("Sound", workspace)
+			s.SoundId = "rbxassetid://1054811116"; s:Play(); game.Debris:AddItem(s, 2)
+		else
+			warn("ðŸ”´ ADMIN ERROR: No se leyÃ³ GameData.TITLES_DATA")
 		end
 
 	elseif action == "Reset" then
 		if leaderstats then
 			leaderstats.Coins.Value = 0
 			leaderstats.HighScore.Value = 0
-			leaderstats.Level.Value = 1 -- Resetear nivel también
+			leaderstats.Level.Value = 1 -- Resetear nivel tambiÃ©n
 			if leaderstats:FindFirstChild("FruitGems") then leaderstats.FruitGems.Value = 0 end
 			if leaderstats:FindFirstChild("Diamonds") then leaderstats.Diamonds.Value = 0 end
 		end
@@ -181,18 +238,20 @@ AdminEvent.OnServerEvent:Connect(function(player, action, targetName, value)
 		targetPlayer:SetAttribute("MaxXP", 500)
 		targetPlayer:SetAttribute("OwnedSkin_Classic", true)
 
-		-- ? BORRADO TOTAL DE DATASTORES (Incluyendo Leaderboards)
+		-- âœ… BORRADO TOTAL DE DATASTORES (Incluyendo Leaderboards)
 		pcall(function()
 			PlayerDataStore:RemoveAsync(targetPlayer.UserId)
 			-- Borrar del Leaderboard de Puntos
 			local HighScoreStore = DataStoreService:GetOrderedDataStore("GlobalScore_V4")
+			-- âœ… NUEVA REFERENCIA
+			local Score5x5Store = DataStoreService:GetOrderedDataStore("GlobalScore5x5_V4")
 			HighScoreStore:RemoveAsync(targetPlayer.UserId)
 			-- Borrar del Leaderboard de Tiempo
 			local TimePlayedStore = DataStoreService:GetOrderedDataStore("GlobalTime_V4")
 			TimePlayedStore:RemoveAsync(targetPlayer.UserId)
 		end)
 
-		print("?? RESET COMPLETO (Data + Leaderboards) PARA: " .. targetPlayer.Name)
+		print("â™»ï¸ RESET COMPLETO (Data + Leaderboards) PARA: " .. targetPlayer.Name)
 	end
 end)
 
