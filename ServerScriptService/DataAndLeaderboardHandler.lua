@@ -133,13 +133,21 @@ local function savePlayerData(player)
 			if id then table.insert(savedPasses, id) end
 		end
 	end
+	
+	
 
 	-- DATOS A GUARDAR
 	local data = {
 		SavedGamePasses = savedPasses, -- <--- ESTA LÍNEA GUARDA LOS PASES
-		HighScore = leaderstats.HighScore.Value,
-		Coins = leaderstats.Coins.Value,
-		FruitGems = leaderstats.FruitGems.Value,
+		-- Datos existentes (Ejemplo)
+		Coins = player:GetAttribute("Coins"),
+		HighScore = player:GetAttribute("HighScore"),
+		Gems = player:GetAttribute("Gems"),
+
+		-- ✅ NUEVO: GUARDAR SKIN Y CONFIGURACIÓN
+		EquippedSkin = player:GetAttribute("CurrentSkin"), -- Guarda la skin que tienes puesta
+		Setting_ShowXP = player:GetAttribute("ShowXP"),    -- Guarda si tienes el XP activado
+		Setting_Music = player:GetAttribute("MusicEnabled"), -- Opcional: Si quieres guardar musica
 		Level = leaderstats.Level.Value,
 		Diamonds = leaderstats.Diamonds.Value,
 		CurrentXP = player:GetAttribute("CurrentXP") or 0,
@@ -301,18 +309,17 @@ local function playerAdded(player)
 			player:SetAttribute("ClaimedLevelReward_" .. levelId, true)
 		end
 
-		-- CARGAR SETTINGS
+		-- 2. CARGAR SETTINGS
 		player:SetAttribute("SavedVolMusic", data.VolMusic or 0.5)
 		player:SetAttribute("SavedVolSFX", data.VolSFX or 0.5)
 		player:SetAttribute("SavedDarkMode", data.IsDarkMode or false)
 
-		-- ✅ LÓGICA CORREGIDA PARA XP DEFAULT:
-		-- Si data.IsShowXP es nil, significa que nunca lo guardó -> Ponemos TRUE.
-		-- Solo ponemos false si explícitamente guardó 'false'.
-		if data.IsShowXP == nil then
+		-- 3. CARGAR XP (Corregido el nombre de la variable: Setting_ShowXP)
+		-- Si data.Setting_ShowXP es nil, es usuario nuevo -> true.
+		if data.Setting_ShowXP == nil then
 			player:SetAttribute("SavedShowXP", true)
 		else
-			player:SetAttribute("SavedShowXP", data.IsShowXP)
+			player:SetAttribute("SavedShowXP", data.Setting_ShowXP)
 		end
 	else
 		-- DEFAULT SETTINGS
@@ -322,6 +329,13 @@ local function playerAdded(player)
 		player:SetAttribute("SavedVolMusic", 0.5)
 		player:SetAttribute("SavedVolSFX", 0.5)
 		player:SetAttribute("SavedDarkMode", false)
+
+		-- ✅ CORRECCIÓN IMPORTANTE: INICIALIZAR RACHA
+		-- Si no ponemos esto, al guardar será nil/0 y se reiniciará siempre
+		local today = math.floor(os.time() / 86400)
+		player:SetAttribute("CurrentStreak", 1)
+		player:SetAttribute("LastLoginDay", today)
+		player:SetAttribute("DailyClaimed", false) -- Para que pueda reclamar el día 1
 	end
 end
 
