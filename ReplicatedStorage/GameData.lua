@@ -135,29 +135,47 @@ GameData.THEMES = {
 			[2048] = Color3.fromRGB(255, 255, 255), ["SUPER"] = Color3.fromRGB(0, 0, 0)
 		}
 	},
+	--[[ 
+	   SKIN VIP REDISE—ADA - Estilo "Royal Knight Neon"
+	   Basado en la armadura azul, dorada y el neÛn morado de la imagen.
+	]]
+	-- ?? SKIN VIP (EdiciÛn Lujo: Oro, Azul y Negro)
 	["VIP"] = {
-		Board = Color3.fromRGB(20, 20, 20), 
-		Bg = Color3.fromRGB(10, 10, 10),     
-		Empty = Color3.fromRGB(40, 40, 40), 
-		TextDark = Color3.fromRGB(255, 215, 0),  
-		TextLight = Color3.fromRGB(255, 255, 255),
+		-- Entorno elegante y oscuro
+		Board = Color3.fromRGB(10, 10, 15),     -- Negro con tono azulado muy oscuro
+		Bg = Color3.fromRGB(0, 0, 0),           -- Fondo Negro Puro
+		Empty = Color3.fromRGB(25, 25, 35),     -- Casillas vacÌas gris oscuro
+
+		TextDark = Color3.fromRGB(255, 215, 0), -- Texto Dorado
+		TextLight = Color3.fromRGB(255, 255, 255), -- Texto Blanco
+
+		IsRoyalStyle = true, 
+		CornerRadius = 4, -- Bordes m·s rectos para que se vea m·s "fuerte"
+
+		-- PALETA: De Azul Profundo a Oro Brillante
 		Tiles = { 
-			[2] = Color3.fromRGB(255, 250, 220), [4] = Color3.fromRGB(255, 240, 200),
-			[8] = Color3.fromRGB(255, 220, 150), [16] = Color3.fromRGB(255, 200, 100),
-			[32] = Color3.fromRGB(255, 180, 50), [64] = Color3.fromRGB(255, 160, 0),
-			[128] = Color3.fromRGB(255, 140, 0), [256] = Color3.fromRGB(255, 100, 0),
-			[512] = Color3.fromRGB(255, 80, 0), [1024] = Color3.fromRGB(255, 50, 0),
-			[2048] = Color3.fromRGB(255, 0, 0), ["SUPER"] = Color3.fromRGB(0, 0, 0)
+			[2] = Color3.fromRGB(0, 30, 80),      -- Azul Marino Oscuro
+			[4] = Color3.fromRGB(0, 50, 120),
+			[8] = Color3.fromRGB(0, 80, 180),     -- Azul Real
+			[16] = Color3.fromRGB(0, 120, 255),   -- Azul ElÈctrico
+			[32] = Color3.fromRGB(30, 144, 255),
+			[64] = Color3.fromRGB(135, 206, 250), -- Azul Cielo
+			[128] = Color3.fromRGB(25, 25, 112),  -- Azul Medianoche (TransiciÛn)
+			[256] = Color3.fromRGB(218, 165, 32), -- Oro Viejo
+			[512] = Color3.fromRGB(255, 215, 0),  -- ORO PURO
+			[1024] = Color3.fromRGB(255, 223, 0), -- Amarillo Dorado
+			[2048] = Color3.fromRGB(255, 255, 0), -- Amarillo NeÛn (M·ximo Lujo)
+			["SUPER"] = Color3.fromRGB(0, 0, 0)   -- Negro
 		}
 	},
-	-- üåà SKIN RAINBOW (MEJORADA: Efecto Ola RGB)
+	-- ?? SKIN RAINBOW (MEJORADA: Efecto Ola RGB)
 	["Rainbow"] = {
 		Board = Color3.fromRGB(20, 20, 25),   -- Marco casi negro
 		Bg = Color3.fromRGB(10, 10, 15),      -- Fondo oscuro
-		Empty = Color3.fromRGB(35, 35, 40),   -- Casillas vac√≠as oscuras
+		Empty = Color3.fromRGB(35, 35, 40),   -- Casillas vacÌas oscuras
 		TextDark = Color3.fromRGB(255, 255, 255),
 		TextLight = Color3.fromRGB(255, 255, 255),
-		Tiles = GameData.DEFAULT_TILES, -- Se ignorar√°, lo controla el script
+		Tiles = GameData.DEFAULT_TILES, -- Se ignorar·, lo controla el script
 		IsRainbow = true,
 		HasBorder = true,  -- Activamos borde para pintarlo RGB
 		CornerRadius = 8
@@ -216,7 +234,7 @@ GameData.THEMES = {
 		Board = Color3.fromRGB(0, 50, 100), Bg = Color3.fromRGB(0, 20, 40), Empty = Color3.fromRGB(0, 80, 150),
 		TextDark = Color3.new(1,1,1), TextLight = Color3.new(1,1,1),
 		Tiles = {[2]=Color3.fromRGB(100, 220, 255), [4]=Color3.fromRGB(50, 200, 255), [8]=Color3.fromRGB(0, 180, 255), ["SUPER"]=Color3.fromRGB(0, 100, 200)},
-		HasBorder = true, CornerRadius = 8 -- ‚úÖ Borde activado para relieve
+		HasBorder = true, CornerRadius = 8 -- ? Borde activado para relieve
 	},
 	["Red Pro"] = {
 		Board = Color3.fromRGB(100, 20, 20), Bg = Color3.fromRGB(50, 10, 10), Empty = Color3.fromRGB(150, 50, 50),
@@ -285,7 +303,7 @@ GameData.THEMES = {
 			[16] = "rbxassetid://132000975413440", -- Pera
 			[32] = "rbxassetid://73675450769816",  -- Custard Apple
 			[64] = "rbxassetid://117586290048073", -- Kiwi
-			[128] = "rbxassetid://93248093536327", -- Pi√±a
+			[128] = "rbxassetid://93248093536327", -- PiÒa
 			[256] = "rbxassetid://100659106786283",-- Arandanos
 			[512] = "rbxassetid://91382253679136", -- Cerezas v1
 			[1024] = "rbxassetid://108744734844187",-- Aguacate
@@ -294,7 +312,7 @@ GameData.THEMES = {
 		}
 	},
 
-	-- 3. MIX 3 (Ex√≥ticas)
+	-- 3. MIX 3 (ExÛticas)
 	["Fruit Mix 3"] = {
 		Board = Color3.fromRGB(100, 50, 50), Bg = Color3.fromRGB(255, 220, 220), Empty = Color3.fromRGB(150, 70, 70),
 		TextDark = Color3.new(1,1,1), TextLight = Color3.new(1,1,1),
@@ -315,7 +333,7 @@ GameData.THEMES = {
 		}
 	},
 
-	-- 4. GREEN ONLY (Sin Sand√≠a, solo verdes puros)
+	-- 4. GREEN ONLY (Sin SandÌa, solo verdes puros)
 	["Fruits Green"] = { 
 		Board = Color3.fromRGB(40, 80, 40), Bg = Color3.fromRGB(200, 255, 200), Empty = Color3.fromRGB(60, 100, 60),
 		TextDark = Color3.new(1,1,1), TextLight = Color3.new(1,1,1),
@@ -336,13 +354,13 @@ GameData.THEMES = {
 		}
 	},
 
-	-- 5. RED ONLY (Incluye Sand√≠a y Morados)
+	-- 5. RED ONLY (Incluye SandÌa y Morados)
 	["Fruits Red"] = { 
 		Board = Color3.fromRGB(100, 20, 40), Bg = Color3.fromRGB(255, 200, 200), Empty = Color3.fromRGB(150, 60, 80),
 		TextDark = Color3.new(1,1,1), TextLight = Color3.new(1,1,1),
 		IsImageBased = true, IsFruitSkin = true,
 		Images = {
-			[2] = "rbxassetid://139818222601413",  -- Sandia (Movida aqu√≠)
+			[2] = "rbxassetid://139818222601413",  -- Sandia (Movida aquÌ)
 			[4] = "rbxassetid://91382253679136",   -- Cerezas v1
 			[8] = "rbxassetid://112934857714958",  -- Cerezas v2
 			[16] = "rbxassetid://110048911581992", -- Red Fruit
@@ -371,17 +389,17 @@ GameData.THEMES = {
 		CornerRadius = 12
 	},
 
-	-- ü§ñ NUEVA SKIN ROBOT (Estilo Industrial/Carcasa)
+	-- ?? NUEVA SKIN ROBOT (Estilo Industrial/Carcasa)
 	["Robot"] = {
 		Board = Color3.fromRGB(80, 85, 90),    -- Marco Gris Metal
-		Bg = Color3.fromRGB(135, 206, 235),    -- (El fondo ser√° tu imagen, este color es de reserva)
-		Empty = Color3.fromRGB(120, 125, 130), -- Casilla vac√≠a met√°lica
+		Bg = Color3.fromRGB(135, 206, 235),    -- (El fondo ser· tu imagen, este color es de reserva)
+		Empty = Color3.fromRGB(120, 125, 130), -- Casilla vacÌa met·lica
 		TextDark = Color3.fromRGB(255, 255, 255),
 		TextLight = Color3.fromRGB(255, 255, 255),
 		Tiles = {
 			-- Paleta sacada de tu imagen de referencia
 			[2] = Color3.fromRGB(230, 230, 235),   -- Gris Claro (Placa)
-			[4] = Color3.fromRGB(100, 190, 180),   -- Cian Met√°lico
+			[4] = Color3.fromRGB(100, 190, 180),   -- Cian Met·lico
 			[8] = Color3.fromRGB(160, 160, 165),   -- Gris Medio
 			[16] = Color3.fromRGB(140, 145, 150),  -- Gris Oscuro
 			[32] = Color3.fromRGB(210, 215, 220),  -- Gris Plata
@@ -395,11 +413,11 @@ GameData.THEMES = {
 		IsRobotStyle = true,
 		CornerRadius = 8 -- Bordes redondeados pero industriales
 	},
-	-- üåã SKIN VOLCANIC (Corregida: Colores Oscuros)
+	-- ?? SKIN VOLCANIC (Corregida: Colores Oscuros)
 	["Volcanic"] = {
 		Board = Color3.fromRGB(30, 15, 10),   -- Borde del tablero (Roca oscura)
 		Bg = Color3.fromRGB(15, 10, 5),       -- Fondo de pantalla oscuro
-		Empty = Color3.fromRGB(45, 35, 35),   -- ‚úÖ ESTO QUITA EL BEIGE: Casillas vac√≠as color roca
+		Empty = Color3.fromRGB(45, 35, 35),   -- ? ESTO QUITA EL BEIGE: Casillas vacÌas color roca
 		TextDark = Color3.fromRGB(255, 200, 50), 
 		TextLight = Color3.fromRGB(255, 100, 0), 
 		Tiles = GameData.DEFAULT_TILES, 
@@ -413,7 +431,7 @@ GameData.THEMES = {
 }
 
 
--- 4. PLAYLIST DE M√öSICA
+-- 4. PLAYLIST DE M⁄SICA
 GameData.MUSIC_PLAYLIST = {
 	{Id = "rbxassetid://5979775161", Name = "Lofi Hip Hop"},
 	{Id = "rbxassetid://1848354536", Name = "Chill Vibes"},
@@ -422,7 +440,7 @@ GameData.MUSIC_PLAYLIST = {
 	{Id = "rbxassetid://1837070127", Name = "Deep Focus"}
 }
 
--- TABLA DE T√çTULOS (ACTUALIZADA CON STAFF Y ROBUX EXTRA)
+-- TABLA DE TÕTULOS (ACTUALIZADA CON STAFF Y ROBUX EXTRA)
 GameData.TITLES_DATA = {
 	-- === [MAIN] ===
 	{Name="Novice",   Category="Main", Desc="Play for the first time.", Req=0, Color=Color3.fromRGB(200,200,200), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(220,220,220)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,150,150))}},

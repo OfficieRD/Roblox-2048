@@ -13,7 +13,7 @@ local ShopRefs = {}
 local ShopFrame = nil
 local player = Players.LocalPlayer
 local VIP_ID = 0
--- NUEVO: Lista para recordar compras hechas en esta sesi√≥n
+-- NUEVO: Lista para recordar compras hechas en esta sesiÛn
 local sessionOwnedPasses = {} 
 
 function ShopManager.registerLocalPurchase(id)
@@ -215,13 +215,13 @@ function ShopManager.populateCurrency()
 
 
 
-	-- ‚úÖ PADDING AUMENTADO (250) PARA QUE BAJE BIEN EL SCROLL
+	-- ? PADDING AUMENTADO (250) PARA QUE BAJE BIEN EL SCROLL
 
 	local pad = Instance.new("UIPadding", ShopRefs.CurrencyContainer); pad.PaddingTop=UDim.new(0,10); pad.PaddingBottom=UDim.new(0,250)
 
 
 
-	-- ‚úÖ TUS IDS DEFINIDOS AQU√ç DENTRO PARA QUE NO DEN ERROR
+	-- ? TUS IDS DEFINIDOS AQUÕ DENTRO PARA QUE NO DEN ERROR
 
 	local ICON_COIN = "rbxassetid://108796514719654"
 
@@ -272,9 +272,9 @@ function ShopManager.populateCurrency()
 		{Amount="50,000", Robux=899, ProductId=3467283985, Icon=ICON_FRUIT}
 	}
 
-	-- ‚úÖ LISTA DE DONACIONES (EXPANDIDA)
-	-- Recuerda crear los DevProducts en la web y poner sus IDs aqu√≠ luego.
-	-- ‚úÖ LISTA DE DONACIONES (CON IDs REALES)
+	-- ? LISTA DE DONACIONES (EXPANDIDA)
+	-- Recuerda crear los DevProducts en la web y poner sus IDs aquÌ luego.
+	-- ? LISTA DE DONACIONES (CON IDs REALES)
 	local ICON_DONATE = "rbxassetid://80905865363888"
 	local ICON_DONATE_GOLD = "rbxassetid://117872441064361"
 
@@ -336,13 +336,13 @@ function ShopManager.populateCurrency()
 
 	createSection("FRUITS", fruitProducts, 5, Color3.fromRGB(255, 80, 100))
 
-	-- ‚úÖ NUEVA SECCI√ìN: DONATIONS (Color Verde Robux)
+	-- ? NUEVA SECCI”N: DONATIONS (Color Verde Robux)
 	createSection("DONATIONS", donationProducts, 7, Color3.fromRGB(0, 255, 100))
 end
 
 
 
--- 3. POPULATE SKINS (CORREGIDO: VIP BUTTON + COMPRA √öNICA)
+-- 3. POPULATE SKINS (CORREGIDO: VIP BUTTON + COMPRA ⁄NICA)
 function ShopManager.populateSkins(currentSkin, callbackColor)
 	if not ShopRefs.SkinsPageContainer then return end
 
@@ -388,7 +388,7 @@ function ShopManager.populateSkins(currentSkin, callbackColor)
 		{Name="Volcanic",     Price=2500,  Currency="Diamonds", Color=Color3.fromRGB(255, 80, 0)},
 		{Name="Classic 2048", Price=500,   Currency="Diamonds", Color=Color3.fromRGB(237, 194, 46), HasBorder=true},
 		{Name="Fruit Mix",    Price=2000,  Currency="Diamonds", Color=Color3.fromRGB(255, 170, 0)},
-		-- ‚ö†Ô∏è NOTA: El Price es 0 aqu√≠ porque es GamePass, pero lo manejamos abajo
+		-- ?? NOTA: El Price es 0 aquÌ porque es GamePass, pero lo manejamos abajo
 		{Name="VIP",          Price=0,     Currency="Pass",     Color=Color3.fromRGB(20, 20, 20), IsVIP=true}
 	}
 
@@ -459,12 +459,12 @@ function ShopManager.populateSkins(currentSkin, callbackColor)
 
 			local safeName = string.gsub(item.Name, " ", "")
 
-			-- === L√ìGICA DE PROPIEDAD (IS OWNED) ===
+			-- === L”GICA DE PROPIEDAD (IS OWNED) ===
 			local isOwned = false
 
 			if item.IsVIP then
-				-- Verificaci√≥n para VIP (GamePass)
-				-- 1. Mirar si lo compramos en esta sesi√≥n o si el servidor carg√≥ el dato (Atributo)
+				-- VerificaciÛn para VIP (GamePass)
+				-- 1. Mirar si lo compramos en esta sesiÛn o si el servidor cargÛ el dato (Atributo)
 				if sessionOwnedPasses[VIP_ID] or player:GetAttribute("PassOwned_" .. VIP_ID) then 
 					isOwned = true 
 				else
@@ -473,7 +473,7 @@ function ShopManager.populateSkins(currentSkin, callbackColor)
 					if s and h then isOwned = true end
 				end
 			else
-				-- Verificaci√≥n para Skins normales (Coins/Gems)
+				-- VerificaciÛn para Skins normales (Coins/Gems)
 				isOwned = (item.Price == 0) or player:GetAttribute("OwnedSkin_" .. safeName)
 			end
 
@@ -491,9 +491,9 @@ function ShopManager.populateSkins(currentSkin, callbackColor)
 			else
 				-- NO LO TIENES -> COMPRAR
 
-				-- === L√ìGICA VIP (Fix del bot√≥n "Button") ===
+				-- === L”GICA VIP (Fix del botÛn "Button") ===
 				if item.IsVIP then
-					buyBtn.Text = "BUY VIP" -- ‚úÖ AHORA S√ç DICE TEXTO
+					buyBtn.Text = "BUY VIP" -- ? AHORA SÕ DICE TEXTO
 					buyBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) -- Dorado
 					buyBtn.TextColor3 = Color3.new(0,0,0) -- Texto Negro
 
@@ -503,7 +503,7 @@ function ShopManager.populateSkins(currentSkin, callbackColor)
 					end)
 
 				else
-					-- L√ìGICA NORMAL (Monedas/Gemas)
+					-- L”GICA NORMAL (Monedas/Gemas)
 					if item.Currency == "Diamonds" then buyBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
 					elseif item.Currency == "FruitGems" then buyBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
 					else buyBtn.BackgroundColor3 = Color3.fromRGB(255, 180, 0) end
@@ -572,7 +572,7 @@ end
 
 
 
--- 4. POPULATE PASSES (VERIFICACI√ìN DE PROPIEDAD CORREGIDA)
+-- 4. POPULATE PASSES (VERIFICACI”N DE PROPIEDAD CORREGIDA)
 function ShopManager.populatePasses()
 	if not ShopRefs.PassesContainer then return end
 	ShopRefs.PassesContainer:ClearAllChildren()
@@ -580,7 +580,7 @@ function ShopManager.populatePasses()
 	local layout = Instance.new("UIGridLayout", ShopRefs.PassesContainer); layout.CellSize = UDim2.new(0.47, 0, 0, 200); layout.CellPadding = UDim2.new(0.04, 0, 0.04, 0); layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	local pad = Instance.new("UIPadding", ShopRefs.PassesContainer); pad.PaddingTop = UDim.new(0, 20); pad.PaddingBottom = UDim.new(0, 150)
 
-	-- ‚úÖ IDs REALES (Aseg√∫rate de que coincidan con los de tu juego)
+	-- ? IDs REALES (Aseg˙rate de que coincidan con los de tu juego)
 	local passes = {
 		{Name="x2 XP",     Id=1609347878, Price=249, Color=Color3.fromRGB(100, 255, 100)},
 		{Name="x2 Coins",  Id=1612413325, Price=149, Color=Color3.fromRGB(255, 200, 0)},
@@ -602,17 +602,17 @@ function ShopManager.populatePasses()
 		buyBtn.Size=UDim2.new(0.9,0,0.2,0); buyBtn.Position=UDim2.new(0.05,0,0.78,0)
 		buyBtn.Font=Enum.Font.FredokaOne; buyBtn.TextScaled=true; Instance.new("UICorner", buyBtn).CornerRadius = UDim.new(0, 8)
 
-		-- üîé VERIFICAR SI YA LO TIENE (API + Memoria Local)
+		-- ?? VERIFICAR SI YA LO TIENE (API + Memoria Local)
 		local isOwned = false
 
-		-- 1. Revisar si el servidor nos carg√≥ el pase (SISTEMA DE GUARDADO)
+		-- 1. Revisar si el servidor nos cargÛ el pase (SISTEMA DE GUARDADO)
 		if player:GetAttribute("PassOwned_" .. pass.Id) then
 			isOwned = true
-			-- 2. Revisar si lo compramos en esta sesi√≥n
+			-- 2. Revisar si lo compramos en esta sesiÛn
 		elseif sessionOwnedPasses[pass.Id] then
 			isOwned = true
 		else
-			-- 3. Preguntar a Roblox (√öltimo recurso)
+			-- 3. Preguntar a Roblox (⁄ltimo recurso)
 			local success, result = pcall(function()
 				return MarketplaceService:UserOwnsGamePassAsync(player.UserId, pass.Id)
 			end)
@@ -687,7 +687,7 @@ function ShopManager.switchTab(name, currentSkin, skinCallback)
 
 
 
-		-- ‚úÖ LLAMAMOS A LA NUEVA FUNCI√ìN PARA QUE CARGUEN LOS PASES
+		-- ? LLAMAMOS A LA NUEVA FUNCI”N PARA QUE CARGUEN LOS PASES
 
 		ShopManager.populatePasses()
 

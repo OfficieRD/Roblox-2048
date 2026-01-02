@@ -13,13 +13,13 @@ local Tabs = {}
 
 function LeaderboardManager.init(ScreenGui)
 	-- 1. CREAR UI (Si no existe, aunque idealmente ya la creaste en GameClient, 
-	-- pero vamos a asumir que la manejamos desde aquÃ­ o tomamos referencia)
+	-- pero vamos a asumir que la manejamos desde aquí o tomamos referencia)
 
-	-- Para no reescribir toda la creaciÃ³n UI aquÃ­ y complicarte, 
+	-- Para no reescribir toda la creación UI aquí y complicarte, 
 	-- vamos a hacer que este init reciba el Frame ya creado o lo busque.
-	-- Pero para mantener la limpieza que hicimos con Shop, lo ideal es crearlo aquÃ­.
+	-- Pero para mantener la limpieza que hicimos con Shop, lo ideal es crearlo aquí.
 
-	-- (Para ser prÃ¡cticos y rÃ¡pidos: Crearemos la estructura lÃ³gica aquÃ­)
+	-- (Para ser prácticos y rápidos: Crearemos la estructura lógica aquí)
 	LeaderboardFrame = Instance.new("Frame")
 	LeaderboardFrame.Name = "LeaderboardFrame"
 	LeaderboardFrame.Size = UDim2.new(0.9, 0, 0.8, 0)
@@ -56,7 +56,7 @@ function LeaderboardManager.init(ScreenGui)
 	Tabs.HighScore = createTab("High Score")
 	Tabs.HighScore.BackgroundColor3 = Color3.fromHex("edc22e"); Tabs.HighScore.TextColor3 = Color3.new(0,0,0)
 
-	-- âœ… NUEVAS PESTAÃ‘AS
+	-- ? NUEVAS PESTAÑAS
 	Tabs.Score5x5 = createTab("5x5 Score")
 	Tabs.Level = createTab("Level")
 
@@ -75,7 +75,7 @@ function LeaderboardManager.init(ScreenGui)
 	LbRefs.ScrollList.Parent = LeaderboardFrame
 	local UIListLayout = Instance.new("UIListLayout"); UIListLayout.Padding = UDim.new(0, 6); UIListLayout.Parent = LbRefs.ScrollList
 	
-	-- âœ… CONTADOR DE ACTUALIZACIÃ“N
+	-- ? CONTADOR DE ACTUALIZACIÓN
 	local TimerLabel = Instance.new("TextLabel", LeaderboardFrame)
 	TimerLabel.Name = "RefreshTimer"
 	TimerLabel.Text = "Refresh: 60s"
@@ -88,16 +88,16 @@ function LeaderboardManager.init(ScreenGui)
 	TimerLabel.TextScaled = true
 	TimerLabel.ZIndex = 1105
 
-	-- LÃ“GICA DEL CONTADOR (Bucle Continuo Global)
+	-- LÓGICA DEL CONTADOR (Bucle Continuo Global)
 	task.spawn(function()
 		local countdown = 60
 		while true do
 			task.wait(1)
 
-			-- 1. Restar SIEMPRE (EstÃ© abierto o cerrado)
+			-- 1. Restar SIEMPRE (Esté abierto o cerrado)
 			countdown = countdown - 1
 
-			-- 2. Solo actualizar el texto si el jugador lo estÃ¡ viendo
+			-- 2. Solo actualizar el texto si el jugador lo está viendo
 			if LeaderboardFrame.Visible then
 				TimerLabel.Text = "Refresh: " .. countdown .. "s"
 			end
@@ -106,8 +106,8 @@ function LeaderboardManager.init(ScreenGui)
 			if countdown <= 0 then
 				countdown = 60
 
-				-- Solo pedir datos nuevos al servidor si la ventana estÃ¡ abierta
-				-- (Para no gastar internet si nadie estÃ¡ mirando)
+				-- Solo pedir datos nuevos al servidor si la ventana está abierta
+				-- (Para no gastar internet si nadie está mirando)
 				if LeaderboardFrame.Visible and currentLeaderboardTab then
 					LeaderboardManager.switchTab(currentLeaderboardTab)
 				end
@@ -115,7 +115,7 @@ function LeaderboardManager.init(ScreenGui)
 		end
 	end)
 
-	-- CLOSE BUTTON (El cÃ³digo que ya tenÃ­as sigue aquÃ­ abajo...)
+	-- CLOSE BUTTON (El código que ya tenías sigue aquí abajo...)
 	local LCloseBtn = Instance.new("TextButton")
 	-- CLOSE BUTTON
 	local LCloseBtn = Instance.new("TextButton")
@@ -136,7 +136,7 @@ function LeaderboardManager.init(ScreenGui)
 	-- CONEXIONES
 	Tabs.HighScore.MouseButton1Click:Connect(function() LeaderboardManager.switchTab("HighScore") end)
 
-	-- âœ… CONEXIONES NUEVAS
+	-- ? CONEXIONES NUEVAS
 	Tabs.Score5x5.MouseButton1Click:Connect(function() LeaderboardManager.switchTab("Score5x5") end)
 	Tabs.Level.MouseButton1Click:Connect(function() LeaderboardManager.switchTab("Level") end)
 
@@ -165,7 +165,7 @@ function LeaderboardManager.updateUI(data, mode)
 		if child:IsA("Frame") or child:IsA("TextLabel") then child:Destroy() end
 	end
 
-	-- Solo Donate sigue en construcciÃ³n
+	-- Solo Donate sigue en construcción
 	if mode == "Donate" then
 		local msg = Instance.new("TextLabel", LbRefs.ScrollList)
 		msg.Size = UDim2.new(1,0,0.5,0); msg.Text = "Coming Soon..."; msg.TextColor3 = Color3.new(0.7,0.7,0.7); msg.Font = Enum.Font.FredokaOne; msg.TextSize = 24; msg.BackgroundTransparency = 1
@@ -205,30 +205,30 @@ function LeaderboardManager.updateUI(data, mode)
 		local s = Instance.new("TextLabel", row)
 		local valDisplay = formatNumber(entry.value)
 
-		-- LÃ³gica especial de visualizaciÃ³n
+		-- Lógica especial de visualización
 		if mode == "TimePlayed" then 
-			-- 1. Usamos la funciÃ³n 'formatTime' que ya tienes creada arriba
+			-- 1. Usamos la función 'formatTime' que ya tienes creada arriba
 			valDisplay = formatTime(tonumber(entry.value) or 0)
 			s.Text = valDisplay
 
 			-- 2. Color Verde (Solo si no es Top 3, para que se lea bien)
 			if i > 3 then s.TextColor3 = Color3.fromRGB(100, 255, 150) end
 
-			-- 3. IMPORTANTE: Definir tamaÃ±o y posiciÃ³n (igual que HighScore)
+			-- 3. IMPORTANTE: Definir tamaño y posición (igual que HighScore)
 			s.Size = UDim2.new(0.3, 0, 1, 0) 
 			s.Position = UDim2.new(0.68, 0, 0, 0) 
 			s.TextXAlignment = Enum.TextXAlignment.Right
 
 		elseif mode == "RobuxSpent" then
-			-- ... (tu cÃ³digo de robux) ...
+			-- ... (tu código de robux) ...
 
-			-- âœ… NUEVO: FORMATO NIVEL
+			-- ? NUEVO: FORMATO NIVEL
 		elseif mode == "Level" then
 			valDisplay = "Lvl " .. entry.value
 			s.Text = valDisplay
 			s.TextColor3 = Color3.fromRGB(0, 200, 255) -- Azul Cielito
 
-			-- âœ… NUEVO: FORMATO 5x5
+			-- ? NUEVO: FORMATO 5x5
 		elseif mode == "Score5x5" then
 			valDisplay = formatNumber(entry.value)
 			s.Text = valDisplay
@@ -239,7 +239,7 @@ function LeaderboardManager.updateUI(data, mode)
 			local days = tonumber(entry.value) or 0
 			if days <= 0 then days = 1 end
 
-			-- 1. Texto de DÃ­as (Alineado un poco a la izquierda para dejar sitio al fuego)
+			-- 1. Texto de Días (Alineado un poco a la izquierda para dejar sitio al fuego)
 			s.Text = days .. " Days"
 			s.Size = UDim2.new(0.2, 0, 1, 0)
 			s.Position = UDim2.new(0.65, 0, 0, 0) 
@@ -253,7 +253,7 @@ function LeaderboardManager.updateUI(data, mode)
 			fire.BackgroundTransparency = 1
 			fire.ZIndex = 5
 
-			-- LÃ³gica de Color (IDs Solicitados)
+			-- Lógica de Color (IDs Solicitados)
 			if days >= 150 then
 				fire.Image = "rbxassetid://132241895741787" -- Morado
 			elseif days >= 50 then
@@ -299,7 +299,7 @@ function LeaderboardManager.switchTab(tabName)
 		activeBtn.TextColor3 = Color3.new(0,0,0)
 	end
 
-	-- âœ… SOLICITUD AL SERVIDOR (AHORA FUNCIONA PARA TODO)
+	-- ? SOLICITUD AL SERVIDOR (AHORA FUNCIONA PARA TODO)
 	local getScoresFunc = ReplicatedStorage:FindFirstChild("GetTopScores")
 	if getScoresFunc then
 		task.spawn(function()

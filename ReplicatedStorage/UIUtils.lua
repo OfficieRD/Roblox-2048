@@ -3,12 +3,12 @@ local Debris = game:GetService("Debris")
 
 local UIUtils = {}
 
--- CONSTANTES DE ANIMACIÃ“N
+-- CONSTANTES DE ANIMACIÓN
 local POP_OPEN_INFO = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local POP_CLOSE_INFO = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 local HOVER_INFO = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
--- SONIDOS (Se asignarÃ¡n desde el cliente para no crear conflictos)
+-- SONIDOS (Se asignarán desde el cliente para no crear conflictos)
 UIUtils.ClickSound = nil
 
 function UIUtils.playClick()
@@ -17,7 +17,7 @@ end
 
 function UIUtils.addHoverEffect(button)
 	if not button then return end
-	-- Usamos pcall por si el botÃ³n no tiene propiedad Size (raro, pero seguro)
+	-- Usamos pcall por si el botón no tiene propiedad Size (raro, pero seguro)
 	local success, originalSize = pcall(function() return button.Size end)
 	if not success then return end
 
@@ -34,7 +34,7 @@ end
 function UIUtils.openMenuWithAnim(frame)
 	if frame.Visible then return end
 
-	-- Detectar tamaÃ±o objetivo basado en el nombre o tipo (lÃ³gica simplificada)
+	-- Detectar tamaño objetivo basado en el nombre o tipo (lógica simplificada)
 	local targetSize = UDim2.new(0.7, 0, 0.7, 0) -- Default
 	if frame.Name == "SettingsFrame" then targetSize = UDim2.new(0.6, 0, 0.6, 0) 
 	elseif frame.Name == "LeaderboardFrame" then targetSize = UDim2.new(0.7, 0, 0.8, 0)
