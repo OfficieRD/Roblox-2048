@@ -1124,7 +1124,6 @@ local function UpdateTileVisuals_Robot(frame, value, theme)
 	pad.PaddingBottom = UDim.new(0.15, 0)
 end
 
--- 3. FUNCIÓN VISUAL VOLCANIC
 -- 3. FUNCIÓN VISUAL VOLCANIC (Versión Final: Números de Fuego con Color Variable + Profundidad 3D)
 local function UpdateTileVisuals_Volcanic(frame, value)
 	-- [LIMPIEZA Y BASE]
@@ -1269,6 +1268,82 @@ local function UpdateTileVisuals_Volcanic(frame, value)
 	pad.PaddingRight = UDim.new(0.1, 0)
 end
 
+-- 5. FUNCIÓN VISUAL ROYAL VIP (Oro, Azul, Negro - Glow Sutil)
+local function UpdateTileVisuals_Royal(frame, value)
+	frame:ClearAllChildren()
+	frame.ClipsDescendants = false -- Importante para que el borde se vea
+
+	-- Color de fondo base (desde GameData)
+	local vipTheme = GameData.THEMES["VIP"]
+	local tileColor = vipTheme.Tiles[value] or vipTheme.Tiles["SUPER"]
+	frame.BackgroundColor3 = tileColor
+
+	frame.BorderSizePixel = 0
+	frame.ZIndex = 20
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0.15, 0)
+
+	-- [CAPA 1: BORDE FINO Y ELEGANTE]
+	local stroke = Instance.new("UIStroke", frame)
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	stroke.Thickness = 2.5 -- Un poco más fino
+
+	if value >= 256 then
+		stroke.Color = Color3.fromRGB(255, 215, 0) -- Oro
+	else
+		stroke.Color = Color3.fromRGB(50, 150, 255) -- Azul claro
+	end
+
+	-- [CAPA 2: RESPLANDOR (Glow) MUY SUTIL]
+	-- Si el valor es bajo, no ponemos glow para que no sature.
+	if value >= 16 then 
+		local glow = Instance.new("ImageLabel", frame)
+		glow.Name = "SoftGlow"
+		glow.BackgroundTransparency = 1
+		-- Usamos una textura circular suave
+		glow.Image = "rbxassetid://1316045217" 
+
+		-- ✅ AJUSTE CLAVE: Mucho más transparente y pequeño
+		glow.ImageTransparency = 0.65 -- Antes 0.3 (Ahora es muy suave)
+		glow.Size = UDim2.new(1.2, 0, 1.2, 0) -- Antes 1.6 (Ahora sobresale poco)
+
+		glow.Position = UDim2.new(0.5, 0, 0.5, 0)
+		glow.AnchorPoint = Vector2.new(0.5, 0.5)
+		glow.ZIndex = 19
+
+		if value >= 256 then
+			glow.ImageColor3 = Color3.fromRGB(255, 200, 50) -- Brillo dorado suave
+		else
+			glow.ImageColor3 = Color3.fromRGB(0, 100, 200) -- Brillo azul suave
+		end
+	end
+
+	-- [CAPA 3: TEXTO]
+	local label = Instance.new("TextLabel", frame)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = tostring(value)
+	label.Font = Enum.Font.FredokaOne
+	label.TextScaled = true
+	label.ZIndex = 22
+
+	-- Colores de texto para máximo contraste
+	if value >= 256 then
+		-- Fondo dorado/amarillo -> Texto Negro
+		label.TextColor3 = Color3.fromRGB(20, 20, 20) 
+	elseif value >= 64 then
+		-- Fondo azul claro -> Texto Negro
+		label.TextColor3 = Color3.fromRGB(20, 20, 20)
+	else
+		-- Fondo azul oscuro -> Texto Blanco
+		label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	end
+
+	-- Padding
+	local pad = Instance.new("UIPadding", label)
+	pad.PaddingTop = UDim.new(0.2, 0)
+	pad.PaddingBottom = UDim.new(0.2, 0)
+end
+
 -- 4. FUNCIÓN CREATETILE PRINCIPAL (CONECTA TODO)
 local function createTile(r, c, val, isSpawnAnim)
 	local t = Instance.new("Frame")
@@ -1281,13 +1356,18 @@ local function createTile(r, c, val, isSpawnAnim)
 	local theme = THEMES[currentSkin] or THEMES["Classic"]
 
 	if theme.IsNeonStyle then
-		UpdateTileVisuals(t, val) -- ✅ AHORA SÍ EXISTE
+		UpdateTileVisuals(t, val) --
 
 	elseif theme.IsRobotStyle then
-		UpdateTileVisuals_Robot(t, val, theme) -- ✅ AHORA SÍ EXISTE
+		UpdateTileVisuals_Robot(t, val, theme) --
 
 	elseif theme.IsVolcanicStyle then
-		UpdateTileVisuals_Volcanic(t, val) -- ✅ AHORA SÍ EXISTE
+		UpdateTileVisuals_Volcanic(t, val) --
+
+		-- ✅ ESTE ES EL BLOQUE NUEVO QUE DEBES AGREGAR:
+	elseif theme.IsRoyalStyle then
+		UpdateTileVisuals_Royal(t, val)
+		-- ✅ FIN DEL BLOQUE NUEVO
 
 	elseif theme.IsImageBased then
 		Instance.new("UICorner", t).CornerRadius = UDim.new(0, theme.CornerRadius or 4)
@@ -1370,6 +1450,7 @@ local function redrawBoard(mergedMap)
 	end
 	ScoreLabel.Text = tostring(score)
 end
+
 
 -- CAMBIAR COLORES (FONDO)
 -- CAMBIAR COLORES (FONDO Y SKIN)
