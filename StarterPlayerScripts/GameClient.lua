@@ -1861,7 +1861,10 @@ local function checkIsUnlocked(data)
 
 	-- 2. Chequeo VIP
 	if data.IsVIP then
+		-- Revisamos Atributo Guardado O Sesión Actual O API
+		if player:GetAttribute("PassOwned_" .. VIP_GAMEPASS_ID) then return true end
 		if localSessionPasses[VIP_GAMEPASS_ID] == true then return true end
+
 		local success, hasPass = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, VIP_GAMEPASS_ID) end)
 		return success and hasPass
 	end
@@ -2003,8 +2006,14 @@ local function openDailyRewards()
 	UIUtils.playClick(); DailyScroll:ClearAllChildren()
 	local uiGrid = Instance.new("UIGridLayout", DailyScroll); uiGrid.CellSize = UDim2.new(0.18, 0, 0, 100); uiGrid.CellPadding = UDim2.new(0.02, 0, 0.02, 0); uiGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-	local isVip = localSessionPasses[VIP_GAMEPASS_ID] == true
-	if isVip then DailyButton.Image = "rbxassetid://80848827945021" else DailyButton.Image = "rbxassetid://86257281348163" end
+	-- Verificar VIP (Atributo Guardado O Sesión actual)
+	local isVip = player:GetAttribute("PassOwned_" .. VIP_GAMEPASS_ID) or localSessionPasses[VIP_GAMEPASS_ID] == true
+
+	if isVip then 
+		DailyButton.Image = "rbxassetid://80848827945021" -- Dorado
+	else 
+		DailyButton.Image = "rbxassetid://86257281348163" -- Azul
+	end
 
 	-- OBTENCIÓN DE RACHA SEGURA
 	local rawStreak = player:GetAttribute("CurrentStreak") or 1
@@ -2701,9 +2710,9 @@ task.spawn(function()
 
 				-- ? ACTUALIZAR CALENDARIO DORADO (VIP)
 				-- Revisamos si tenemos el VIP en cache o en atributo
-				local hasVip = localSessionPasses[VIP_GAMEPASS_ID] == true
+				local hasVip = player:GetAttribute("PassOwned_" .. tostring(VIP_GAMEPASS_ID)) or localSessionPasses[VIP_GAMEPASS_ID] == true
 
-				-- Si no está en cache, intentamos una vez leerlo (sin spamear API)
+				-- Si no está detectado, intentamos una vez leerlo de la API (sin spamear)
 				if not hasVip and not player:GetAttribute("CheckedVipOnce") then
 					player:SetAttribute("CheckedVipOnce", true)
 					task.spawn(function()
