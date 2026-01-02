@@ -13,7 +13,7 @@ local ShopRefs = {}
 local ShopFrame = nil
 local player = Players.LocalPlayer
 local VIP_ID = 0
--- NUEVO: Lista para recordar compras hechas en esta sesi�n
+-- NUEVO: Lista para recordar compras hechas en esta sesión
 local sessionOwnedPasses = {} 
 
 function ShopManager.registerLocalPurchase(id)
@@ -215,13 +215,13 @@ function ShopManager.populateCurrency()
 
 
 
-	-- ? PADDING AUMENTADO (250) PARA QUE BAJE BIEN EL SCROLL
+	-- ✅ PADDING AUMENTADO (250) PARA QUE BAJE BIEN EL SCROLL
 
 	local pad = Instance.new("UIPadding", ShopRefs.CurrencyContainer); pad.PaddingTop=UDim.new(0,10); pad.PaddingBottom=UDim.new(0,250)
 
 
 
-	-- ? TUS IDS DEFINIDOS AQU� DENTRO PARA QUE NO DEN ERROR
+	-- ✅ TUS IDS DEFINIDOS AQUÍ DENTRO PARA QUE NO DEN ERROR
 
 	local ICON_COIN = "rbxassetid://108796514719654"
 
@@ -264,19 +264,30 @@ function ShopManager.populateCurrency()
 	}
 
 	local fruitProducts = {
-
 		{Amount="500", Robux=15, ProductId=3467282831, Icon=ICON_FRUIT},
-
 		{Amount="2,500", Robux=59, ProductId=3467283069, Icon=ICON_FRUIT},
-
 		{Amount="7,000", Robux=149, ProductId=3467283366, Icon=ICON_FRUIT},
-
 		{Amount="12,500", Robux=259, ProductId=3467283639, Icon=ICON_FRUIT},
-
 		{Amount="25,000", Robux=479, ProductId=3467283819, Icon=ICON_FRUIT},
-
 		{Amount="50,000", Robux=899, ProductId=3467283985, Icon=ICON_FRUIT}
+	}
 
+	-- ✅ LISTA DE DONACIONES (EXPANDIDA)
+	-- Recuerda crear los DevProducts en la web y poner sus IDs aquí luego.
+	-- ✅ LISTA DE DONACIONES (CON IDs REALES)
+	local ICON_DONATE = "rbxassetid://80905865363888"
+	local ICON_DONATE_GOLD = "rbxassetid://117872441064361"
+
+	local donationProducts = {
+		{Amount="Small Tip", Robux=10,    ProductId=3496514879, Icon=ICON_DONATE},
+		{Amount="Nice Tip",  Robux=50,    ProductId=3496515376, Icon=ICON_DONATE},
+		{Amount="Big Tip",   Robux=100,   ProductId=3496517459, Icon=ICON_DONATE},
+		{Amount="Generous",  Robux=250,   ProductId=3496518145, Icon=ICON_DONATE},
+		{Amount="Huge Tip",  Robux=500,   ProductId=3496519083, Icon=ICON_DONATE_GOLD},
+		{Amount="Mega Tip",  Robux=1000,  ProductId=3496519406, Icon=ICON_DONATE_GOLD},
+		{Amount="Ultra Tip", Robux=2500,  ProductId=3496519824, Icon=ICON_DONATE_GOLD},
+		{Amount="Legendary", Robux=5000,  ProductId=3496520239, Icon=ICON_DONATE_GOLD},
+		{Amount="Mythical",  Robux=10000, ProductId=3496520670, Icon=ICON_DONATE_GOLD}
 	}
 
 
@@ -325,381 +336,243 @@ function ShopManager.populateCurrency()
 
 	createSection("FRUITS", fruitProducts, 5, Color3.fromRGB(255, 80, 100))
 
+	-- ✅ NUEVA SECCIÓN: DONATIONS (Color Verde Robux)
+	createSection("DONATIONS", donationProducts, 7, Color3.fromRGB(0, 255, 100))
 end
 
 
 
--- 3. POPULATE SKINS
-
+-- 3. POPULATE SKINS (CORREGIDO: VIP BUTTON + COMPRA ÚNICA)
 function ShopManager.populateSkins(currentSkin, callbackColor)
-
 	if not ShopRefs.SkinsPageContainer then return end
+
+	-- 1. CONGELADO EXACTO (Anti-Parpadeo)
+	local savedY = ShopRefs.SkinsPageContainer.CanvasPosition.Y
+	local currentPixelHeight = ShopRefs.SkinsPageContainer.AbsoluteCanvasSize.Y
+
+	ShopRefs.SkinsPageContainer.AutomaticCanvasSize = Enum.AutomaticSize.None
+	ShopRefs.SkinsPageContainer.CanvasSize = UDim2.new(0, 0, 0, currentPixelHeight)
 
 	ShopRefs.SkinsPageContainer:ClearAllChildren()
 
-
-
 	local mainLayout = Instance.new("UIListLayout", ShopRefs.SkinsPageContainer)
-
 	mainLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
 	mainLayout.Padding = UDim.new(0, 30)
-
 	mainLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-
-
-	-- ? Padding de 300 para que baje completamente
-
 	local pad = Instance.new("UIPadding", ShopRefs.SkinsPageContainer)
-
-	pad.PaddingBottom = UDim.new(0, 300) 
-
 	pad.PaddingTop = UDim.new(0, 20)
 
-
-
-	-- LISTA DE SKINS
-
+	-- LISTAS (Igual que antes)
 	local normalItems = {
-
-		{Name="Classic",  Price=0,       Currency="Coins", Color=Color3.fromRGB(238, 228, 218)},
-
+		{Name="Classic",  Price=0,     Currency="Coins", Color=Color3.fromRGB(238, 228, 218)},
 		{Name="Blue",     Price=500,     Currency="Coins", Color=Color3.fromRGB(0, 200, 255)},
-
 		{Name="Red",      Price=1000,    Currency="Coins", Color=Color3.fromRGB(255, 80, 80)},
-
 		{Name="Green",    Price=2500,    Currency="Coins", Color=Color3.fromRGB(80, 200, 80)},
-
 		{Name="Purple",   Price=5000,    Currency="Coins", Color=Color3.fromRGB(180, 100, 255)},
-
-
-
 		{Name="Blue Pro",   Price=10000,  Currency="Coins", Color=Color3.fromRGB(0, 150, 255), HasBorder=true},
-
 		{Name="Red Pro",    Price=15000,  Currency="Coins", Color=Color3.fromRGB(255, 50, 50), HasBorder=true},
-
 		{Name="Green Pro",  Price=20000,  Currency="Coins", Color=Color3.fromRGB(50, 200, 50), HasBorder=true},
-
 		{Name="Purple Pro", Price=25000,  Currency="Coins", Color=Color3.fromRGB(150, 50, 255), HasBorder=true},
-
 		{Name="Orange Pro", Price=30000,  Currency="Coins", Color=Color3.fromRGB(255, 120, 0), HasBorder=true},
-
 		{Name="Pink Pro",   Price=40000,  Currency="Coins", Color=Color3.fromRGB(255, 80, 150), HasBorder=true},
-
 		{Name="Cyan Pro",   Price=50000,  Currency="Coins", Color=Color3.fromRGB(0, 255, 255), HasBorder=true},
-
-
-
 		{Name="Dark",     Price=90000,   Currency="Coins", Color=Color3.fromRGB(50, 50, 50)},
-
 		{Name="Gold",     Price=95000,   Currency="Coins", Color=Color3.fromRGB(255, 215, 0)},
-
 		{Name="Rainbow",  Price=100000,  Currency="Coins", Color=Color3.new(1,0,0), IsRainbow=true}
-
 	}
-
-
 
 	local specialItems = {
-
 		{Name="Neon",         Price=1500,  Currency="Diamonds", Color=Color3.fromRGB(0, 255, 255), IsNeon=true},
-
 		{Name="Robot",        Price=1000,  Currency="Diamonds", Color=Color3.fromRGB(80, 90, 100)},
-
 		{Name="Volcanic",     Price=2500,  Currency="Diamonds", Color=Color3.fromRGB(255, 80, 0)},
-
 		{Name="Classic 2048", Price=500,   Currency="Diamonds", Color=Color3.fromRGB(237, 194, 46), HasBorder=true},
-
 		{Name="Fruit Mix",    Price=2000,  Currency="Diamonds", Color=Color3.fromRGB(255, 170, 0)},
-
+		-- ⚠️ NOTA: El Price es 0 aquí porque es GamePass, pero lo manejamos abajo
 		{Name="VIP",          Price=0,     Currency="Pass",     Color=Color3.fromRGB(20, 20, 20), IsVIP=true}
-
 	}
 
-
+	local fruitItems = {
+		{Name="Fruit Mix 2",  Price=15000,  Currency="FruitGems", Color=Color3.fromRGB(240, 230, 100)},
+		{Name="Fruit Mix 3",  Price=35000,  Currency="FruitGems", Color=Color3.fromRGB(255, 150, 150)},
+		{Name="Fruits Green", Price=75000,  Currency="FruitGems", Color=Color3.fromRGB(100, 255, 100)},
+		{Name="Fruits Red",   Price=150000, Currency="FruitGems", Color=Color3.fromRGB(255, 80, 80)},
+	}
 
 	local function createSection(title, list, orderIndex)
-
 		local header = Instance.new("TextLabel", ShopRefs.SkinsPageContainer)
-
 		header.Text = title
-
 		header.Size = UDim2.new(0.95, 0, 0, 40)
-
 		header.BackgroundTransparency = 1
-
 		header.TextColor3 = Color3.fromRGB(0, 120, 220)
-
 		header.Font = Enum.Font.FredokaOne
-
 		header.TextSize = 28
-
 		header.TextXAlignment = Enum.TextXAlignment.Left
-
 		header.LayoutOrder = orderIndex
 
-
-
 		local gridFrame = Instance.new("Frame", ShopRefs.SkinsPageContainer)
-
 		gridFrame.BackgroundTransparency = 1
-
 		gridFrame.Size = UDim2.new(1, 0, 0, 0)
-
 		gridFrame.AutomaticSize = Enum.AutomaticSize.Y
-
 		gridFrame.LayoutOrder = orderIndex + 1
 
-
-
 		local grid = Instance.new("UIGridLayout", gridFrame)
-
 		grid.CellSize = UDim2.new(0.47, 0, 0, 230)
-
 		grid.CellPadding = UDim2.new(0.04, 0, 0.04, 0)
-
 		grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-
-
 		for k, item in ipairs(list) do
-
 			local card = Instance.new("Frame", gridFrame)
-
 			card.BackgroundColor3 = Color3.fromRGB(240, 248, 255)
-
 			Instance.new("UICorner", card).CornerRadius = UDim.new(0, 16)
 
-
-
 			local cardStroke = Instance.new("UIStroke", card)
-
 			cardStroke.Color = Color3.fromRGB(180, 210, 255)
-
 			cardStroke.Thickness = 4
 
-
-
 			local titleLbl = Instance.new("TextLabel", card)
-
 			titleLbl.Text = item.Name
-
 			titleLbl.Size = UDim2.new(1,0,0.2,0)
-
 			titleLbl.BackgroundTransparency = 1
-
 			titleLbl.Font = Enum.Font.FredokaOne
-
 			titleLbl.TextScaled = true
-
 			titleLbl.TextColor3 = Color3.fromRGB(80, 80, 90)
-
 			titleLbl.Position = UDim2.new(0,0,0.05,0)
 
-
-
 			local pv = Instance.new("Frame", card)
-
 			pv.Size = UDim2.new(0.55,0,0.4,0)
-
 			pv.Position = UDim2.new(0.225,0,0.25,0)
-
 			pv.BackgroundColor3 = item.Color
-
 			Instance.new("UICorner", pv).CornerRadius = UDim.new(0, 12)
 
-
-
 			if item.HasBorder then
-
-				local pvStroke = Instance.new("UIStroke", pv)
-
-				pvStroke.Thickness = 3
-
-				pvStroke.Color = Color3.new(0,0,0)
-
-				pvStroke.Transparency = 0.5
-
+				local pvStroke = Instance.new("UIStroke", pv); pvStroke.Thickness = 3; pvStroke.Color = Color3.new(0,0,0); pvStroke.Transparency = 0.5
 			end
-
-
-
 			if item.IsRainbow then 
-
-				task.spawn(function() 
-
-					while pv.Parent do 
-
-						local t=tick(); 
-
-						pv.BackgroundColor3=Color3.fromHSV((t*0.5)%1,1,1); 
-
-						task.wait() 
-
-					end 
-
-				end) 
-
+				task.spawn(function() while pv.Parent do local t=tick(); pv.BackgroundColor3=Color3.fromHSV((t*0.5)%1,1,1); task.wait() end end) 
 			end
-
-
 
 			local buyBtn = Instance.new("TextButton", card)
-
-			buyBtn.Size = UDim2.new(0.9,0,0.22,0)
-
-			buyBtn.Position = UDim2.new(0.05,0,0.72,0)
-
-			buyBtn.Font = Enum.Font.FredokaOne
-
-			buyBtn.TextScaled = true
-
-			buyBtn.TextColor3 = Color3.new(1,1,1)
-
+			buyBtn.Size = UDim2.new(0.9,0,0.22,0); buyBtn.Position = UDim2.new(0.05,0,0.72,0)
+			buyBtn.Font = Enum.Font.FredokaOne; buyBtn.TextScaled = true; buyBtn.TextColor3 = Color3.new(1,1,1)
 			Instance.new("UICorner", buyBtn).CornerRadius = UDim.new(0, 10)
-
-
 
 			local safeName = string.gsub(item.Name, " ", "")
 
-			local isOwned = (item.Price == 0) or player:GetAttribute("OwnedSkin_" .. safeName)
+			-- === LÓGICA DE PROPIEDAD (IS OWNED) ===
+			local isOwned = false
 
-			if item.IsVIP then 
-
-				local s, h = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, VIP_ID) end); 
-
-				isOwned = s and h 
-
+			if item.IsVIP then
+				-- Verificación para VIP (GamePass)
+				-- 1. Mirar si lo compramos en esta sesión
+				if sessionOwnedPasses[VIP_ID] then 
+					isOwned = true 
+				else
+					-- 2. Preguntar a Roblox (Esto previene comprarlo 2 veces)
+					local s, h = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, VIP_ID) end)
+					if s and h then isOwned = true end
+				end
+			else
+				-- Verificación para Skins normales (Coins/Gems)
+				isOwned = (item.Price == 0) or player:GetAttribute("OwnedSkin_" .. safeName)
 			end
-
-
 
 			if isOwned then
-
+				-- YA LO TIENES -> EQUIPAR
 				buyBtn.Text = (currentSkin == item.Name) and "EQUIPPED" or "EQUIP"
-
 				buyBtn.BackgroundColor3 = (currentSkin == item.Name) and Color3.fromRGB(0, 200, 80) or Color3.fromRGB(0, 160, 255)
-
 				buyBtn.MouseButton1Click:Connect(function() 
-
 					UIUtils.playClick()
-
 					if callbackColor then 
-
 						callbackColor(item.Name)
-
 						ShopManager.populateSkins(item.Name, callbackColor) 
-
 					end
-
 				end)
-
 			else
+				-- NO LO TIENES -> COMPRAR
 
-				if item.Currency == "Diamonds" then buyBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+				-- === LÓGICA VIP (Fix del botón "Button") ===
+				if item.IsVIP then
+					buyBtn.Text = "BUY VIP" -- ✅ AHORA SÍ DICE TEXTO
+					buyBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) -- Dorado
+					buyBtn.TextColor3 = Color3.new(0,0,0) -- Texto Negro
 
-				elseif item.Currency == "FruitGems" then buyBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+					buyBtn.MouseButton1Click:Connect(function()
+						UIUtils.playClick()
+						if VIP_ID > 0 then MarketplaceService:PromptGamePassPurchase(player, VIP_ID) end
+					end)
 
-				else buyBtn.BackgroundColor3 = Color3.fromRGB(255, 180, 0) end
-
-
-
-				buyBtn.MouseButton1Click:Connect(function()
-
-					UIUtils.playClick()
-
-					if item.IsVIP then if VIP_ID > 0 then MarketplaceService:PromptGamePassPurchase(player, VIP_ID) end
-
-					else
-
-						local ls = player:FindFirstChild("leaderstats")
-
-						local currencyVal = 0
-
-						if item.Currency == "Diamonds" then currencyVal = ls.Diamonds.Value
-
-						elseif item.Currency == "FruitGems" then currencyVal = ls.FruitGems.Value
-
-						else currencyVal = ls.Coins.Value end
-
-
-
-						if currencyVal >= item.Price then
-
-							game.ReplicatedStorage:FindFirstChild("PurchaseItem"):FireServer(item.Name)
-
-							player:SetAttribute("OwnedSkin_"..safeName, true)
-
-							if callbackColor then ShopManager.populateSkins(currentSkin, callbackColor) end
-
-						end
-
-					end
-
-				end)
-
-				if not item.IsVIP then 
-
-					-- CALCULAR PRECIO VISUAL (Con descuento VIP si aplica)
+				else
+					-- LÓGICA NORMAL (Monedas/Gemas)
+					if item.Currency == "Diamonds" then buyBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+					elseif item.Currency == "FruitGems" then buyBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+					else buyBtn.BackgroundColor3 = Color3.fromRGB(255, 180, 0) end
 
 					local finalPrice = item.Price
-
-
-
-					-- Verificamos localmente si tiene VIP para mostrar el precio rebajado
-
-					-- (El servidor hace la verificaci�n real de seguridad, esto es solo visual)
-
+					-- Descuento VIP para skins normales
 					local hasVip = false
-
 					pcall(function() hasVip = MarketplaceService:UserOwnsGamePassAsync(player.UserId, VIP_ID) end)
-
-
-
-					if hasVip and finalPrice > 0 then
-
-						finalPrice = math.floor(finalPrice * 0.85) -- 15% menos
-
-						buyBtn.TextColor3 = Color3.fromRGB(255, 255, 100) -- Texto amarillo para indicar oferta
-
+					if hasVip and finalPrice > 0 then 
+						finalPrice = math.floor(finalPrice * 0.85)
+						buyBtn.TextColor3 = Color3.fromRGB(255, 255, 100) 
 					end
 
-
-
 					buyBtn.Text = "   "..finalPrice 
-
 					local ic = Instance.new("ImageLabel", buyBtn); ic.Size=UDim2.new(0.25,0,0.7,0); ic.Position=UDim2.new(0.8,0,0.15,0); ic.BackgroundTransparency=1; ic.ScaleType=Enum.ScaleType.Fit; ic.AnchorPoint=Vector2.new(0.5,0)
-
-					-- ? ICONOS CORRECTOS EN EL BOT�N DE COMPRA
-
 					if item.Currency == "Diamonds" then ic.Image = "rbxassetid://111308733495717"
-
 					elseif item.Currency == "FruitGems" then ic.Image = "rbxassetid://128100423386205"
-
 					else ic.Image = "rbxassetid://108796514719654" end
-
 					buyBtn.TextXAlignment = Enum.TextXAlignment.Left
 
+					buyBtn.MouseButton1Click:Connect(function()
+						UIUtils.playClick()
+						local ls = player:FindFirstChild("leaderstats")
+						local currencyVal = 0
+						if item.Currency == "Diamonds" then currencyVal = ls.Diamonds.Value
+						elseif item.Currency == "FruitGems" then currencyVal = ls.FruitGems.Value
+						else currencyVal = ls.Coins.Value end
+
+						if currencyVal >= item.Price then
+							player:SetAttribute("OwnedSkin_"..safeName, true)
+							game.ReplicatedStorage:FindFirstChild("PurchaseItem"):FireServer(item.Name)
+							if callbackColor then 
+								ShopManager.populateSkins(currentSkin, callbackColor) 
+							end
+						end
+					end)
 				end
-
 			end
-
 		end
-
 	end
 
-
-
+	-- SECCIONES
 	createSection("NORMAL SKINS (Coins)", normalItems, 1)
+	createSection("SPECIALS (Exclusives)", specialItems, 3)
+	createSection("FRUIT SHOP (Fruit Gems)", fruitItems, 5)
 
-	createSection("SPECIALS (Exclusives)", specialItems, 2)
+	-- 2. ESPACIADOR INVISIBLE
+	local spacer = Instance.new("Frame", ShopRefs.SkinsPageContainer)
+	spacer.Name = "ScrollSpacer"
+	spacer.Size = UDim2.new(1, 0, 0, 600)
+	spacer.BackgroundTransparency = 1
+	spacer.LayoutOrder = 999 
 
+	-- 3. RESTAURAR SCROLL
+	if ShopRefs.SkinsPageContainer then
+		ShopRefs.SkinsPageContainer.CanvasPosition = Vector2.new(0, savedY)
+	end
+
+	task.defer(function()
+		if ShopRefs.SkinsPageContainer then
+			ShopRefs.SkinsPageContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+			ShopRefs.SkinsPageContainer.CanvasPosition = Vector2.new(0, savedY)
+		end
+	end)
 end
 
 
 
--- 4. POPULATE PASSES (VERIFICACI�N DE PROPIEDAD CORREGIDA)
+-- 4. POPULATE PASSES (VERIFICACIÓN DE PROPIEDAD CORREGIDA)
 function ShopManager.populatePasses()
 	if not ShopRefs.PassesContainer then return end
 	ShopRefs.PassesContainer:ClearAllChildren()
@@ -707,7 +580,7 @@ function ShopManager.populatePasses()
 	local layout = Instance.new("UIGridLayout", ShopRefs.PassesContainer); layout.CellSize = UDim2.new(0.47, 0, 0, 200); layout.CellPadding = UDim2.new(0.04, 0, 0.04, 0); layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	local pad = Instance.new("UIPadding", ShopRefs.PassesContainer); pad.PaddingTop = UDim.new(0, 20); pad.PaddingBottom = UDim.new(0, 150)
 
-	-- ? IDs REALES (Aseg�rate de que coincidan con los de tu juego)
+	-- ✅ IDs REALES (Asegúrate de que coincidan con los de tu juego)
 	local passes = {
 		{Name="x2 XP",     Id=1609347878, Price=249, Color=Color3.fromRGB(100, 255, 100)},
 		{Name="x2 Coins",  Id=1612413325, Price=149, Color=Color3.fromRGB(255, 200, 0)},
@@ -729,10 +602,10 @@ function ShopManager.populatePasses()
 		buyBtn.Size=UDim2.new(0.9,0,0.2,0); buyBtn.Position=UDim2.new(0.05,0,0.78,0)
 		buyBtn.Font=Enum.Font.FredokaOne; buyBtn.TextScaled=true; Instance.new("UICorner", buyBtn).CornerRadius = UDim.new(0, 8)
 
-		-- ?? VERIFICAR SI YA LO TIENE (API + Memoria Local)
+		-- 🔎 VERIFICAR SI YA LO TIENE (API + Memoria Local)
 		local isOwned = sessionOwnedPasses[pass.Id] == true -- Revisar memoria local primero
 
-		if not isOwned then -- Si no est� en memoria, preguntar a Roblox
+		if not isOwned then -- Si no está en memoria, preguntar a Roblox
 			local success, result = pcall(function()
 				return MarketplaceService:UserOwnsGamePassAsync(player.UserId, pass.Id)
 			end)
@@ -807,7 +680,7 @@ function ShopManager.switchTab(name, currentSkin, skinCallback)
 
 
 
-		-- ? LLAMAMOS A LA NUEVA FUNCI�N PARA QUE CARGUEN LOS PASES
+		-- ✅ LLAMAMOS A LA NUEVA FUNCIÓN PARA QUE CARGUEN LOS PASES
 
 		ShopManager.populatePasses()
 
