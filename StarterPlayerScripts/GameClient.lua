@@ -2724,7 +2724,8 @@ task.spawn(function()
 				end
 
 				-- Aplicar imagen si encontramos el VIP
-				if localSessionPasses[VIP_GAMEPASS_ID] then
+				-- ✅ CORRECCIÓN: Usar 'hasVip' que ya calculaste arriba (incluye atributos guardados)
+				if hasVip then
 					DailyButton.Image = "rbxassetid://80848827945021" -- Dorado
 				else
 					DailyButton.Image = "rbxassetid://86257281348163" -- Azul Normal
