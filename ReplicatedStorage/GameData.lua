@@ -98,7 +98,7 @@ GameData.THEMES = {
 		TextLight = Color3.fromRGB(255, 255, 255),
 		Tiles = GameData.NEON_PALETTE,
 
-		
+
 		-- TU ID ORIGINAL:
 		BgImage = "rbxassetid://111069386777584", 
 		IsNeonStyle = true,
@@ -150,14 +150,14 @@ GameData.THEMES = {
 			[2048] = Color3.fromRGB(255, 0, 0), ["SUPER"] = Color3.fromRGB(0, 0, 0)
 		}
 	},
-	-- ?? SKIN RAINBOW (MEJORADA: Efecto Ola RGB)
+	-- üåà SKIN RAINBOW (MEJORADA: Efecto Ola RGB)
 	["Rainbow"] = {
 		Board = Color3.fromRGB(20, 20, 25),   -- Marco casi negro
 		Bg = Color3.fromRGB(10, 10, 15),      -- Fondo oscuro
-		Empty = Color3.fromRGB(35, 35, 40),   -- Casillas vacÌas oscuras
+		Empty = Color3.fromRGB(35, 35, 40),   -- Casillas vac√≠as oscuras
 		TextDark = Color3.fromRGB(255, 255, 255),
 		TextLight = Color3.fromRGB(255, 255, 255),
-		Tiles = GameData.DEFAULT_TILES, -- Se ignorar·, lo controla el script
+		Tiles = GameData.DEFAULT_TILES, -- Se ignorar√°, lo controla el script
 		IsRainbow = true,
 		HasBorder = true,  -- Activamos borde para pintarlo RGB
 		CornerRadius = 8
@@ -216,7 +216,7 @@ GameData.THEMES = {
 		Board = Color3.fromRGB(0, 50, 100), Bg = Color3.fromRGB(0, 20, 40), Empty = Color3.fromRGB(0, 80, 150),
 		TextDark = Color3.new(1,1,1), TextLight = Color3.new(1,1,1),
 		Tiles = {[2]=Color3.fromRGB(100, 220, 255), [4]=Color3.fromRGB(50, 200, 255), [8]=Color3.fromRGB(0, 180, 255), ["SUPER"]=Color3.fromRGB(0, 100, 200)},
-		HasBorder = true, CornerRadius = 8 -- ? Borde activado para relieve
+		HasBorder = true, CornerRadius = 8 -- ‚úÖ Borde activado para relieve
 	},
 	["Red Pro"] = {
 		Board = Color3.fromRGB(100, 20, 20), Bg = Color3.fromRGB(50, 10, 10), Empty = Color3.fromRGB(150, 50, 50),
@@ -254,20 +254,106 @@ GameData.THEMES = {
 		Tiles = {[2]=Color3.fromRGB(200, 255, 255), [4]=Color3.fromRGB(150, 255, 255), [8]=Color3.fromRGB(50, 220, 220), ["SUPER"]=Color3.fromRGB(0, 180, 180)},
 		HasBorder = true, CornerRadius = 8
 	},
+	-- === FRUIT COLLECTION ===
+
+	-- 1. ORIGINAL (Restaurada)
 	["Fruit Mix"] = {
-		Board = Color3.fromRGB(101, 67, 33),
-		Bg = Color3.fromRGB(222, 184, 135),
-		Empty = Color3.fromRGB(139, 69, 19),
-		TextDark = Color3.fromRGB(255, 255, 255),
-		TextLight = Color3.fromRGB(255, 255, 255),
+		Board = Color3.fromRGB(101, 67, 33), Bg = Color3.fromRGB(222, 184, 135), Empty = Color3.fromRGB(139, 69, 19),
+		TextDark = Color3.new(1,1,1), TextLight = Color3.new(1,1,1),
 		IsImageBased = true,
+		IsFruitSkin = true, -- ? IMPORTANTE: Marca como skin de fruta
 		Images = {
-			[2] = "rbxassetid://82155629413293",
+			-- IDs Originales del archivo subido
+			[2] = "rbxassetid://82155629413293", 
 			[4] = "rbxassetid://116490216224760",
-			[8] = "rbxassetid://112971287879477",
+			[8] = "rbxassetid://112971287879477", 
 			[16] = "rbxassetid://105463210552976",
-			[32] = "rbxassetid://128100423386205",
+			[32] = "rbxassetid://128100423386205", 
 			["SUPER"] = "rbxassetid://105418130110436"
+		}
+	},
+
+	-- 2. MIX 2 (Variado)
+	["Fruit Mix 2"] = {
+		Board = Color3.fromRGB(90, 60, 30), Bg = Color3.fromRGB(240, 230, 180), Empty = Color3.fromRGB(120, 80, 40),
+		TextDark = Color3.new(1,1,1), TextLight = Color3.new(1,1,1),
+		IsImageBased = true, IsFruitSkin = true,
+		Images = {
+			[2] = "rbxassetid://76951596663341",   -- Limon
+			[4] = "rbxassetid://139818222601413",  -- Sandia
+			[8] = "rbxassetid://78776843765357",   -- Melon v1
+			[16] = "rbxassetid://132000975413440", -- Pera
+			[32] = "rbxassetid://73675450769816",  -- Custard Apple
+			[64] = "rbxassetid://117586290048073", -- Kiwi
+			[128] = "rbxassetid://93248093536327", -- Pi√±a
+			[256] = "rbxassetid://100659106786283",-- Arandanos
+			[512] = "rbxassetid://91382253679136", -- Cerezas v1
+			[1024] = "rbxassetid://108744734844187",-- Aguacate
+			[2048] = "rbxassetid://93291750469341", -- Uva Verde
+			["SUPER"] = "rbxassetid://93248093536327" 
+		}
+	},
+
+	-- 3. MIX 3 (Ex√≥ticas)
+	["Fruit Mix 3"] = {
+		Board = Color3.fromRGB(100, 50, 50), Bg = Color3.fromRGB(255, 220, 220), Empty = Color3.fromRGB(150, 70, 70),
+		TextDark = Color3.new(1,1,1), TextLight = Color3.new(1,1,1),
+		IsImageBased = true, IsFruitSkin = true,
+		Images = {
+			[2] = "rbxassetid://116453258699233",  -- Uva Morada
+			[4] = "rbxassetid://88713982101816",   -- Green Mango
+			[8] = "rbxassetid://96024693618887",   -- Melon v2
+			[16] = "rbxassetid://112968271193557", -- Chayote
+			[32] = "rbxassetid://128181068243828", -- Green Berry
+			[64] = "rbxassetid://136853516693553", -- Dragon Fruit
+			[128] = "rbxassetid://110048911581992",-- Red Fruit
+			[256] = "rbxassetid://113133998929200",-- Uva Roja
+			[512] = "rbxassetid://112934857714958",-- Cerezas v2
+			[1024] = "rbxassetid://88045392381930",-- Red Fruit v2
+			[2048] = "rbxassetid://136853516693553",-- Dragon Fruit
+			["SUPER"] = "rbxassetid://136853516693553"
+		}
+	},
+
+	-- 4. GREEN ONLY (Sin Sand√≠a, solo verdes puros)
+	["Fruits Green"] = { 
+		Board = Color3.fromRGB(40, 80, 40), Bg = Color3.fromRGB(200, 255, 200), Empty = Color3.fromRGB(60, 100, 60),
+		TextDark = Color3.new(1,1,1), TextLight = Color3.new(1,1,1),
+		IsImageBased = true, IsFruitSkin = true,
+		Images = {
+			[2] = "rbxassetid://76951596663341",   -- Limon
+			[4] = "rbxassetid://132000975413440",  -- Pera
+			[8] = "rbxassetid://117586290048073",  -- Kiwi
+			[16] = "rbxassetid://108744734844187", -- Aguacate
+			[32] = "rbxassetid://93291750469341",  -- Uva Verde
+			[64] = "rbxassetid://88713982101816",  -- Green Mango
+			[128] = "rbxassetid://112968271193557",-- Chayote
+			[256] = "rbxassetid://128181068243828",-- Green Berry
+			[512] = "rbxassetid://78776843765357", -- Melon v1
+			[1024] = "rbxassetid://96024693618887",-- Melon v2
+			[2048] = "rbxassetid://73675450769816",-- Custard Apple
+			["SUPER"] = "rbxassetid://76951596663341" -- Limon
+		}
+	},
+
+	-- 5. RED ONLY (Incluye Sand√≠a y Morados)
+	["Fruits Red"] = { 
+		Board = Color3.fromRGB(100, 20, 40), Bg = Color3.fromRGB(255, 200, 200), Empty = Color3.fromRGB(150, 60, 80),
+		TextDark = Color3.new(1,1,1), TextLight = Color3.new(1,1,1),
+		IsImageBased = true, IsFruitSkin = true,
+		Images = {
+			[2] = "rbxassetid://139818222601413",  -- Sandia (Movida aqu√≠)
+			[4] = "rbxassetid://91382253679136",   -- Cerezas v1
+			[8] = "rbxassetid://112934857714958",  -- Cerezas v2
+			[16] = "rbxassetid://110048911581992", -- Red Fruit
+			[32] = "rbxassetid://88045392381930",  -- Red Fruit v2
+			[64] = "rbxassetid://113133998929200", -- Uva Roja
+			[128] = "rbxassetid://136853516693553",-- Dragon Fruit
+			[256] = "rbxassetid://116453258699233",-- Uva Morada
+			[512] = "rbxassetid://100659106786283",-- Arandanos
+			[1024] = "rbxassetid://110048911581992",-- Red Fruit (Repetido alto valor)
+			[2048] = "rbxassetid://136853516693553",-- Dragon Fruit (Repetido alto valor)
+			["SUPER"] = "rbxassetid://139818222601413"
 		}
 	},
 
@@ -284,18 +370,18 @@ GameData.THEMES = {
 		HasTextStroke = true,
 		CornerRadius = 12
 	},
-	
-	-- ?? NUEVA SKIN ROBOT (Estilo Industrial/Carcasa)
+
+	-- ü§ñ NUEVA SKIN ROBOT (Estilo Industrial/Carcasa)
 	["Robot"] = {
 		Board = Color3.fromRGB(80, 85, 90),    -- Marco Gris Metal
-		Bg = Color3.fromRGB(135, 206, 235),    -- (El fondo ser· tu imagen, este color es de reserva)
-		Empty = Color3.fromRGB(120, 125, 130), -- Casilla vacÌa met·lica
+		Bg = Color3.fromRGB(135, 206, 235),    -- (El fondo ser√° tu imagen, este color es de reserva)
+		Empty = Color3.fromRGB(120, 125, 130), -- Casilla vac√≠a met√°lica
 		TextDark = Color3.fromRGB(255, 255, 255),
 		TextLight = Color3.fromRGB(255, 255, 255),
 		Tiles = {
 			-- Paleta sacada de tu imagen de referencia
 			[2] = Color3.fromRGB(230, 230, 235),   -- Gris Claro (Placa)
-			[4] = Color3.fromRGB(100, 190, 180),   -- Cian Met·lico
+			[4] = Color3.fromRGB(100, 190, 180),   -- Cian Met√°lico
 			[8] = Color3.fromRGB(160, 160, 165),   -- Gris Medio
 			[16] = Color3.fromRGB(140, 145, 150),  -- Gris Oscuro
 			[32] = Color3.fromRGB(210, 215, 220),  -- Gris Plata
@@ -309,11 +395,11 @@ GameData.THEMES = {
 		IsRobotStyle = true,
 		CornerRadius = 8 -- Bordes redondeados pero industriales
 	},
-	-- ?? SKIN VOLCANIC (Corregida: Colores Oscuros)
+	-- üåã SKIN VOLCANIC (Corregida: Colores Oscuros)
 	["Volcanic"] = {
 		Board = Color3.fromRGB(30, 15, 10),   -- Borde del tablero (Roca oscura)
 		Bg = Color3.fromRGB(15, 10, 5),       -- Fondo de pantalla oscuro
-		Empty = Color3.fromRGB(45, 35, 35),   -- ? ESTO QUITA EL BEIGE: Casillas vacÌas color roca
+		Empty = Color3.fromRGB(45, 35, 35),   -- ‚úÖ ESTO QUITA EL BEIGE: Casillas vac√≠as color roca
 		TextDark = Color3.fromRGB(255, 200, 50), 
 		TextLight = Color3.fromRGB(255, 100, 0), 
 		Tiles = GameData.DEFAULT_TILES, 
@@ -327,7 +413,7 @@ GameData.THEMES = {
 }
 
 
--- 4. PLAYLIST DE M⁄SICA
+-- 4. PLAYLIST DE M√öSICA
 GameData.MUSIC_PLAYLIST = {
 	{Id = "rbxassetid://5979775161", Name = "Lofi Hip Hop"},
 	{Id = "rbxassetid://1848354536", Name = "Chill Vibes"},
@@ -336,26 +422,35 @@ GameData.MUSIC_PLAYLIST = {
 	{Id = "rbxassetid://1837070127", Name = "Deep Focus"}
 }
 
--- 5. TÕTULOS
+-- TABLA DE T√çTULOS (ACTUALIZADA CON STAFF Y ROBUX EXTRA)
 GameData.TITLES_DATA = {
-	{Name = "Novice",   Color = Color3.fromRGB(200, 200, 200), Req = 0,      Desc = "Start your journey."},
-	{Name = "Pro",      Color = Color3.fromRGB(0, 170, 255),   Req = 2048,   Desc = "Reach 2048 score to unlock."},
-	{Name = "Master",   Color = Color3.fromRGB(170, 0, 255),   Req = 4096,   Desc = "Reach 4096 score to unlock."},
-	{Name = "Legend",   Color = Color3.fromRGB(255, 170, 0),   Req = 8192,   Desc = "Only for the 2048 gods."},
-	{Name = "Hacker",   Color = Color3.fromRGB(0, 255, 100),   Req = 16384, Desc = "Nobody plays this fast..."},
-	{Name = "VIP",      Color = Color3.fromRGB(255, 215, 0),   IsVIP = true,Desc = "Exclusive for VIP members."},
+	-- === [MAIN] ===
+	{Name="Novice",   Category="Main", Desc="Play for the first time.", Req=0, Color=Color3.fromRGB(200,200,200), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(220,220,220)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,150,150))}},
+	{Name="Pro",      Category="Main", Desc="Reach 10,000 Score.",    Req=10000, Color=Color3.fromRGB(50,100,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(50,100,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,50,200))}},
+	{Name="Master",   Category="Main", Desc="Reach 100,000 Score.",   Req=100000, Color=Color3.fromRGB(255,50,50), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,50,50)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,0,0))}},
 
-	-- SEASON 1: HIGH SCORE
-	{Name = "S1 #1 Score ??",   Color = Color3.fromRGB(255, 215, 0), ReqAttribute = "Title_S1_HS_1",   Desc = "Rank #1 in High Score (Season 1)."},
-	{Name = "S1 #2 Score ??",   Color = Color3.fromRGB(192, 192, 192), ReqAttribute = "Title_S1_HS_2",   Desc = "Rank #2 in High Score (Season 1)."},
-	{Name = "S1 #3 Score ??",   Color = Color3.fromRGB(205, 127, 50), ReqAttribute = "Title_S1_HS_3",   Desc = "Rank #3 in High Score (Season 1)."},
-	{Name = "S1 Top 10 Score",  Color = Color3.fromRGB(160, 32, 240), ReqAttribute = "Title_S1_HS_10",  Desc = "Top 10 in High Score (Season 1)."},
-	{Name = "S1 Top 100 Score", Color = Color3.fromRGB(0, 100, 255),  ReqAttribute = "Title_S1_HS_100", Desc = "Top 100 in High Score (Season 1)."},
+	-- RACHAS
+	{Name="Dedicated",   Category="Main", Desc="7 Day Login Streak.",  ReqAttribute="Streak7", Color=Color3.fromRGB(100,255,100), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(100,255,100)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,180,0))}},
+	{Name="Addicted",    Category="Main", Desc="30 Day Login Streak.", ReqAttribute="Streak30", Color=Color3.fromRGB(255,150,0), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,150,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,80,0))}},
+	{Name="Eternal",     Category="Main", Desc="100 Day Streak.",      ReqAttribute="Streak100", Color=Color3.fromRGB(255,0,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,255)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,255))}},
 
-	-- TÕTULOS DE FRUTAS
-	{Name = "Tutti Frutti ??", Color = Color3.fromRGB(255, 105, 180), ReqSkin = "FruitMix", Desc = "Own the Fruit Mix Skin."},
-	{Name = "Apple Crisp ??",  Color = Color3.fromRGB(255, 80, 80),   ReqTotalGems = 2000,  Desc = "Collect 2,000 Fruit Gems (Total Lifetime)."},
-	{Name = "Golden Orchard ??",Color = Color3.fromRGB(255, 223, 0),  ReqTotalGems = 10000, Desc = "Collect 10,000 Fruit Gems (Total Lifetime)."}
+	-- === [FRUITS] ===
+	{Name="Berry Picker",  Category="Fruits", Desc="Collect 500 Fruit Gems.",   ReqTotalGems=500, Color=Color3.fromRGB(255,100,150), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,150,180)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,50,100))}},
+	{Name="Fruit Ninja",   Category="Fruits", Desc="Collect 10,000 Fruit Gems.",ReqTotalGems=10000, Color=Color3.fromRGB(100,255,50), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(150,255,50)), ColorSequenceKeypoint.new(1, Color3.fromRGB(50,200,0))}},
+	{Name="Harvest King",  Category="Fruits", Desc="Collect 100k Fruit Gems.",  ReqTotalGems=100000, Color=Color3.fromRGB(255,215,0), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,215,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(50,200,50))}},
+
+	-- === [OTHERS] ===
+	{Name="VIP", Category="Others", Desc="Exclusive VIP Title.", IsVIP=true, Color=Color3.fromRGB(255, 200, 80), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromHex("FFC850")), ColorSequenceKeypoint.new(1, Color3.fromHex("FFF0B4"))}},
+
+	-- NUEVOS DE ROBUX
+	{Name="Supporter", Category="Others", Desc="Spent 100+ Robux.", ReqRobux=100, Color=Color3.fromRGB(0,255,150), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(80,255,150)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,180,100))}},
+	{Name="Whale",     Category="Others", Desc="Spent 5,000+ Robux.", ReqRobux=5000, Color=Color3.fromRGB(0,255,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(0,255,255)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255,0,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,255))}},
+	{Name="Leviathan", Category="Others", Desc="Spent 50,000+ Robux.", ReqRobux=50000, Color=Color3.fromRGB(100,0,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(150,0,255)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,0,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,0,255))}},
+
+	-- NUEVOS DE STAFF
+	{Name="Mod",   Category="Others", Desc="Community Moderator.", ReqAttribute="IsMod", Color=Color3.fromRGB(50,200,100), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(0,255,100)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,100,50))}},
+	{Name="Admin", Category="Others", Desc="Game Administrator.",  ReqAttribute="IsAdmin", Color=Color3.fromRGB(255,50,50), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,80,80)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,0,0))}},
+	{Name="Owner", Category="Others", Desc="Game Creator.",        ReqAttribute="IsOwner", Color=Color3.fromRGB(255,0,0), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(100,0,0))}}
 }
 
 return GameData
