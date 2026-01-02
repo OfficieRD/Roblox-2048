@@ -1,17 +1,18 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
--- 1. Esperamos a que el "buzÃ³n" exista (Ya comprobamos que sÃ­ existe)
+-- 1. Esperamos a que el "buzón" exista (Ya comprobamos que sí existe)
 local equipEvent = ReplicatedStorage:WaitForChild("EquipTitle")
 
-print("ðŸŸ¢ SERVER: Script de Chat Cargado y Esperando...")
+print("?? SERVER: Script de Chat Cargado y Esperando...")
 
 -- 2. Escuchamos cuando el cliente manda el mensaje
 equipEvent.OnServerEvent:Connect(function(player, titleName)
-	print("ðŸ“¨ SERVER: Recibido tÃ­tulo '" .. tostring(titleName) .. "' de " .. player.Name)
+	print("?? SERVER: Recibido título '" .. tostring(titleName) .. "' de " .. player.Name)
 
-	-- Guardamos el tÃ­tulo en el jugador (Atributo)
+	-- Guardamos el título en el jugador (Atributo)
 	player:SetAttribute("EquippedTitle", titleName)
 
-	print("âœ… SERVER: Atributo guardado. El script ChatTags (Cliente) deberÃ­a pintarlo ahora.")
+	-- Feedback en consola para confirmar
+	print("? TÍTULO EQUIPADO Y LISTO PARA GUARDAR: " .. tostring(titleName))
 end)

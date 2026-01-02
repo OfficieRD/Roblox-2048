@@ -2,7 +2,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 
 local PRODUCTS = {
-	-- Asegúrate de que este ID sea un DEVELOPER PRODUCT, no un GamePass.
+	-- Aseg�rate de que este ID sea un DEVELOPER PRODUCT, no un GamePass.
 	[3472578365] = {Type = "Undos", Amount = 3},
 
 	-- MONEDAS
@@ -30,7 +30,7 @@ local PRODUCTS = {
 	[3467283985] = {Type = "FruitGems", Amount = 50000},
 }
 
--- FUNCIÓN DE PROCESO DE COMPRA
+-- FUNCI�N DE PROCESO DE COMPRA
 MarketplaceService.ProcessReceipt = function(receiptInfo)
 	local player = Players:GetPlayerByUserId(receiptInfo.PlayerId)
 
@@ -49,7 +49,7 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
 
 	local currentTotal = player:GetAttribute("TotalRobuxSpent") or 0
 	player:SetAttribute("TotalRobuxSpent", currentTotal + spent)
-	print("💸 Gasto registrado: +" .. spent .. " Robux.")
+	print("?? Gasto registrado: +" .. spent .. " Robux.")
 
 	-- 2. ENTREGAR PRODUCTO
 	local productData = PRODUCTS[receiptInfo.ProductId]
@@ -74,7 +74,7 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
 				leaderstats.FruitGems.Value += productData.Amount
 				player:SetAttribute("TotalFruitGems", (player:GetAttribute("TotalFruitGems") or 0) + productData.Amount)
 
-				-- D) ✅ UNDOS (MODO REFILL: SIEMPRE 3 - SIN LAG)
+				-- D) ? UNDOS (MODO REFILL: SIEMPRE 3 - SIN LAG)
 			elseif productData.Type == "Undos" then
 				local fixedAmount = productData.Amount or 3
 
