@@ -50,13 +50,13 @@ local function createDayButton(day, displayDay, alreadyClaimed, isVip)
 	dayLbl.Font = Enum.Font.GothamBlack; dayLbl.TextScaled = true; dayLbl.Parent = frame; dayLbl.ZIndex = 3007
 
 	-- CALCULO NERFEADO
-	local rewardAmt = 500 + (day * 200) 
+	local rewardAmt = 1000 + (day * 500) 
 	local rewardType = "Coins"
 	local iconId = "rbxassetid://108796514719654"
 
 	if day == 30 then rewardType = "Skin"; rewardAmt = 1; iconId = "rbxassetid://100737380049446"
-	elseif day % 7 == 0 then rewardType = "Gems"; rewardAmt = 20 + (day * 5); iconId = "rbxassetid://111308733495717"
-	elseif day % 5 == 0 then rewardType = "Fruits"; rewardAmt = 50 + (day * 10); iconId = "rbxassetid://128100423386205" end
+	elseif day % 7 == 0 then rewardType = "Gems"; rewardAmt = 50 + (day * 10); iconId = "rbxassetid://111308733495717"
+	elseif day % 5 == 0 then rewardType = "Fruits"; rewardAmt = 200 + (day * 50); iconId = "rbxassetid://128100423386205" end
 
 	if isVip and rewardType ~= "Skin" then rewardAmt = rewardAmt * 2 end
 
