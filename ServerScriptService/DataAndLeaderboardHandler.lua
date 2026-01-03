@@ -307,22 +307,12 @@ local function playerAdded(player)
 			player:SetAttribute("DailyClaimed", false) -- Aún no cobra hoy
 		end
 
-		if lastLoginDay == today then
-			-- Ya entró hoy, no sumamos racha pero mantenemos estado
-		elseif lastLoginDay == (today - 1) then
-			-- Nuevo día consecutivo
-			currentStreak = currentStreak + 1
-			player:SetAttribute("DailyClaimed", false) -- <--- AGREGAR ESTO (Permite reclamar)
-			-- BORRA LA LÍNEA QUE DABA DINERO AUTOMÁTICO AQUÍ PARA QUE NO TE DE DOBLE
-		else
-			-- Perdió racha
-			currentStreak = 1
-			player:SetAttribute("DailyClaimed", false) -- <--- AGREGAR ESTO
-			-- BORRA LA LÍNEA QUE DABA DINERO AUTOMÁTICO AQUÍ
+		-- [[ CORRECCIÓN: RACHA DESACTIVADA AQUÍ ]] 
+		-- La racha ahora la maneja EXCLUSIVAMENTE DailySystem_V2 para evitar conflictos.
+		-- Solo cargamos valores pasivos si existen.
+		if not player:GetAttribute("CurrentStreak") then
+			player:SetAttribute("CurrentStreak", data.CurrentStreak or 1)
 		end
-
-		player:SetAttribute("CurrentStreak", currentStreak)
-		player:SetAttribute("LastLoginDay", today)
 
 		local ownedSkins = data.OwnedSkins or {"Classic"}
 		for _, skinName in ipairs(ownedSkins) do
