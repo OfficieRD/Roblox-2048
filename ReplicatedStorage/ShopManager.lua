@@ -248,19 +248,18 @@ function ShopManager.populateCurrency()
 	} 
 
 	local diamondProducts = {
-
-		{Amount="20", Robux=15, ProductId=3467196622, Icon=ICON_DIAMOND},
-
-		{Amount="120", Robux=59, ProductId=3467197662, Icon=ICON_DIAMOND},
-
-		{Amount="300", Robux=149, ProductId=3467197871, Icon=ICON_DIAMOND},
-
-		{Amount="550", Robux=259, ProductId=3467281064, Icon=ICON_DIAMOND},
-
-		{Amount="1,200", Robux=479, ProductId=3467281907, Icon=ICON_DIAMOND},
-
-		{Amount="2,500", Robux=899, ProductId=3467282191, Icon=ICON_DIAMOND}
-
+		-- Pequeño buff (Base)
+		{Amount="30", Robux=15, ProductId=3467196622, Icon=ICON_DIAMOND}, 
+		-- Buff notable
+		{Amount="150", Robux=59, ProductId=3467197662, Icon=ICON_DIAMOND}, 
+		-- Estrategia: Empieza a rentar más comprar este
+		{Amount="450", Robux=149, ProductId=3467197871, Icon=ICON_DIAMOND}, 
+		-- Valor alto
+		{Amount="900", Robux=259, ProductId=3467281064, Icon=ICON_DIAMOND}, 
+		-- Valor Muy alto (x2 comparado con el base en ratio)
+		{Amount="2,000", Robux=479, ProductId=3467281907, Icon=ICON_DIAMOND}, 
+		-- "Best Value" (Casi el doble del anterior original)
+		{Amount="4,500", Robux=899, ProductId=3467282191, Icon=ICON_DIAMOND}
 	}
 
 	local fruitProducts = {

@@ -440,35 +440,53 @@ GameData.MUSIC_PLAYLIST = {
 	{Id = "rbxassetid://1837070127", Name = "Deep Focus"}
 }
 
--- TABLA DE TÍTULOS (ACTUALIZADA CON STAFF Y ROBUX EXTRA)
+-- TABLA DE TÍTULOS (ACTUALIZADA Y ORDENADA)
 GameData.TITLES_DATA = {
-	-- === [MAIN] ===
-	{Name="Novice",   Category="Main", Desc="Play for the first time.", Req=0, Color=Color3.fromRGB(200,200,200), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(220,220,220)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,150,150))}},
-	{Name="Pro",      Category="Main", Desc="Reach 10,000 Score.",    Req=10000, Color=Color3.fromRGB(50,100,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(50,100,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,50,200))}},
-	{Name="Master",   Category="Main", Desc="Reach 100,000 Score.",   Req=100000, Color=Color3.fromRGB(255,50,50), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,50,50)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,0,0))}},
+	-- === [MAIN] (Ordenado por Dificultad) ===
+	{Name="Novice",      Category="Main", Desc="Play for the first time.", Req=0, Color=Color3.fromRGB(200,200,200), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(220,220,220)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,150,150))}},
+	{Name="Pro",         Category="Main", Desc="Reach 10,000 Score.",    Req=10000, Color=Color3.fromRGB(50,100,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(50,100,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,50,200))}},
+	{Name="Expert",      Category="Main", Desc="Reach 50,000 Score.",    Req=50000, Color=Color3.fromRGB(180, 50, 255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(180,50,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(100,0,180))}}, -- NUEVO
+	{Name="Master",      Category="Main", Desc="Reach 100,000 Score.",   Req=100000, Color=Color3.fromRGB(255,50,50), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,50,50)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,0,0))}},
+	{Name="Grandmaster", Category="Main", Desc="Reach 500,000 Score.",   Req=500000, Color=Color3.fromRGB(255,150,0), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,150,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,80,0))}}, -- NUEVO
+	{Name="Legend",      Category="Main", Desc="Reach 1,000,000 Score.", Req=1000000, Color=Color3.fromRGB(0,255,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(0,255,255)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255,255,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,200,255))}}, -- NUEVO
 
-	-- RACHAS
+	-- RACHAS (Dentro de Main)
 	{Name="Dedicated",   Category="Main", Desc="7 Day Login Streak.",  ReqAttribute="Streak7", Color=Color3.fromRGB(100,255,100), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(100,255,100)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,180,0))}},
 	{Name="Addicted",    Category="Main", Desc="30 Day Login Streak.", ReqAttribute="Streak30", Color=Color3.fromRGB(255,150,0), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,150,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,80,0))}},
 	{Name="Eternal",     Category="Main", Desc="100 Day Streak.",      ReqAttribute="Streak100", Color=Color3.fromRGB(255,0,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,255)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,255))}},
 
-	-- === [FRUITS] ===
-	{Name="Berry Picker",  Category="Fruits", Desc="Collect 500 Fruit Gems.",   ReqTotalGems=500, Color=Color3.fromRGB(255,100,150), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,150,180)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,50,100))}},
-	{Name="Fruit Ninja",   Category="Fruits", Desc="Collect 10,000 Fruit Gems.",ReqTotalGems=10000, Color=Color3.fromRGB(100,255,50), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(150,255,50)), ColorSequenceKeypoint.new(1, Color3.fromRGB(50,200,0))}},
-	{Name="Harvest King",  Category="Fruits", Desc="Collect 100k Fruit Gems.",  ReqTotalGems=100000, Color=Color3.fromRGB(255,215,0), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,215,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(50,200,50))}},
+	-- === [RICHES] (Divisa/Dinero/Frutas) ===
 
-	-- === [OTHERS] ===
-	{Name="VIP", Category="Others", Desc="Exclusive VIP Title.", IsVIP=true, Color=Color3.fromRGB(255, 200, 80), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromHex("FFC850")), ColorSequenceKeypoint.new(1, Color3.fromHex("FFF0B4"))}},
+	-- FRUTAS (Fruit Gems)
+	{Name="Berry Picker",  Category="Riches", Desc="Collect 1,000 Fruit Gems.", ReqTotalGems=1000, Color=Color3.fromRGB(255,100,150), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,150,180)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,50,100))}}, -- Buffeado a 1000
+	{Name="Collector",     Category="Riches", Desc="Collect 5,000 Fruit Gems.", ReqTotalGems=5000, Color=Color3.fromRGB(255,180,50), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,200,80)), ColorSequenceKeypoint.new(1, Color3.fromRGB(200,100,0))}}, -- Nuevo
+	{Name="Fruit Ninja",   Category="Riches", Desc="Collect 10,000 Fruit Gems.",ReqTotalGems=10000, Color=Color3.fromRGB(100,255,50), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(150,255,50)), ColorSequenceKeypoint.new(1, Color3.fromRGB(50,200,0))}},
+	{Name="Harvest King",  Category="Riches", Desc="Collect 100k Fruit Gems.",  ReqTotalGems=100000, Color=Color3.fromRGB(255,215,0), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,215,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(50,200,50))}},
 
-	-- NUEVOS DE ROBUX
-	{Name="Supporter", Category="Others", Desc="Spent 100+ Robux.", ReqRobux=100, Color=Color3.fromRGB(0,255,150), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(80,255,150)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,180,100))}},
-	{Name="Whale",     Category="Others", Desc="Spent 5,000+ Robux.", ReqRobux=5000, Color=Color3.fromRGB(0,255,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(0,255,255)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255,0,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,255))}},
+	-- MONEDAS (Coins)
+	{Name="Saver",         Category="Riches", Desc="Have 10,000 Coins.",       ReqCoins=10000, Color=Color3.fromRGB(200,200,100), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(220,220,150)), ColorSequenceKeypoint.new(1, Color3.fromRGB(180,180,50))}},
+	{Name="Banker",        Category="Riches", Desc="Have 100,000 Coins.",      ReqCoins=100000, Color=Color3.fromRGB(50,255,100), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(100,255,150)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,150,50))}},
+	{Name="Tycoon",        Category="Riches", Desc="Have 1,000,000 Coins.",    ReqCoins=1000000, Color=Color3.fromRGB(50,200,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(50,200,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,150))}},
+
+	-- DIAMANTES (Gems)
+	{Name="Shiny",         Category="Riches", Desc="Have 500 Gems.",           ReqGems=500, Color=Color3.fromRGB(100,240,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(200,250,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,200,255))}},
+	{Name="Gem Hunter",    Category="Riches", Desc="Have 2,000 Gems.",         ReqGems=2000, Color=Color3.fromRGB(0,150,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(0,180,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,200))}},
+	{Name="Rich",          Category="Riches", Desc="Have 10,000 Gems.",        ReqGems=10000, Color=Color3.fromRGB(255,0,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,100,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,0,150))}},
+	-- === [OTHERS] (Ordenado por tipo) ===
+
+	-- ESPECIALES (Tester, VIP)
+	{Name="Tester",    Category="Others", Desc="Beta Tester.",         ReqAttribute="IsTester", Color=Color3.fromRGB(0,200,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(0,255,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,150,200))}}, -- NUEVO
+	{Name="VIP",       Category="Others", Desc="Exclusive VIP Title.", IsVIP=true, Color=Color3.fromRGB(255, 200, 80), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromHex("FFC850")), ColorSequenceKeypoint.new(1, Color3.fromHex("FFF0B4"))}},
+
+	-- ROBUX SPENT
+	{Name="Supporter", Category="Others", Desc="Spent 100+ Robux.",    ReqRobux=100, Color=Color3.fromRGB(0,255,150), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(80,255,150)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,180,100))}},
+	{Name="Whale",     Category="Others", Desc="Spent 5,000+ Robux.",  ReqRobux=5000, Color=Color3.fromRGB(0,255,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(0,255,255)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255,0,255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,255))}},
 	{Name="Leviathan", Category="Others", Desc="Spent 50,000+ Robux.", ReqRobux=50000, Color=Color3.fromRGB(100,0,255), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(150,0,255)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,0,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,0,255))}},
 
-	-- NUEVOS DE STAFF
-	{Name="Mod",   Category="Others", Desc="Community Moderator.", ReqAttribute="IsMod", Color=Color3.fromRGB(50,200,100), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(0,255,100)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,100,50))}},
-	{Name="Admin", Category="Others", Desc="Game Administrator.",  ReqAttribute="IsAdmin", Color=Color3.fromRGB(255,50,50), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,80,80)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,0,0))}},
-	{Name="Owner", Category="Others", Desc="Game Creator.",        ReqAttribute="IsOwner", Color=Color3.fromRGB(255,0,0), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(100,0,0))}}
+	-- STAFF (Al final)
+	{Name="Mod",       Category="Others", Desc="Community Moderator.", ReqAttribute="IsMod", Color=Color3.fromRGB(50,200,100), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(0,255,100)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0,100,50))}},
+	{Name="Admin",     Category="Others", Desc="Game Administrator.",  ReqAttribute="IsAdmin", Color=Color3.fromRGB(255,50,50), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,80,80)), ColorSequenceKeypoint.new(1, Color3.fromRGB(150,0,0))}},
+	{Name="Owner",     Category="Others", Desc="Game Creator.",        ReqAttribute="IsOwner", Color=Color3.fromRGB(255,0,0), Gradient=ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(100,0,0))}}
 }
 
 return GameData
