@@ -573,7 +573,7 @@ do
 			populateTitlesList() -- Recarga la lista con la nueva categoría
 		end)
 	end
-	createTab("MAIN", "Main"); createTab("FRUITS", "Fruits"); createTab("OTHERS", "Others")
+	createTab("MAIN", "Main"); createTab("RICHES", "Riches"); createTab("OTHERS", "Others")
 
 	-- LISTAS
 	LeftPanel = Instance.new("ScrollingFrame", TitlesFrame)
@@ -1971,6 +1971,19 @@ local function checkIsUnlocked(data)
 		return total >= data.ReqRobux
 	end
 
+	--  NUEVO: Chequeo Monedas (Total)
+	if data.ReqCoins then
+		local total = player:GetAttribute("TotalCoins") or 0
+		return total >= data.ReqCoins
+	end
+
+	--  NUEVO: Chequeo Gemas (Actuales)
+	if data.ReqGems then
+		local leaderstats = player:FindFirstChild("leaderstats")
+		local current = (leaderstats and leaderstats:FindFirstChild("Diamonds")) and leaderstats.Diamonds.Value or 0
+		return current >= data.ReqGems
+	end
+
 	-- 6. Chequeo Score Normal (Main)
 	if data.Req then
 		-- ARREGLO NOVICE: Si requiere 0 puntos, siempre es true
@@ -2165,12 +2178,17 @@ toggleMenu = function(frameToToggle)
 	else
 		-- SI ESTÁ CERRADO -> ABRIR (Y CERRAR LOS DEMÁS)
 
-		-- Cerrar Shop, Titles, Settings, Leaderboard, Stats
-		if ShopFrame.Visible then UIUtils.closeMenuWithAnim(ShopFrame) end
-		if TitlesFrame.Visible then UIUtils.closeMenuWithAnim(TitlesFrame) end
-		if SettingsFrame.Visible then UIUtils.closeMenuWithAnim(SettingsFrame) end
-		if LeaderboardFrame.Visible then UIUtils.closeMenuWithAnim(LeaderboardFrame) end
-		if StatsFrame.Visible then UIUtils.closeMenuWithAnim(StatsFrame) end
+		-- Cerrar todos los menús
+		if ShopFrame and ShopFrame.Visible then UIUtils.closeMenuWithAnim(ShopFrame) end
+		if TitlesFrame and TitlesFrame.Visible then UIUtils.closeMenuWithAnim(TitlesFrame) end
+		if SettingsFrame and SettingsFrame.Visible then UIUtils.closeMenuWithAnim(SettingsFrame) end
+		if LeaderboardFrame and LeaderboardFrame.Visible then UIUtils.closeMenuWithAnim(LeaderboardFrame) end
+		if StatsFrame and StatsFrame.Visible then UIUtils.closeMenuWithAnim(StatsFrame) end
+
+		-- ? AGREGADO: CERRAR CÓDIGOS AUTOMÁTICAMENTE
+		if CodesFrame and CodesFrame.Visible and frameToToggle ~= CodesFrame then 
+			UIUtils.closeMenuWithAnim(CodesFrame) 
+		end
 
 		-- ? IMPORTANTE: Cerrar Daily si está abierto y estamos abriendo otra cosa
 		if DailyFrame and DailyFrame.Visible and frameToToggle ~= DailyFrame then 
@@ -2801,3 +2819,17 @@ RedeemBtn.MouseButton1Click:Connect(function()
 		RedeemBtn.Text = "REDEEM"
 	end
 end)
+
+-------------------------------------------------------------------------
+-- LISTENER DE SKIN (FIX FINAL)
+-- Esto actualiza el tablero automáticamente cuando el Servidor carga tus datos
+-------------------------------------------------------------------------
+if player then
+	player:GetAttributeChangedSignal("CurrentSkin"):Connect(function()
+		-- Llamamos a la función de pintar (debe existir en el script)
+		if applySkinColors then
+			applySkinColors()
+			print("?? Skin actualizada visualmente por carga de datos.")
+		end
+	end)
+end
