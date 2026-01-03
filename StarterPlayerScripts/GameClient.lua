@@ -362,93 +362,139 @@ txtStroke.Color = Color3.new(0,0,0)
 
 
 
--- [[ CREACIÓN DE LA VENTANA DE RECOMPENSAS (CORREGIDA) ]] --
+-- [[ 1. CREACIÓN UI DAILY REWARDS (VERSIÓN ÚNICA Y FINAL) ]] --
+
+-- Destruir si ya existe para evitar duplicados al reiniciar script
+if ScreenGui:FindFirstChild("DailyRewardsFrame") then
+	ScreenGui.DailyRewardsFrame:Destroy()
+end
+
 local DailyFrame = Instance.new("Frame", ScreenGui)
 DailyFrame.Name = "DailyRewardsFrame"
 DailyFrame.Size = UDim2.new(0.8, 0, 0.8, 0)
 DailyFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 DailyFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-DailyFrame.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
+DailyFrame.BackgroundColor3 = Color3.fromRGB(30, 32, 40)
 DailyFrame.Visible = false
-DailyFrame.ZIndex = 1400
+DailyFrame.ZIndex = 2000 
 Instance.new("UICorner", DailyFrame).CornerRadius = UDim.new(0, 15)
 Instance.new("UIStroke", DailyFrame).Color = Color3.fromRGB(255, 200, 50); Instance.new("UIStroke", DailyFrame).Thickness = 4
 
-local DailyTitle = Instance.new("TextLabel", DailyFrame); DailyTitle.Text = "DAILY REWARDS"; DailyTitle.Size = UDim2.new(1, 0, 0.1, 0); DailyTitle.BackgroundTransparency = 1; DailyTitle.TextColor3 = Color3.new(1,1,1); DailyTitle.Font = Enum.Font.FredokaOne; DailyTitle.TextScaled = true; DailyTitle.Parent = DailyFrame
+-- Título
+local DailyTitle = Instance.new("TextLabel", DailyFrame); DailyTitle.Text = "DAILY REWARDS"; DailyTitle.Size = UDim2.new(1, 0, 0.1, 0); DailyTitle.BackgroundTransparency = 1; DailyTitle.TextColor3 = Color3.new(1,1,1); DailyTitle.Font = Enum.Font.FredokaOne; DailyTitle.TextScaled = true; DailyTitle.Parent = DailyFrame; DailyTitle.ZIndex = 2005
 
-local DailyClose = Instance.new("TextButton", DailyFrame); DailyClose.Text = "X"; DailyClose.Size = UDim2.new(0.08, 0, 0.08, 0); DailyClose.Position = UDim2.new(0.98, 0, 0.02, 0); DailyClose.AnchorPoint = Vector2.new(1, 0); DailyClose.BackgroundColor3 = Color3.fromRGB(255, 80, 80); DailyClose.TextColor3 = Color3.new(1,1,1); DailyClose.Font = Enum.Font.FredokaOne; DailyClose.TextScaled = true; Instance.new("UICorner", DailyClose).CornerRadius = UDim.new(0, 8)
+-- Cartel VIP
+local VipStatusLabel = Instance.new("TextLabel", DailyFrame)
+VipStatusLabel.Text = "?? VIP: x2 REWARDS! ??"
+VipStatusLabel.Size = UDim2.new(1, 0, 0.05, 0)
+VipStatusLabel.Position = UDim2.new(0, 0, 0.11, 0)
+VipStatusLabel.BackgroundTransparency = 1
+VipStatusLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+VipStatusLabel.Font = Enum.Font.GothamBlack
+VipStatusLabel.TextScaled = true
+VipStatusLabel.Visible = false 
+VipStatusLabel.ZIndex = 2005
 
--- [[ CORRECCIÓN 1: SCROLL CON TAMAÑO AUTOMÁTICO ]] --
+-- SCROLL (ZINDEX 2005)
 local DailyScroll = Instance.new("ScrollingFrame", DailyFrame)
-DailyScroll.Name = "Container" -- El Manager necesita este nombre
-DailyScroll.Size = UDim2.new(0.95, 0, 0.85, 0)
-DailyScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-DailyScroll.CanvasSize = UDim2.new(0,0,0,0)
-DailyScroll.Position = UDim2.new(0.5, 0, 0.55, 0)
+DailyScroll.Name = "Container"
+DailyScroll.Size = UDim2.new(0.95, 0, 0.8, 0)
+DailyScroll.Position = UDim2.new(0.5, 0, 0.58, 0)
 DailyScroll.AnchorPoint = Vector2.new(0.5, 0.5)
 DailyScroll.BackgroundTransparency = 1
-DailyScroll.ScrollBarThickness = 6
+DailyScroll.ScrollBarThickness = 8
+DailyScroll.CanvasSize = UDim2.new(0,0,0,1200) -- TAMAÑO FIJO GRANDE PARA QUE BAJE SI O SI
+DailyScroll.ZIndex = 2005 
 
--- ?? ESTO ES LO QUE FALTABA PARA QUE SE VEAN LOS BOTONES:
-DailyScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y 
-DailyScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-
--- El Layout se mantiene igual
 local DailyLayout = Instance.new("UIGridLayout", DailyScroll)
 DailyLayout.CellSize = UDim2.new(0.18, 0, 0, 110)
 DailyLayout.CellPadding = UDim2.new(0.02, 0, 0.02, 0)
 DailyLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+DailyLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+-- Botón Cerrar
+local DailyClose = Instance.new("TextButton", DailyFrame); DailyClose.Text = "X"; DailyClose.Size = UDim2.new(0.08, 0, 0.08, 0); DailyClose.Position = UDim2.new(0.98, 0, 0.02, 0); DailyClose.AnchorPoint = Vector2.new(1, 0); DailyClose.BackgroundColor3 = Color3.fromRGB(255, 80, 80); DailyClose.TextColor3 = Color3.new(1,1,1); DailyClose.Font = Enum.Font.FredokaOne; DailyClose.TextScaled = true; Instance.new("UICorner", DailyClose).CornerRadius = UDim.new(0, 8); DailyClose.ZIndex = 2010
 
--- ? VENTANA DE CÓDIGOS (Más pequeña y corregida)
-local CodesFrame = Instance.new("Frame", ScreenGui)
-CodesFrame.Name = "CodesFrame"
-CodesFrame.Size = UDim2.new(0.4, 0, 0.3, 0) -- Tamaño reducido
-CodesFrame.Position = UDim2.new(0.5, 0, 0.5, 0); CodesFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-CodesFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 40); CodesFrame.Visible = false; CodesFrame.ZIndex = 1600
-Instance.new("UICorner", CodesFrame).CornerRadius = UDim.new(0, 12)
-Instance.new("UIStroke", CodesFrame).Color = Color3.fromRGB(0, 255, 150); Instance.new("UIStroke", CodesFrame).Thickness = 3
+-- ENCONTRAR BOTÓN DEL MENÚ (AUTO-FIX)
+local foundButton = ScreenGui:FindFirstChild("DailyRewardBtn", true) or ScreenGui:FindFirstChild("DailyButton", true) or ScreenGui:FindFirstChild("CalendarBtn", true) or DailyButton
 
-local CTitle = Instance.new("TextLabel", CodesFrame); CTitle.Text = "REDEEM CODES"; CTitle.Size = UDim2.new(1,0,0.25,0); CTitle.BackgroundTransparency=1; CTitle.TextColor3=Color3.new(1,1,1); CTitle.Font=Enum.Font.FredokaOne; CTitle.TextScaled=true
-local CloseCodes = Instance.new("TextButton", CodesFrame); CloseCodes.Text = "X"; CloseCodes.Size = UDim2.new(0.12, 0, 0.15, 0); CloseCodes.Position = UDim2.new(0.98, 0, 0.05, 0); CloseCodes.AnchorPoint=Vector2.new(1,0); CloseCodes.BackgroundColor3=Color3.fromRGB(255,80,80); CloseCodes.TextColor3=Color3.new(1,1,1); CloseCodes.Font=Enum.Font.FredokaOne; CloseCodes.TextScaled=true; Instance.new("UICorner", CloseCodes).CornerRadius = UDim.new(0, 6)
+-- INICIALIZAR
+if DailyRewardsManager then
+	DailyRewardsManager.init(UIUtils, DailyScroll, DailyFrame, foundButton, VIP_GAMEPASS_ID, toggleMenuButtons)
+end
 
-local CodeInput = Instance.new("TextBox", CodesFrame); CodeInput.PlaceholderText = "Enter Code..."; CodeInput.Size = UDim2.new(0.8, 0, 0.25, 0); CodeInput.Position = UDim2.new(0.1, 0, 0.35, 0); CodeInput.BackgroundColor3 = Color3.fromRGB(60, 60, 65); CodeInput.TextColor3 = Color3.new(1,1,1); CodeInput.Font = Enum.Font.GothamBold; CodeInput.TextScaled = true; Instance.new("UICorner", CodeInput).CornerRadius = UDim.new(0, 8)
-local RedeemBtn = Instance.new("TextButton", CodesFrame); RedeemBtn.Text = "REDEEM"; RedeemBtn.Size = UDim2.new(0.5, 0, 0.2, 0); RedeemBtn.Position = UDim2.new(0.25, 0, 0.7, 0); RedeemBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100); RedeemBtn.TextColor3 = Color3.new(1,1,1); RedeemBtn.Font = Enum.Font.GothamBlack; RedeemBtn.TextScaled = true; Instance.new("UICorner", RedeemBtn).CornerRadius = UDim.new(0, 8)
+-- CONEXIÓN CIERRE
+DailyClose.MouseButton1Click:Connect(function()
+	UIUtils.playClick()
+	UIUtils.closeMenuWithAnim(DailyFrame)
+	toggleMenuButtons(true)
+end)
 
--- ? SOLUCIÓN AL ERROR 424 Y DOBLE CLICK:
-if CodesButton then
-	CodesButton.MouseButton1Click:Connect(function()
-		if toggleMenu then toggleMenu(CodesFrame) end -- Usa la lógica maestra
+-- CONEXIÓN APERTURA
+if foundButton then
+	foundButton.MouseButton1Click:Connect(function()
+		UIUtils.playClick()
+		DailyRewardsManager.open()
 	end)
 end
 
-CloseCodes.MouseButton1Click:Connect(function()
-	if toggleMenu then toggleMenu(CodesFrame) end
-end)
-
--- LÓGICA LOCAL DE CÓDIGOS
-CloseCodes.MouseButton1Click:Connect(function() UIUtils.closeMenuWithAnim(CodesFrame); toggleMenuButtons(true) end)
-
--- LÓGICA DE CANJEAR CÓDIGO (AGREGAR ESTO)
-RedeemBtn.MouseButton1Click:Connect(function()
-	UIUtils.playClick()
-	local text = CodeInput.Text
-	if text == "" then return end
-
-	RedeemBtn.Text = "Checking..."
-
-	-- Usamos el NUEVO nombre del remoto
-	local remote = ReplicatedStorage:WaitForChild("Daily_Redeem", 5)
-
-	if remote then
-		local result = remote:InvokeServer(text)
-		RedeemBtn.Text = result -- Muestra "Success!" o "Invalid"
-		task.wait(2)
-		RedeemBtn.Text = "REDEEM"
-	else
-		RedeemBtn.Text = "Error"
+-- Bucle VIP
+task.spawn(function()
+	while true do
+		if player and VipStatusLabel then
+			local hasVip = player:GetAttribute("PassOwned_" .. VIP_GAMEPASS_ID) or localSessionPasses[VIP_GAMEPASS_ID]
+			VipStatusLabel.Visible = (hasVip == true)
+		end
+		task.wait(1)
 	end
 end)
+
+-- Definimos la variable global para evitar errores
+local CloseCodes 
+
+local CodesFrame = Instance.new("Frame", ScreenGui)
+CodesFrame.Name = "CodesFrame"
+CodesFrame.Size = UDim2.new(0.35, 0, 0.35, 0) 
+CodesFrame.Position = UDim2.new(0.5, 0, 0.5, 0); CodesFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+CodesFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35); CodesFrame.Visible = false; CodesFrame.ZIndex = 1600
+Instance.new("UICorner", CodesFrame).CornerRadius = UDim.new(0, 15)
+local cfStroke = Instance.new("UIStroke", CodesFrame); cfStroke.Color = Color3.fromRGB(0, 255, 150); cfStroke.Thickness = 3
+
+-- Título
+local CTitle = Instance.new("TextLabel", CodesFrame)
+CTitle.Text = "REDEEM CODES"; CTitle.Size = UDim2.new(1,0,0.2,0); CTitle.Position = UDim2.new(0,0,0.05,0)
+CTitle.BackgroundTransparency=1; CTitle.TextColor3=Color3.new(1,1,1); CTitle.Font=Enum.Font.FredokaOne; CTitle.TextScaled=true
+CTitle.ZIndex = 1601
+
+-- Texto de Like + Favorite
+local InfoLabel = Instance.new("TextLabel", CodesFrame)
+InfoLabel.Text = "? Favorite + ?? Like for 1,000 coins!"
+InfoLabel.Size = UDim2.new(0.9, 0, 0.1, 0); InfoLabel.Position = UDim2.new(0.05, 0, 0.25, 0)
+InfoLabel.BackgroundTransparency = 1; InfoLabel.TextColor3 = Color3.fromRGB(255, 255, 100); InfoLabel.Font = Enum.Font.GothamBold; InfoLabel.TextScaled = true
+InfoLabel.ZIndex = 1601
+
+-- Botón Cerrar
+CloseCodes = Instance.new("TextButton", CodesFrame)
+CloseCodes.Text = "X"; CloseCodes.Size = UDim2.new(0.12, 0, 0.12, 0); CloseCodes.Position = UDim2.new(0.98, 0, 0.02, 0)
+CloseCodes.AnchorPoint=Vector2.new(1,0); CloseCodes.BackgroundColor3=Color3.fromRGB(255,80,80); CloseCodes.TextColor3=Color3.new(1,1,1)
+CloseCodes.Font=Enum.Font.FredokaOne; CloseCodes.TextScaled=true; Instance.new("UICorner", CloseCodes).CornerRadius = UDim.new(0, 8)
+CloseCodes.ZIndex = 1602
+
+-- EL INPUT BOX (CUADRO DE TEXTO) - ¡AQUÍ ESTÁ!
+local CodeInput = Instance.new("TextBox", CodesFrame)
+CodeInput.Name = "CodeInput"
+CodeInput.Text = ""; CodeInput.PlaceholderText = "ENTER CODE HERE..."
+CodeInput.Size = UDim2.new(0.8, 0, 0.18, 0); CodeInput.Position = UDim2.new(0.1, 0, 0.45, 0)
+CodeInput.BackgroundColor3 = Color3.fromRGB(50, 50, 55); CodeInput.TextColor3 = Color3.new(1,1,1)
+CodeInput.Font = Enum.Font.GothamBold; CodeInput.TextScaled = true; CodeInput.ZIndex = 1602
+Instance.new("UICorner", CodeInput).CornerRadius = UDim.new(0, 8)
+
+-- Botón Canjear
+local RedeemBtn = Instance.new("TextButton", CodesFrame)
+RedeemBtn.Text = "REDEEM"; RedeemBtn.Size = UDim2.new(0.5, 0, 0.18, 0); RedeemBtn.Position = UDim2.new(0.25, 0, 0.72, 0)
+RedeemBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100); RedeemBtn.TextColor3 = Color3.new(1,1,1)
+RedeemBtn.Font = Enum.Font.GothamBlack; RedeemBtn.TextScaled = true; RedeemBtn.ZIndex = 1602
+Instance.new("UICorner", RedeemBtn).CornerRadius = UDim.new(0, 8)
 
 -- ?? INICIAR MÚSICA (RESTAURADO) ??
 if MusicManager then
@@ -2599,21 +2645,38 @@ RunService.Stepped:Connect(function()
 end)
 
 -- CONEXIÓN DE LA X (DAILY REWARDS)
-if DailyClose then 
-	DailyClose.MouseButton1Click:Connect(function()
-		-- 1. Reproducir sonido click
-		UIUtils.playClick()
-		-- 2. Cerrar la ventana con animación
-		UIUtils.closeMenuWithAnim(DailyFrame)
-		-- 3. IMPORTANTE: Volver a mostrar los botones del menú (Play, Leaderboard, etc)
-		toggleMenuButtons(true) 
-	end) 
+-- [[ 1. ARREGLO DEL ORDEN (Daily Rewards) ]] --
+local DailyScroll = Instance.new("ScrollingFrame", DailyFrame)
+DailyScroll.Name = "Container"
+DailyScroll.Size = UDim2.new(0.95, 0, 0.85, 0)
+DailyScroll.Position = UDim2.new(0.5, 0, 0.55, 0)
+DailyScroll.AnchorPoint = Vector2.new(0.5, 0.5)
+DailyScroll.BackgroundTransparency = 1
+DailyScroll.ScrollBarThickness = 6
+DailyScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+DailyScroll.CanvasSize = UDim2.new(0,0,0,0)
+
+local DailyLayout = Instance.new("UIGridLayout", DailyScroll)
+DailyLayout.CellSize = UDim2.new(0.18, 0, 0, 110)
+DailyLayout.CellPadding = UDim2.new(0.02, 0, 0.02, 0)
+DailyLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+-- !! ESTA ES LA LÍNEA QUE ARREGLA EL DESORDEN !!
+DailyLayout.SortOrder = Enum.SortOrder.LayoutOrder 
+
+-- (El resto del código de inicialización del Manager sigue igual...)
+if DailyRewardsManager then
+	DailyRewardsManager.init(UIUtils, DailyScroll, DailyFrame, DailyButton, VIP_GAMEPASS_ID, toggleMenuButtons)
+	-- ... (Tus conexiones de botones) ...
 end
--- LOAD LOOP & UI UPDATE (CORREGIDO Y FUSIONADO)
+
+
+-- [[ 2. ARREGLO DEL FUEGO EVOLUTIVO (Pégalo al final del script) ]] --
+-- Reemplaza tu bloque 'task.spawn(function() ... end)' del final por este:
+
 task.spawn(function()
 	local startTime = tick()
 	while true do
-		-- 1. PANTALLA DE CARGA
+		-- PANTALLA DE CARGA
 		if loadingActive then
 			local elapsed = tick() - startTime; local progress = math.clamp(elapsed / TOTAL_LOAD_TIME, 0, 1)
 			if LoadingBarFill then LoadingBarFill.Size = UDim2.new(progress, 0, 1, 0) end
@@ -2621,72 +2684,61 @@ task.spawn(function()
 			if elapsed >= TOTAL_LOAD_TIME then loadingActive = false; showMenu() end
 		end
 
-		-- 2. ACTUALIZACIÓN DE UI
+		-- ACTUALIZACIÓN UI
 		if player then
 			local ls = player:FindFirstChild("leaderstats")
 			if ls then
+				-- Actualizar monedas...
 				local c = ls:FindFirstChild("Coins") and ls.Coins.Value or 0
 				local d = ls:FindFirstChild("Diamonds") and ls.Diamonds.Value or 0
 				local f = ls:FindFirstChild("FruitGems") and ls.FruitGems.Value or 0
 				local sc, sd, sf = formatNumber(c), formatNumber(d), formatNumber(f)
 
-				-- Actualizar etiquetas
-				if CoinLabel then CoinLabel.Text = sc end       -- Monedas
-				if FruitLabel then FruitLabel.Text = sd end     -- Diamantes (Variable vieja)
-				if FruitGemLabel then FruitGemLabel.Text = sf end -- Frutas (Nueva)
+				if CoinLabel then CoinLabel.Text = sc end
+				if FruitLabel then FruitLabel.Text = sd end
+				if FruitGemLabel then FruitGemLabel.Text = sf end
 				if MenuCoinLbl then MenuCoinLbl.Text = sc end; if MenuGemLbl then MenuGemLbl.Text = sd end; if MenuFruitLbl then MenuFruitLbl.Text = sf end
 				if ShopRefs.CoinLbl then ShopRefs.CoinLbl.Text = sc end; if ShopRefs.GemLbl then ShopRefs.GemLbl.Text = sd end; if ShopRefs.FruitLbl then ShopRefs.FruitLbl.Text = sf end
 
+				-- >>> LÓGICA DEL FUEGO DE RACHA (ACTUALIZADA) <<<
+				local currentStreak = player:GetAttribute("CurrentStreak") or 1
 
-				-- ? ACTUALIZAR CALENDARIO DORADO (VIP)
-				-- Revisamos si tenemos el VIP en cache o en atributo
+				-- 1. Número
+				if StreakNumMenu then StreakNumMenu.Text = tostring(currentStreak) end
+
+				-- 2. Icono Evolutivo
+				if StreakBadge then
+					if currentStreak >= 150 then
+						StreakBadge.Image = "rbxassetid://132241895741787" -- Morado (150+)
+					elseif currentStreak >= 50 then
+						StreakBadge.Image = "rbxassetid://85252887341379" -- Verde (50-149)
+					else
+						StreakBadge.Image = "rbxassetid://134763959761180" -- Rojo (1-49)
+					end
+				end
+
+				-- BOTÓN CALENDARIO (Dorado si es VIP)
 				local hasVip = player:GetAttribute("PassOwned_" .. tostring(VIP_GAMEPASS_ID)) or localSessionPasses[VIP_GAMEPASS_ID] == true
-
-				-- Si no está detectado, intentamos una vez leerlo de la API (sin spamear)
 				if not hasVip and not player:GetAttribute("CheckedVipOnce") then
 					player:SetAttribute("CheckedVipOnce", true)
-					task.spawn(function()
-						local s, r = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, VIP_GAMEPASS_ID) end)
-						if s and r then 
-							localSessionPasses[VIP_GAMEPASS_ID] = true 
-						end
-					end)
+					task.spawn(function() pcall(function() if MarketplaceService:UserOwnsGamePassAsync(player.UserId, VIP_GAMEPASS_ID) then localSessionPasses[VIP_GAMEPASS_ID] = true end end) end)
 				end
+				if hasVip then DailyButton.Image = "rbxassetid://80848827945021" else DailyButton.Image = "rbxassetid://86257281348163" end
 
-				-- Aplicar imagen si encontramos el VIP
-				-- ? CORRECCIÓN: Usar 'hasVip' que ya calculaste arriba (incluye atributos guardados)
-				if hasVip then
-					DailyButton.Image = "rbxassetid://80848827945021" -- Dorado
-				else
-					DailyButton.Image = "rbxassetid://86257281348163" -- Azul Normal
-				end
-
-				-- NIVEL Y XP
+				-- BARRA DE NIVEL
 				if ls:FindFirstChild("Level") then
 					local lvl = ls.Level.Value
 					if LevelNumLabel then LevelNumLabel.Text = tostring(lvl) end
-
-					local cur = player:GetAttribute("CurrentXP") or 0
-					local max = player:GetAttribute("MaxXP") or 500
+					local cur, max = player:GetAttribute("CurrentXP") or 0, player:GetAttribute("MaxXP") or 500
 					local pct = math.clamp(cur / max, 0, 1)
-
-					-- Barra Azul
-					if LevelBarFill then 
-						TweenService:Create(LevelBarFill, TweenInfo.new(0.2), {Size = UDim2.new(pct, 0, 1, 0)}):Play() 
-					end
-
-					-- ? TEXTO COMBINADO: "59% | 0 / 1434 XP"
-					if LevelProgressText then 
-						local percentText = math.floor(pct * 100) .. "%"
-						local xpText = formatNumber(cur) .. " / " .. formatNumber(max) .. " XP"
-						LevelProgressText.Text = percentText .. " | " .. xpText
-					end
+					if LevelBarFill then TweenService:Create(LevelBarFill, TweenInfo.new(0.2), {Size = UDim2.new(pct, 0, 1, 0)}):Play() end
+					if LevelProgressText then LevelProgressText.Text = math.floor(pct * 100) .. "% | " .. formatNumber(cur) .. " / " .. formatNumber(max) .. " XP" end
 				end
 			end
 		end
-		task.wait(0.2)
-	end -- CIERRE DEL WHILE
-end) -- CIERRE DEL TASK.SPAWN
+		task.wait(0.5)
+	end
+end)
 
 -- ==========================================================
 -- ? VIGILANTE DE SKIN (AHORA SÍ EN UBICACIÓN CORRECTA)
@@ -2741,3 +2793,16 @@ if CloseCodes then
 		if toggleMenu and CodesFrame then toggleMenu(CodesFrame) end
 	end)
 end
+
+RedeemBtn.MouseButton1Click:Connect(function()
+	UIUtils.playClick()
+	local code = CodeInput.Text
+	if code ~= "" then
+		RedeemBtn.Text = "Checking..."
+		-- Llama al servidor y espera la respuesta (Texto)
+		local result = ReplicatedStorage:WaitForChild("Daily_Redeem"):InvokeServer(code)
+		RedeemBtn.Text = result
+		task.wait(2)
+		RedeemBtn.Text = "REDEEM"
+	end
+end)
