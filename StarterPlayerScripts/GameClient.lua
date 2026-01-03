@@ -362,92 +362,94 @@ txtStroke.Color = Color3.new(0,0,0)
 
 
 
--- [[ 1. CREACIÓN UI DAILY REWARDS (VERSIÓN ÚNICA Y FINAL) ]] --
+-- [[ 1. CREACIÓN UI DAILY REWARDS (OPTIMIZADO - FIX MEMORIA) ]] --
 
--- Destruir si ya existe para evitar duplicados al reiniciar script
-if ScreenGui:FindFirstChild("DailyRewardsFrame") then
-	ScreenGui.DailyRewardsFrame:Destroy()
-end
+-- Declaramos variables para que sean visibles al final del script
+local DailyFrame, DailyScroll 
 
-local DailyFrame = Instance.new("Frame", ScreenGui)
-DailyFrame.Name = "DailyRewardsFrame"
-DailyFrame.Size = UDim2.new(0.8, 0, 0.8, 0)
-DailyFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-DailyFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-DailyFrame.BackgroundColor3 = Color3.fromRGB(30, 32, 40)
-DailyFrame.Visible = false
-DailyFrame.ZIndex = 2000 
-Instance.new("UICorner", DailyFrame).CornerRadius = UDim.new(0, 15)
-Instance.new("UIStroke", DailyFrame).Color = Color3.fromRGB(255, 200, 50); Instance.new("UIStroke", DailyFrame).Thickness = 4
+do -- INICIO BLOQUE DE MEMORIA (Esto arregla el error "Limit 200")
+	if ScreenGui:FindFirstChild("DailyRewardsFrame") then
+		ScreenGui.DailyRewardsFrame:Destroy()
+	end
 
--- Título
-local DailyTitle = Instance.new("TextLabel", DailyFrame); DailyTitle.Text = "DAILY REWARDS"; DailyTitle.Size = UDim2.new(1, 0, 0.1, 0); DailyTitle.BackgroundTransparency = 1; DailyTitle.TextColor3 = Color3.new(1,1,1); DailyTitle.Font = Enum.Font.FredokaOne; DailyTitle.TextScaled = true; DailyTitle.Parent = DailyFrame; DailyTitle.ZIndex = 2005
+	DailyFrame = Instance.new("Frame", ScreenGui)
+	DailyFrame.Name = "DailyRewardsFrame"
+	DailyFrame.Size = UDim2.new(0.8, 0, 0.8, 0)
+	DailyFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+	DailyFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+	DailyFrame.BackgroundColor3 = Color3.fromRGB(30, 32, 40)
+	DailyFrame.Visible = false
+	DailyFrame.ZIndex = 2000 
+	Instance.new("UICorner", DailyFrame).CornerRadius = UDim.new(0, 15)
+	Instance.new("UIStroke", DailyFrame).Color = Color3.fromRGB(255, 200, 50); Instance.new("UIStroke", DailyFrame).Thickness = 4
 
--- Cartel VIP
-local VipStatusLabel = Instance.new("TextLabel", DailyFrame)
-VipStatusLabel.Text = "?? VIP: x2 REWARDS! ??"
-VipStatusLabel.Size = UDim2.new(1, 0, 0.05, 0)
-VipStatusLabel.Position = UDim2.new(0, 0, 0.11, 0)
-VipStatusLabel.BackgroundTransparency = 1
-VipStatusLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
-VipStatusLabel.Font = Enum.Font.GothamBlack
-VipStatusLabel.TextScaled = true
-VipStatusLabel.Visible = false 
-VipStatusLabel.ZIndex = 2005
+	-- Variables locales temporales (se borran de la memoria al terminar el bloque)
+	local DailyTitle = Instance.new("TextLabel", DailyFrame); DailyTitle.Text = "DAILY REWARDS"; DailyTitle.Size = UDim2.new(1, 0, 0.1, 0); DailyTitle.BackgroundTransparency = 1; DailyTitle.TextColor3 = Color3.new(1,1,1); DailyTitle.Font = Enum.Font.FredokaOne; DailyTitle.TextScaled = true; DailyTitle.Parent = DailyFrame; DailyTitle.ZIndex = 2005
 
--- SCROLL (ZINDEX 2005)
-local DailyScroll = Instance.new("ScrollingFrame", DailyFrame)
-DailyScroll.Name = "Container"
-DailyScroll.Size = UDim2.new(0.95, 0, 0.8, 0)
-DailyScroll.Position = UDim2.new(0.5, 0, 0.58, 0)
-DailyScroll.AnchorPoint = Vector2.new(0.5, 0.5)
-DailyScroll.BackgroundTransparency = 1
-DailyScroll.ScrollBarThickness = 8
-DailyScroll.CanvasSize = UDim2.new(0,0,0,1200) -- TAMAÑO FIJO GRANDE PARA QUE BAJE SI O SI
-DailyScroll.ZIndex = 2005 
+	local VipStatusLabel = Instance.new("TextLabel", DailyFrame)
+	VipStatusLabel.Text = "?? VIP: x2 REWARDS! ??"
+	VipStatusLabel.Size = UDim2.new(1, 0, 0.05, 0); VipStatusLabel.Position = UDim2.new(0, 0, 0.11, 0); VipStatusLabel.BackgroundTransparency = 1; VipStatusLabel.TextColor3 = Color3.fromRGB(255, 215, 0); VipStatusLabel.Font = Enum.Font.GothamBlack; VipStatusLabel.TextScaled = true; VipStatusLabel.Visible = false; VipStatusLabel.ZIndex = 2005
 
-local DailyLayout = Instance.new("UIGridLayout", DailyScroll)
-DailyLayout.CellSize = UDim2.new(0.18, 0, 0, 110)
-DailyLayout.CellPadding = UDim2.new(0.02, 0, 0.02, 0)
-DailyLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-DailyLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	-- Bucle VIP Local
+	task.spawn(function()
+		while true do
+			if player and VipStatusLabel then
+				local hasVip = player:GetAttribute("PassOwned_" .. VIP_GAMEPASS_ID) or localSessionPasses[VIP_GAMEPASS_ID]
+				VipStatusLabel.Visible = (hasVip == true)
+			end
+			task.wait(1)
+		end
+	end)
 
--- Botón Cerrar
-local DailyClose = Instance.new("TextButton", DailyFrame); DailyClose.Text = "X"; DailyClose.Size = UDim2.new(0.08, 0, 0.08, 0); DailyClose.Position = UDim2.new(0.98, 0, 0.02, 0); DailyClose.AnchorPoint = Vector2.new(1, 0); DailyClose.BackgroundColor3 = Color3.fromRGB(255, 80, 80); DailyClose.TextColor3 = Color3.new(1,1,1); DailyClose.Font = Enum.Font.FredokaOne; DailyClose.TextScaled = true; Instance.new("UICorner", DailyClose).CornerRadius = UDim.new(0, 8); DailyClose.ZIndex = 2010
+	DailyScroll = Instance.new("ScrollingFrame", DailyFrame)
+	DailyScroll.Name = "Container"
+	DailyScroll.Size = UDim2.new(0.95, 0, 0.8, 0)
+	DailyScroll.Position = UDim2.new(0.5, 0, 0.58, 0)
+	DailyScroll.AnchorPoint = Vector2.new(0.5, 0.5)
+	DailyScroll.BackgroundTransparency = 1
+	DailyScroll.ScrollBarThickness = 8
+	-- ARREGLO DE SCROLL: Tamaño 0 + Automático
+	DailyScroll.CanvasSize = UDim2.new(0,0,0,0) 
+	DailyScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	DailyScroll.ZIndex = 2005 
 
--- ENCONTRAR BOTÓN DEL MENÚ (AUTO-FIX)
-local foundButton = ScreenGui:FindFirstChild("DailyRewardBtn", true) or ScreenGui:FindFirstChild("DailyButton", true) or ScreenGui:FindFirstChild("CalendarBtn", true) or DailyButton
+	local DailyLayout = Instance.new("UIGridLayout", DailyScroll)
+	DailyLayout.CellSize = UDim2.new(0.18, 0, 0, 110)
+	DailyLayout.CellPadding = UDim2.new(0.02, 0, 0.02, 0)
+	DailyLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	DailyLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- INICIALIZAR
-if DailyRewardsManager then
-	DailyRewardsManager.init(UIUtils, DailyScroll, DailyFrame, foundButton, VIP_GAMEPASS_ID, toggleMenuButtons)
-end
+	local DailyClose = Instance.new("TextButton", DailyFrame); DailyClose.Text = "X"; DailyClose.Size = UDim2.new(0.08, 0, 0.08, 0); DailyClose.Position = UDim2.new(0.98, 0, 0.02, 0); DailyClose.AnchorPoint = Vector2.new(1, 0); DailyClose.BackgroundColor3 = Color3.fromRGB(255, 80, 80); DailyClose.TextColor3 = Color3.new(1,1,1); DailyClose.Font = Enum.Font.FredokaOne; DailyClose.TextScaled = true; Instance.new("UICorner", DailyClose).CornerRadius = UDim.new(0, 8); DailyClose.ZIndex = 2010
 
--- CONEXIÓN CIERRE
+	-- CONEXIÓN CIERRE (ARREGLADO DEFINITIVO)
 DailyClose.MouseButton1Click:Connect(function()
 	UIUtils.playClick()
 	UIUtils.closeMenuWithAnim(DailyFrame)
-	toggleMenuButtons(true)
-end)
-
--- CONEXIÓN APERTURA
-if foundButton then
-	foundButton.MouseButton1Click:Connect(function()
-		UIUtils.playClick()
-		DailyRewardsManager.open()
-	end)
-end
-
--- Bucle VIP
-task.spawn(function()
-	while true do
-		if player and VipStatusLabel then
-			local hasVip = player:GetAttribute("PassOwned_" .. VIP_GAMEPASS_ID) or localSessionPasses[VIP_GAMEPASS_ID]
-			VipStatusLabel.Visible = (hasVip == true)
+	
+	-- Lógica blindada: Si no estamos jugando, forzamos mostrar los botones
+	if MainFrame and not MainFrame.Visible then
+		-- Intentamos usar la función estándar
+		if toggleMenuButtons then
+			toggleMenuButtons(true)
+		else
+			-- FALLBACK MANUAL: Si la función falla, encendemos los botones directamente
+			if PlayButton then PlayButton.Visible = true end
+			if LeaderboardButton then LeaderboardButton.Visible = true end
+			if MenuTitle then MenuTitle.Visible = true end
+			if ScreenGui:FindFirstChild("GlobalStats") then ScreenGui.GlobalStats.Visible = true end
 		end
-		task.wait(1)
 	end
 end)
+
+	-- Botón de apertura
+	local foundButton = ScreenGui:FindFirstChild("DailyRewardBtn", true) or ScreenGui:FindFirstChild("DailyButton", true) or ScreenGui:FindFirstChild("CalendarBtn", true) or DailyButton
+	if foundButton then
+		foundButton.MouseButton1Click:Connect(function()
+			UIUtils.playClick()
+			DailyRewardsManager.open()
+		end)
+	end
+end -- FIN DEL BLOQUE DE MEMORIA
 
 -- Definimos la variable global para evitar errores
 local CloseCodes 
@@ -523,6 +525,8 @@ local ShopRefs = {}
 local toggleMenuButtons = nil 
 local toggleMenu = nil 
 local skinChangeCallback = nil
+local applySkinColors = nil -- ?? AGREGADO PARA CORREGIR ERROR 434
+local redrawBoard = nil    -- ?? AGREGADO POR SEGURIDAD
 
 local ShopFrame, ShopRefs = ShopManager.init(ScreenGui, VIP_GAMEPASS_ID)
 
@@ -1425,7 +1429,7 @@ local function createTile(r, c, val, isSpawnAnim)
 	return t
 end
 
-local function redrawBoard(mergedMap)
+redrawBoard = function(mergedMap) -- ?? QUITAMOS "local function"
 	clearVisuals()
 
 	-- Protección 1: Verificar datos lógicos
@@ -1450,7 +1454,7 @@ end
 
 
 -- CAMBIAR COLORES (FONDO Y SKIN)
-applySkinColors = function() -- ? Quitamos 'local' y asignamos a la variable de arriba
+applySkinColors = function() -- ?? Asegúrate que NO tenga "local" al principio
 	local theme = THEMES[currentSkin] or THEMES["Classic"]
 
 	BOARD_COLOR = theme.Board or Color3.fromRGB(200,200,200)
@@ -2140,17 +2144,15 @@ end
 -- ? PASO 2: INICIALIZAR EL MANAGER DE RECOMPENSAS
 -- (Esto conecta el script nuevo con tu interfaz existente)
 -------------------------------------------------------------------------
-if DailyRewardsManager then
-	-- Argumentos: (UIUtils, El Scroll, El Frame, El Botón del Menú, ID del VIP, Función para ocultar botones)
-	DailyRewardsManager.init(
-		UIUtils, 
-		DailyScroll, 
-		DailyFrame, 
-		DailyButton, 
-		VIP_GAMEPASS_ID, 
-		toggleMenuButtons
-	)
-	print("? DailyRewardsManager inicializado en el Cliente")
+-- [[ INICIALIZACIÓN FINAL DEL DAILY REWARDS ]] --
+-- Lo ponemos al final para asegurar que 'toggleMenuButtons' existe.
+if DailyRewardsManager and DailyScroll then
+	-- Ajuste del Scroll: Usamos AutomaticSize para que no baje al infinito si hay pocos días
+	DailyScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	DailyScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+	DailyRewardsManager.init(UIUtils, DailyScroll, DailyFrame, DailyButton, VIP_GAMEPASS_ID, toggleMenuButtons)
+	print("? DailyRewardsManager inicializado correctamente")
 end
 
 -- LÓGICA DE MENÚS (CORREGIDA PARA CALENDARIO)
@@ -2662,13 +2664,6 @@ DailyLayout.CellPadding = UDim2.new(0.02, 0, 0.02, 0)
 DailyLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 -- !! ESTA ES LA LÍNEA QUE ARREGLA EL DESORDEN !!
 DailyLayout.SortOrder = Enum.SortOrder.LayoutOrder 
-
--- (El resto del código de inicialización del Manager sigue igual...)
-if DailyRewardsManager then
-	DailyRewardsManager.init(UIUtils, DailyScroll, DailyFrame, DailyButton, VIP_GAMEPASS_ID, toggleMenuButtons)
-	-- ... (Tus conexiones de botones) ...
-end
-
 
 -- [[ 2. ARREGLO DEL FUEGO EVOLUTIVO (Pégalo al final del script) ]] --
 -- Reemplaza tu bloque 'task.spawn(function() ... end)' del final por este:
