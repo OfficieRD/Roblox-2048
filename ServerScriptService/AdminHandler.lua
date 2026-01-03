@@ -141,7 +141,7 @@ AdminEvent.OnServerEvent:Connect(function(player, action, targetName, value)
 
 			-- Ajustar la XP Máxima para que la barra no se rompa visualmente
 			targetPlayer:SetAttribute("CurrentXP", 0) 
-			targetPlayer:SetAttribute("MaxXP", newLvl * 500) 
+			targetPlayer:SetAttribute("MaxXP", newLvl * 1500) -- ? CORREGIDO: Multiplicador x1500 (Dificultad x3)
 
 			print("?? Admin: Nivel cambiado a " .. newLvl .. " para " .. targetPlayer.Name)
 		end
@@ -150,7 +150,7 @@ AdminEvent.OnServerEvent:Connect(function(player, action, targetName, value)
 		if leaderstats then
 			leaderstats.Level.Value = 1
 			targetPlayer:SetAttribute("CurrentXP", 0)
-			targetPlayer:SetAttribute("MaxXP", 500) 
+			targetPlayer:SetAttribute("MaxXP", 1500) -- ? CORREGIDO: Base x1500
 			print("?? Nivel reseteado a 1 para " .. targetPlayer.Name)
 		end
 

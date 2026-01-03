@@ -14,12 +14,12 @@ local PRODUCTS = {
 	[3467196400] = {Type = "Coins", Amount = 100000},
 
 	-- DIAMANTES
-	[3467196622] = {Type = "Diamonds", Amount = 20},
-	[3467197662] = {Type = "Diamonds", Amount = 120},
-	[3467197871] = {Type = "Diamonds", Amount = 300},
-	[3467281064] = {Type = "Diamonds", Amount = 550},
-	[3467281907] = {Type = "Diamonds", Amount = 1200},
-	[3467282191] = {Type = "Diamonds", Amount = 2500},
+	[3467196622] = {Type = "Diamonds", Amount = 30},
+	[3467197662] = {Type = "Diamonds", Amount = 150},
+	[3467197871] = {Type = "Diamonds", Amount = 450},
+	[3467281064] = {Type = "Diamonds", Amount = 900},
+	[3467281907] = {Type = "Diamonds", Amount = 2000},
+	[3467282191] = {Type = "Diamonds", Amount = 4500},
 
 	-- FRUIT GEMS
 	[3467282831] = {Type = "FruitGems", Amount = 500},

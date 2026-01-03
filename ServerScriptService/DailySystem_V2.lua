@@ -33,41 +33,43 @@ Players.PlayerAdded:Connect(function(player)
 
 	local streak = 1
 	local lastClaimDay = 0
+	local lastLoginDay = 0 -- Nuevo: Para controlar logins consecutivos sin reclamar
 	local usedCodes = "[]"
 
 	if s and data then
 		streak = data.Streak or 1
-		lastClaimDay = data.LastClaimDayID or 0 
+		lastClaimDay = data.LastClaimDayID or 0
+		lastLoginDay = data.LastLoginDayID or 0
 		usedCodes = data.UsedCodes or "[]"
 	end
 
 	local currentDay = getCurrentDayID()
+
+	-- LÓGICA DE LOGIN CONSECUTIVO (Entrar seguido)
+	-- Solo actualizamos la racha si es la PRIMERA vez que entras hoy.
+	if lastLoginDay ~= currentDay then
+		if lastLoginDay == (currentDay - 1) then
+			-- Entraste ayer -> Sumamos racha
+			streak = streak + 1
+		elseif lastLoginDay < (currentDay - 1) then
+			-- No entraste ayer -> Racha rota, reinicio a 1
+			-- (Excepción: si es jugador nuevo lastLoginDay es 0, streak se queda en 1)
+			if lastLoginDay ~= 0 then streak = 1 end
+		end
+		-- Si lastLoginDay == currentDay, no hacemos nada (ya se calculó hoy)
+	end
+
+	-- LÓGICA DE RECLAMO (Daily Reward)
 	local canClaim = false
-
-	-- LÓGICA MAESTRA DE RACHAS:
-	if lastClaimDay == currentDay then
-		-- CASO A: Ya reclamó hoy.
-		-- La racha se queda igual. No puede reclamar.
-		canClaim = false
-
-	elseif lastClaimDay == (currentDay - 1) then
-		-- CASO B: Reclamó ayer. Hoy es un nuevo día consecutivo.
-		-- ¡AQUÍ ES DONDE SUBIMOS LA RACHA! (De 5 pasamos a 6 para hoy)
-		streak = streak + 1 
-		canClaim = true
-
-	else
-		-- CASO C: No reclamó ayer (perdió racha) o es nuevo.
-		-- Reiniciamos a día 1.
-		-- (Excepción: Si es nuevo lastClaimDay es 0, streak ya es 1)
-		if lastClaimDay ~= 0 then streak = 1 end
-		canClaim = true
+	if lastClaimDay ~= currentDay then
+		canClaim = true -- Si no has reclamado hoy, puedes hacerlo
 	end
 
 	-- Guardamos atributos para el Cliente
 	player:SetAttribute("CurrentStreak", streak)
 	player:SetAttribute("LastClaimDayID", lastClaimDay)
-	player:SetAttribute("DailyClaimed", not canClaim) -- Si puede reclamar, DailyClaimed es false
+	player:SetAttribute("LastLoginDayID", currentDay) -- Marcamos que ya entraste hoy
+	player:SetAttribute("DailyClaimed", not canClaim)
 	player:SetAttribute("UsedCodes", usedCodes)
 end)
 
@@ -76,6 +78,7 @@ local function saveData(player)
 	local d = {
 		Streak = player:GetAttribute("CurrentStreak") or 1, 
 		LastClaimDayID = player:GetAttribute("LastClaimDayID") or 0, 
+		LastLoginDayID = player:GetAttribute("LastLoginDayID") or 0, -- Guardamos el login de hoy
 		UsedCodes = player:GetAttribute("UsedCodes") or "[]"
 	}
 	pcall(function() MyDataStore:SetAsync(player.UserId, d) end)

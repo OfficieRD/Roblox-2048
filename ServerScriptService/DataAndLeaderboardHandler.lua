@@ -103,133 +103,127 @@ local ITEM_PRICES = {
 }
 local sessionJoinTime = {}
 
--------------------------------------------------------------------------
--- FUNCIÓN DE GUARDADO (Centralizada)
--------------------------------------------------------------------------
-local function savePlayerData(player)
-	if not player:FindFirstChild("leaderstats") then return end
 
-	-- Evitar guardar dos veces si ya se procesó
-	if player:GetAttribute("DataSaved") then return end
-	player:SetAttribute("DataSaved", true)
 
-	local leaderstats = player.leaderstats
-	local sessionTime = os.time() - (sessionJoinTime[player.UserId] or os.time())
-	local totalTime = (player:GetAttribute("TimePlayedSaved") or 0) + sessionTime
+	-------------------------------------------------------------------------
+	-- FUNCIÓN DE GUARDADO (CORREGIDA Y CON DEBUG)
+	-------------------------------------------------------------------------
+	local function savePlayerData(player)
+		if not player:FindFirstChild("leaderstats") then return end
 
-	-- Guardar Skins
-	local ownedSkins = {}
-	for name, _ in pairs(ITEM_PRICES) do
-		local safeName = string.gsub(name, " ", "")
-		if player:GetAttribute("OwnedSkin_" .. safeName) == true then table.insert(ownedSkins, name) end
-	end
+		-- Evitar guardar dos veces
+		if player:GetAttribute("DataSaved") then return end
+		player:SetAttribute("DataSaved", true)
 
-	-- Recompensas Reclamadas
-	local claimedRewardsList = {}
-	for i = 1, 50 do
-		if player:GetAttribute("ClaimedLevelReward_" .. i) == true then
-			table.insert(claimedRewardsList, i)
+		print("?? Intentando guardar datos de: " .. player.Name)
+
+		local leaderstats = player.leaderstats
+		local sessionTime = os.time() - (sessionJoinTime[player.UserId] or os.time())
+		local totalTime = (player:GetAttribute("TimePlayedSaved") or 0) + sessionTime
+
+		-- 1. Recolectar Skins Compradas
+		local ownedSkins = {}
+		for name, _ in pairs(ITEM_PRICES) do
+			local safeName = string.gsub(name, " ", "")
+			if player:GetAttribute("OwnedSkin_" .. safeName) == true then table.insert(ownedSkins, name) end
 		end
-	end
 
-	-- ? RECOLECTAR GAMEPASSES (Para Player1/Studio)
-	local savedPasses = {}
-	for attrName, val in pairs(player:GetAttributes()) do
-		if string.sub(attrName, 1, 10) == "PassOwned_" and val == true then
-			local id = tonumber(string.sub(attrName, 11))
-			if id then table.insert(savedPasses, id) end
+		-- 2. Recolectar GamePasses
+		local savedPasses = {}
+		for attrName, val in pairs(player:GetAttributes()) do
+			if string.sub(attrName, 1, 10) == "PassOwned_" and val == true then
+				local id = tonumber(string.sub(attrName, 11))
+				if id then table.insert(savedPasses, id) end
+			end
 		end
-	end
-	
-	
 
-	-- DATOS A GUARDAR
-	local data = {
-		SavedGamePasses = savedPasses,
+	-- 3. DETECTAR SKIN ACTUAL (BLINDADO)
+	-- Si el jugador tiene "CurrentSkin", ESE es el que vale.
+	local current = player:GetAttribute("CurrentSkin")
 
-		-- 1. COSMÉTICOS
-		EquippedSkin = player:GetAttribute("CurrentSkin") or "Classic",
-		EquippedTitle = player:GetAttribute("EquippedTitle") or "Novice",
+	-- Validación extra: Si es nil o string vacío, intentamos recuperar el guardado anterior
+	local skinToSave = (current and current ~= "") and current or player:GetAttribute("EquippedSkin") or "Classic"
 
-		-- 2. CONFIGURACIÓN (SETTINGS) - ¡ESTO ES LO CRÍTICO!
-		Setting_Music = player:GetAttribute("SavedVolMusic"),
-		Setting_SFX = player:GetAttribute("SavedVolSFX"),
-		Setting_DarkMode = player:GetAttribute("SavedDarkMode"),
-		Setting_ShowXP = player:GetAttribute("SavedShowXP"),
+		print("?? GUARDANDO SKIN: " .. tostring(skinToSave)) -- MENSAJE CLAVE
 
-		-- 3. ESTADÍSTICAS
-		Coins = leaderstats.Coins.Value,
-		FruitGems = leaderstats.FruitGems.Value,
-		Diamonds = leaderstats.Diamonds.Value,
-		HighScore = leaderstats.HighScore.Value,
-		Level = leaderstats.Level.Value,
+		-- 4. DATOS A GUARDAR
+		local data = {
+			SavedGamePasses = savedPasses,
 
-		-- 4. ACUMULADOS
-		CurrentXP = player:GetAttribute("CurrentXP"),
-		TotalFruitGems = player:GetAttribute("TotalFruitGems"),
-		TotalCoins = player:GetAttribute("TotalCoins"),
-		TotalRobuxSpent = player:GetAttribute("TotalRobuxSpent"),
-		GamesPlayed = player:GetAttribute("GamesPlayed"),
-		TimePlayed = player:GetAttribute("TimePlayedSaved"),
-		HighScore5x5 = player:GetAttribute("HighScore5x5"),
-		Undos = player:GetAttribute("Undos"),
-		CurrentStreak = player:GetAttribute("CurrentStreak") or 0,
-		LastLoginDay = player:GetAttribute("LastLoginDay") or 0,
-		LastClaimedDay = player:GetAttribute("LastClaimedDay") or 0,
+			-- Cosméticos
+			EquippedSkin = skinToSave, -- Aquí guardamos el valor correcto
+			EquippedTitle = player:GetAttribute("EquippedTitle") or "Novice",
+			OwnedSkins = ownedSkins,
 
-		OwnedSkins = ownedSkins,
-		ClaimedLevelRewards = claimedRewardsList,
+			-- Settings
+			Setting_Music = player:GetAttribute("SavedVolMusic"),
+			Setting_SFX = player:GetAttribute("SavedVolSFX"),
+			Setting_DarkMode = player:GetAttribute("SavedDarkMode"),
+			Setting_ShowXP = player:GetAttribute("SavedShowXP"),
 
-		-- ? NUEVO: GUARDAR TÍTULOS OBTENIDOS
-		UnlockedTitles = (function()
-			local t = {}
-			for attrName, val in pairs(player:GetAttributes()) do
-				if string.sub(attrName, 1, 6) == "Title_" and val == true then table.insert(t, attrName) end
+			-- Estadísticas
+			Coins = leaderstats.Coins.Value,
+			FruitGems = leaderstats.FruitGems.Value,
+			Diamonds = leaderstats.Diamonds.Value,
+			HighScore = leaderstats.HighScore.Value,
+			Level = leaderstats.Level.Value,
+
+			-- Acumulados
+			CurrentXP = player:GetAttribute("CurrentXP"),
+			TotalFruitGems = player:GetAttribute("TotalFruitGems"),
+			TotalCoins = player:GetAttribute("TotalCoins"),
+			TotalRobuxSpent = player:GetAttribute("TotalRobuxSpent"),
+			GamesPlayed = player:GetAttribute("GamesPlayed"),
+			TimePlayed = totalTime,
+			HighScore5x5 = player:GetAttribute("HighScore5x5"),
+			Undos = player:GetAttribute("Undos"),
+
+			-- Daily
+			CurrentStreak = player:GetAttribute("CurrentStreak") or 1,
+			LastLoginDay = player:GetAttribute("LastLoginDay") or 0,
+			LastClaimedDay = player:GetAttribute("LastClaimedDay") or 0,
+
+			-- Listas
+			ClaimedLevelRewards = (function()
+				local t = {}
+				for i=1,50 do if player:GetAttribute("ClaimedLevelReward_"..i) then table.insert(t,i) end end
+				return t
+			end)(),
+
+			UnlockedTitles = (function()
+				local t = {}
+				for n,v in pairs(player:GetAttributes()) do if string.sub(n,1,6)=="Title_" and v then table.insert(t,n) end end
+				return t
+			end)(),
+
+			RedeemedCodes = (function()
+				local t = {}
+				for n,v in pairs(player:GetAttributes()) do if string.sub(n,1,13)=="CodeRedeemed_" and v then table.insert(t,n) end end
+				return t
+			end)(),
+		}
+
+		-- 5. INTENTO DE GUARDADO
+		local success, err
+		for i = 1, 3 do
+			success, err = pcall(function()
+				PlayerDataStore:SetAsync(player.UserId, data)
+			end)
+			if success then 
+				print("? Datos guardados correctamente para " .. player.Name)
+				break 
 			end
-			return t
-		end)(),
+			warn("?? Fallo guardado (Intento "..i.."): " .. tostring(err))
+			task.wait(1)
+		end
 
-		-- ? GUARDAR CÓDIGOS CANJEADOS
-		RedeemedCodes = (function()
-			local t = {}
-			for attrName, val in pairs(player:GetAttributes()) do
-				if string.sub(attrName, 1, 13) == "CodeRedeemed_" and val == true then table.insert(t, attrName) end
-			end
-			return t
-		end)(),
-
-		-- CONFIGURACIÓN (Settings)
-		VolMusic = player:GetAttribute("SavedVolMusic"),
-		VolSFX = player:GetAttribute("SavedVolSFX"),
-		IsDarkMode = player:GetAttribute("SavedDarkMode")
-	}
-
-	-- Intentar guardar con reintentos
-	local success, err
-	for i = 1, 3 do
-		success, err = pcall(function()
-			PlayerDataStore:SetAsync(player.UserId, data)
+		-- Actualizar Leaderboards (Sin cambios aquí)
+		pcall(function()
+			HighScoreStore:UpdateAsync(player.UserId, function(o) return math.max(tonumber(o)or 0, leaderstats.HighScore.Value) end)
+			TimePlayedStore:UpdateAsync(player.UserId, function(o) return math.max(tonumber(o)or 0, totalTime) end)
+			StreakStore:UpdateAsync(player.UserId, function(o) return player:GetAttribute("CurrentStreak") or 0 end)
 		end)
-		if success then break end
-		task.wait(1)
 	end
-
-	if not success then warn("Error guardando datos de " .. player.Name .. ": " .. tostring(err)) end
-
-	-- Leaderboards
-	HighScoreStore:UpdateAsync(player.UserId, function(old) 
-		return math.max(tonumber(old) or 0, leaderstats.HighScore.Value) 
-	end)
-
-	TimePlayedStore:UpdateAsync(player.UserId, function(old) 
-		return math.max(tonumber(old) or 0, totalTime) 
-	end)
-
-	-- ? GUARDAR EN LEADERBOARD DE RACHAS
-	StreakStore:UpdateAsync(player.UserId, function(old)
-		return player:GetAttribute("CurrentStreak") or 0
-	end)
-end
 
 -------------------------------------------------------------------------
 -- CARGA DE DATOS
@@ -256,8 +250,20 @@ local function playerAdded(player)
 		levelValue.Value = data.Level or 1
 		diamondsValue.Value = data.Diamonds or 0
 
-		-- ? CARGAR COSMÉTICOS
-		player:SetAttribute("CurrentSkin", data.EquippedSkin or "Classic")
+		-- ? CARGAR COSMÉTICOS (Versión Final Blindada)
+		-- Leemos EquippedSkin (donde guardamos al salir) o CurrentSkin (respaldo)
+		local loadedSkin = data.EquippedSkin or data.CurrentSkin or "Classic"
+
+		print("?? CARGANDO SKIN PARA " .. player.Name .. ": " .. tostring(loadedSkin))
+
+		-- TRUCO: Seteamos a nil primero para forzar el evento de cambio si ya estaba puesto
+		player:SetAttribute("CurrentSkin", nil) 
+		task.wait() -- Pequeña pausa técnica
+		player:SetAttribute("CurrentSkin", loadedSkin)
+
+		-- También actualizamos EquippedSkin para mantener coherencia interna
+		player:SetAttribute("EquippedSkin", loadedSkin)
+
 		player:SetAttribute("EquippedTitle", data.EquippedTitle or "Novice")
 
 		-- 2. CARGAR SETTINGS (NOMBRES CORREGIDOS)
@@ -281,10 +287,10 @@ local function playerAdded(player)
 			player:SetAttribute("SavedShowXP", true) -- Default encendido
 		end
 
-		player:SetAttribute("CurrentXP", data.CurrentXP or 0)
+		
 
 		player:SetAttribute("CurrentXP", data.CurrentXP or 0)
-		player:SetAttribute("MaxXP", (data.Level or 1) * 500)
+		player:SetAttribute("MaxXP", (data.Level or 1) * 1500) -- Dificultad x3
 		player:SetAttribute("TotalFruitGems", data.TotalFruitGems or 0)
 		player:SetAttribute("TotalCoins", data.TotalCoins or 0)
 		player:SetAttribute("TotalRobuxSpent", data.TotalRobuxSpent or 0)
@@ -294,22 +300,6 @@ local function playerAdded(player)
 		player:SetAttribute("Undos", data.Undos or 0)
 
 		-- ? LÓGICA DE RECOMPENSA DIARIA
-		local currentStreak = data.CurrentStreak or 0
-		local lastLoginDay = data.LastLoginDay or 0
-		local today = math.floor(os.time() / 86400) -- Día actual (número entero)
-
-		-- ?? LÓGICA CORREGIDA: NO MARCAR COMO RECLAMADO AUTOMÁTICAMENTE ??
-		local lastClaimedDay = data.LastClaimedDay or 0 -- Cargamos cuándo reclamó por última vez
-
-		if lastClaimedDay == today then
-			player:SetAttribute("DailyClaimed", true) -- Ya cobró hoy
-		else
-			player:SetAttribute("DailyClaimed", false) -- Aún no cobra hoy
-		end
-
-		-- [[ CORRECCIÓN: RACHA DESACTIVADA AQUÍ ]] 
-		-- La racha ahora la maneja EXCLUSIVAMENTE DailySystem_V2 para evitar conflictos.
-		-- Solo cargamos valores pasivos si existen.
 		if not player:GetAttribute("CurrentStreak") then
 			player:SetAttribute("CurrentStreak", data.CurrentStreak or 1)
 		end
@@ -425,8 +415,7 @@ if PurchaseEvent then
 	end)
 end
 
--- ? 2. NUEVO EVENTO: EQUIPAR SKIN (¡ESTO ES LO QUE FALTABA!)
--- Sin esto, el servidor nunca sabe qué skin llevas puesta.
+-- ? EVENTO EQUIPAR SKIN (DEBUGGING)
 local EquipSkinEvent = ReplicatedStorage:FindFirstChild("EquipSkin")
 if not EquipSkinEvent then
 	EquipSkinEvent = Instance.new("RemoteEvent")
@@ -435,38 +424,17 @@ if not EquipSkinEvent then
 end
 
 EquipSkinEvent.OnServerEvent:Connect(function(player, skinName)
-	-- Verificamos si tiene la skin antes de equiparla
 	local safeName = string.gsub(skinName, " ", "")
+	-- Validar propiedad
 	if skinName == "Classic" or player:GetAttribute("OwnedSkin_" .. safeName) == true then
-		player:SetAttribute("CurrentSkin", skinName)
-		print("?? Skin actualizada en servidor: " .. skinName)
+		-- ACTUALIZAR AMBOS (Para visualización Y guardado)
+		player:SetAttribute("CurrentSkin", skinName)  -- Lo ve el Cliente
+		player:SetAttribute("EquippedSkin", skinName) -- Lo usa el Guardado
+
+		print("? SERVER: Skin cambiada a " .. skinName)
+	else
+		warn("? SERVER: Intento de equipar skin no comprada: " .. skinName)
 	end
-end)
-
--- ? NUEVO EVENTO: Equipar Skin (Indispensable para guardar)
-local EquipSkinEvent = ReplicatedStorage:FindFirstChild("EquipSkin")
-if not EquipSkinEvent then
-	EquipSkinEvent = Instance.new("RemoteEvent", ReplicatedStorage)
-	EquipSkinEvent.Name = "EquipSkin"
-end
-
-EquipSkinEvent.OnServerEvent:Connect(function(player, skinName)
-	-- Guardamos el atributo INMEDIATAMENTE en el servidor
-	player:SetAttribute("CurrentSkin", skinName)
-end)
-
--- ? EVENTO SKIN: Escuchar cambio de skin
-local EquipSkinEvent = ReplicatedStorage:FindFirstChild("EquipSkin")
-if not EquipSkinEvent then
-	EquipSkinEvent = Instance.new("RemoteEvent")
-	EquipSkinEvent.Name = "EquipSkin"
-	EquipSkinEvent.Parent = ReplicatedStorage
-end
-
-EquipSkinEvent.OnServerEvent:Connect(function(player, skinName)
-	-- Guardamos el atributo INMEDIATAMENTE en el servidor
-	player:SetAttribute("CurrentSkin", skinName)
-	print("SERVER: Skin guardada temporalmente: " .. tostring(skinName))
 end)
 
 -- 4. Guardar Configuración (BLINDADO)
@@ -739,7 +707,7 @@ AddXPEvent.OnServerEvent:Connect(function(player, amount)
 		while currentXP >= maxXP do
 			currentXP = currentXP - maxXP
 			leaderstats.Level.Value += 1
-			maxXP = leaderstats.Level.Value * 500
+			maxXP = leaderstats.Level.Value * 1500 -- Dificultad x3
 		end
 	end
 	player:SetAttribute("CurrentXP", currentXP)
@@ -763,41 +731,69 @@ if AddFruitEvent then
 	end)
 end
 
--- ? 12. SISTEMA DE CÓDIGOS
+-- ? 12. SISTEMA DE CÓDIGOS ACTUALIZADO
 local RedeemCodeEvent = ReplicatedStorage:FindFirstChild("RedeemCode")
 if not RedeemCodeEvent then RedeemCodeEvent = Instance.new("RemoteEvent", ReplicatedStorage); RedeemCodeEvent.Name = "RedeemCode" end
 
+-- Tabla configurada para aceptar múltiples premios por código
 local ACTIVE_CODES = {
-	["WELCOME"] = {Reward="Coins", Amt=1000},
-	["2048"] = {Reward="Coins", Amt=2048},
-	["FRUITS"] = {Reward="FruitGems", Amt=500},
-	["DIAMONDS"] = {Reward="Diamonds", Amt=50}
+	["START2025"] = {
+		Rewards = { {Type="Coins", Amt=500} }
+	},
+	["RELEASE"] = { -- Reemplaza a POWERRANGERS
+		Rewards = { {Type="Coins", Amt=1000}, {Type="Diamonds", Amt=10} }
+	},
+	["VIP2048"] = {
+		Rewards = { {Type="Coins", Amt=2000}, {Type="Diamonds", Amt=50} }
+	},
+	["WELCOME"] = {
+		Rewards = { {Type="Coins", Amt=1000} }
+	},
+	["FRUITS"] = {
+		Rewards = { {Type="FruitGems", Amt=500} }
+	}
+	-- Eliminados LIKE y FAVORITE para evitar confusión
 }
 
 RedeemCodeEvent.OnServerEvent:Connect(function(player, code)
 	code = string.upper(code) -- Convertir a mayúsculas
-	local data = ACTIVE_CODES[code]
+	local codeData = ACTIVE_CODES[code]
 
-	if not data then return end -- Código inválido
+	if not codeData then return end -- Código inválido
 	if player:GetAttribute("CodeRedeemed_" .. code) == true then return end -- Ya usado
 
-	-- Dar premio
 	local ls = player:FindFirstChild("leaderstats")
-	if ls then
-		if data.Reward == "Coins" then
-			ls.Coins.Value += data.Amt
-			player:SetAttribute("TotalCoins", (player:GetAttribute("TotalCoins")or 0) + data.Amt)
-		elseif data.Reward == "Diamonds" then
-			ls.Diamonds.Value += data.Amt
-		elseif data.Reward == "FruitGems" then
-			ls.FruitGems.Value += data.Amt
-			player:SetAttribute("TotalFruitGems", (player:GetAttribute("TotalFruitGems")or 0) + data.Amt)
-		end
+	if not ls then return end
+	
+	-- Mensaje de lo que ganó (Para consola o futuro UI)
+	local rewardsText = ""
 
-		-- Marcar como usado y guardar
-		player:SetAttribute("CodeRedeemed_" .. code, true)
-		print("? Código canjeado: " .. code .. " por " .. player.Name)
+	-- Procesar TODOS los premios del código
+	for _, reward in pairs(codeData.Rewards) do
+		if reward.Type == "Coins" then
+			ls.Coins.Value += reward.Amt
+			player:SetAttribute("TotalCoins", (player:GetAttribute("TotalCoins")or 0) + reward.Amt)
+			rewardsText = rewardsText .. "+" .. reward.Amt .. " Coins "
+			
+		elseif reward.Type == "Diamonds" then
+			ls.Diamonds.Value += reward.Amt
+			
+			rewardsText = rewardsText .. "+" .. reward.Amt .. " Diamonds "
+			
+		elseif reward.Type == "FruitGems" then
+			ls.FruitGems.Value += reward.Amt
+			player:SetAttribute("TotalFruitGems", (player:GetAttribute("TotalFruitGems")or 0) + reward.Amt)
+			rewardsText = rewardsText .. "+" .. reward.Amt .. " Fruits "
+		end
 	end
+
+	-- Marcar como usado y guardar
+	player:SetAttribute("CodeRedeemed_" .. code, true)
+	print("? Código canjeado: " .. code .. " | Premios: " .. rewardsText)
+	
+	-- NOTA: Para que salga el texto "+2000 Coins" en la pantalla del jugador, 
+	-- necesitarías editar el script LOCAL (Client) que envía el código, ya que el servidor 
+	-- no controla la UI directamente. Pero con este cambio, los premios se suman correctamente.
 end)
 
 -- ? NUEVO EVENTO: GASTAR UNDO (OPTIMIZADO)
