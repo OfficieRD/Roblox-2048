@@ -7,8 +7,9 @@ local LeaderboardManager = {}
 local LbRefs = {} -- Referencias a objetos UI
 local LeaderboardFrame = nil
 
--- Variables de Tabs
+-- Variables de Control
 local currentLeaderboardTab = "HighScore"
+local isUpdating = false -- ? ANTI-SPAM
 local Tabs = {}
 
 function LeaderboardManager.init(ScreenGui)
@@ -280,6 +281,9 @@ function LeaderboardManager.updateUI(data, mode)
 end
 
 function LeaderboardManager.switchTab(tabName)
+	if isUpdating then return end -- ? SI YA ESTÁ CARGANDO, IGNORAR CLIC
+	isUpdating = true -- Bloquear
+
 	UIUtils.playClick()
 	currentLeaderboardTab = tabName
 
@@ -299,16 +303,23 @@ function LeaderboardManager.switchTab(tabName)
 		activeBtn.TextColor3 = Color3.new(0,0,0)
 	end
 
-	-- ? SOLICITUD AL SERVIDOR (AHORA FUNCIONA PARA TODO)
+	-- ? SOLICITUD AL SERVIDOR (PROTEGIDA)
 	local getScoresFunc = ReplicatedStorage:FindFirstChild("GetTopScores")
 	if getScoresFunc then
 		task.spawn(function()
 			-- Limpiar lista visualmente mientras carga
-			LeaderboardManager.updateUI({}, tabName)
+			LeaderboardManager.updateUI({}, tabName) -- Opcional: Puedes quitar esto si no quieres que parpadee en blanco
 
 			local data = getScoresFunc:InvokeServer(tabName)
-			if data then LeaderboardManager.updateUI(data, tabName) end
+			if data and currentLeaderboardTab == tabName then -- Solo actualizar si seguimos en la misma pestaña
+				LeaderboardManager.updateUI(data, tabName) 
+			end
+
+			task.wait(0.2) -- Pequeña espera extra
+			isUpdating = false -- ? DESBLOQUEAR
 		end)
+	else
+		isUpdating = false
 	end
 end
 

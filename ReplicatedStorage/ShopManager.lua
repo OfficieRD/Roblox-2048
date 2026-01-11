@@ -241,7 +241,7 @@ function ShopManager.populateCurrency()
 
 		{Amount="25,000", Robux=259, ProductId=3467195950, Icon=ICON_COIN},
 
-		{Amount="50,000", Robux=479, ProductId=9240572528, Icon=ICON_COIN},
+		{Amount="50,000", Robux=479, ProductId=3467196173, Icon=ICON_COIN},
 
 		{Amount="100,000", Robux=899, ProductId=3467196400, Icon=ICON_COIN}
 

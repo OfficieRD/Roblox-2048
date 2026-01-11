@@ -199,10 +199,17 @@ function SettingsManager.init(ScreenGui, menuFrame)
 		local v = Instance.new("TextLabel", row); v.Name = "ValueLabel"; v.Text = valText; v.Size = UDim2.new(0.4, 0, 1, 0); v.Position = UDim2.new(0.55, 0, 0, 0); v.BackgroundTransparency = 1; v.TextColor3 = Color3.new(1,1,1); v.Font = Enum.Font.GothamBold; v.TextXAlignment = Enum.TextXAlignment.Right; v.TextSize = 14
 	end
 	createStatRow("Games Played:", "Loading...")
+
+	-- 1. HIGH SCORES
 	createStatRow("High Score:", "Loading...")
+	createStatRow("High Score 5x5:", "Loading...") -- NUEVO: Justo abajo de High Score
+
+	-- 2. ECONOMÍA TOTAL
 	createStatRow("Total Coins:", "Loading...")
+	createStatRow("Total Diamonds:", "Loading...") -- NUEVO: Justo abajo de Total Coins
 	createStatRow("Total Fruit Gems:", "Loading...")
-	-- ? NUEVA FILA VISUAL AQUÍ
+
+	-- 3. EXTRAS
 	createStatRow("Robux Spent:", "Loading...") 
 	createStatRow("Titles Unlocked:", "Loading...")
 	createStatRow("Time Played:", "Loading...")
@@ -236,18 +243,20 @@ function SettingsManager.updateStats()
 				local nameLbl = frame:FindFirstChild("TextLabel"); local valLbl = frame:FindFirstChild("ValueLabel")
 				if nameLbl and valLbl then
 					if nameLbl.Text == "Games Played:" then valLbl.Text = formatNumber(stats.GamesPlayed) end
+
+					-- HIGH SCORES
 					if nameLbl.Text == "High Score:" then valLbl.Text = formatNumber(myBest) end
+					if nameLbl.Text == "High Score 5x5:" then valLbl.Text = formatNumber(stats.HighScore5x5) end -- NUEVO
+
+					-- ECONOMÍA
 					if nameLbl.Text == "Total Coins:" then valLbl.Text = formatNumber(stats.TotalCoins) end
+					if nameLbl.Text == "Total Diamonds:" then valLbl.Text = formatNumber(stats.TotalDiamonds) end -- NUEVO
 					if nameLbl.Text == "Total Fruit Gems:" then valLbl.Text = formatNumber(stats.TotalFruitGems) end
 
-					-- ? ACTUALIZAR EL VALOR DE ROBUX
+					-- EXTRAS
 					if nameLbl.Text == "Robux Spent:" then valLbl.Text = "R$ " .. formatNumber(stats.TotalRobuxSpent or 0) end
-
-					-- ? ACTUALIZAR EL VALOR DE TÍTULOS (Ahora real)
 					if nameLbl.Text == "Titles Unlocked:" then valLbl.Text = (stats.TitlesCount or 0) .. " Titles" end
-
 					if nameLbl.Text == "Time Played:" then valLbl.Text = formatTime(stats.TimePlayed) end
-					
 				end
 			end
 		end
