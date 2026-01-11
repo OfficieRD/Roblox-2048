@@ -3,6 +3,17 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MarketplaceService = game:GetService("MarketplaceService") -- ? ARREGLADO: Faltaba esta línea
 
+local MarketplaceService = game:GetService("MarketplaceService")
+
+-- ? PEGAR AQUÍ LA TABLA PARA QUE FUNCIONE LA DETECCIÓN
+local GAMEPASS_DATA = {
+	{Id = 1612413325, Price = 149, Name = "x2 Coins"},
+	{Id = 1613811032, Price = 249, Name = "x2 Gems"},
+	{Id = 1609347878, Price = 249, Name = "x2 XP"},
+	{Id = 1614668850, Price = 149, Name = "x2 Fruits"},
+	{Id = 1605082468, Price = 199, Name = "VIP"}
+}
+
 -- 1. CONFIGURACIÓN DE EVENTOS
 local ClaimLevelRewardEvent = ReplicatedStorage:FindFirstChild("ClaimLevelReward")
 if not ClaimLevelRewardEvent then
@@ -144,8 +155,6 @@ local sessionJoinTime = {}
 	-- Validación extra: Si es nil o string vacío, intentamos recuperar el guardado anterior
 	local skinToSave = (current and current ~= "") and current or player:GetAttribute("EquippedSkin") or "Classic"
 
-		print("?? GUARDANDO SKIN: " .. tostring(skinToSave)) -- MENSAJE CLAVE
-
 		-- 4. DATOS A GUARDAR
 		local data = {
 			SavedGamePasses = savedPasses,
@@ -210,10 +219,8 @@ local sessionJoinTime = {}
 				PlayerDataStore:SetAsync(player.UserId, data)
 			end)
 			if success then 
-				print("? Datos guardados correctamente para " .. player.Name)
 				break 
 			end
-			warn("?? Fallo guardado (Intento "..i.."): " .. tostring(err))
 			task.wait(1)
 		end
 
@@ -254,8 +261,6 @@ local function playerAdded(player)
 		-- Leemos EquippedSkin (donde guardamos al salir) o CurrentSkin (respaldo)
 		local loadedSkin = data.EquippedSkin or data.CurrentSkin or "Classic"
 
-		print("?? CARGANDO SKIN PARA " .. player.Name .. ": " .. tostring(loadedSkin))
-
 		-- TRUCO: Seteamos a nil primero para forzar el evento de cambio si ya estaba puesto
 		player:SetAttribute("CurrentSkin", nil) 
 		task.wait() -- Pequeña pausa técnica
@@ -293,6 +298,18 @@ local function playerAdded(player)
 		player:SetAttribute("MaxXP", (data.Level or 1) * 1500) -- Dificultad x3
 		player:SetAttribute("TotalFruitGems", data.TotalFruitGems or 0)
 		player:SetAttribute("TotalCoins", data.TotalCoins or 0)
+
+		-- ? CORRECCIÓN: Migración de Diamantes
+		-- Si el jugador ya tiene diamantes (data.Diamonds) pero el Total es 0 o nil,
+		-- igualamos el Total a los actuales para no perder el historial.
+		local savedTotal = data.TotalDiamonds or 0
+		local currentDiamonds = data.Diamonds or 0
+
+		if savedTotal < currentDiamonds then
+			savedTotal = currentDiamonds
+		end
+		player:SetAttribute("TotalDiamonds", savedTotal)
+
 		player:SetAttribute("TotalRobuxSpent", data.TotalRobuxSpent or 0)
 		player:SetAttribute("GamesPlayed", data.GamesPlayed or 0)
 		player:SetAttribute("TimePlayedSaved", data.TimePlayed or 0)
@@ -320,13 +337,39 @@ local function playerAdded(player)
 			for _, codeAttr in pairs(data.RedeemedCodes) do player:SetAttribute(codeAttr, true) end
 		end
 
-		-- ? CARGAR GAMEPASSES GUARDADOS (Fix Player1)
+		-- ? CARGAR GAMEPASSES GUARDADOS
 		if data.SavedGamePasses then
 			for _, passId in ipairs(data.SavedGamePasses) do
 				player:SetAttribute("PassOwned_" .. passId, true)
-				print("?? GamePass cargado: " .. passId)
 			end
 		end
+
+		-- ? [NUEVO] VERIFICACIÓN DE COMPRAS EXTERNAS (WEB/APP)
+		task.spawn(function()
+			for _, passInfo in ipairs(GAMEPASS_DATA) do
+				-- Solo verificamos si el juego NO sabe que lo tiene
+				if not player:GetAttribute("PassOwned_" .. passInfo.Id) then
+					local success, owns = pcall(function()
+						return MarketplaceService:UserOwnsGamePassAsync(player.UserId, passInfo.Id)
+					end)
+
+					if success and owns then
+						-- ¡Lo compró fuera del juego!
+						print("? Compra externa detectada: " .. passInfo.Name .. " (" .. player.Name .. ")")
+
+						-- 1. Marcar como poseído
+						player:SetAttribute("PassOwned_" .. passInfo.Id, true)
+
+						-- 2. Sumar al Total Robux Spent (Retroactivo)
+						local currentSpent = player:GetAttribute("TotalRobuxSpent") or 0
+						player:SetAttribute("TotalRobuxSpent", currentSpent + passInfo.Price)
+					end
+				end
+				task.wait(0.1) -- Pequeña pausa para no saturar
+			end
+		end)
+
+		local claimedRewards = data.ClaimedLevelRewards or {}
 
 		local claimedRewards = data.ClaimedLevelRewards or {}
 		for _, levelId in ipairs(claimedRewards) do
@@ -543,11 +586,18 @@ end
 if GetTopScoresFunc then
 	GetTopScoresFunc.OnServerInvoke = function(player, category)
 		local store = HighScoreStore -- Default
-		if category == "TimePlayed" then store = TimePlayedStore 
-		elseif category == "Streaks" then store = StreakStore
-		elseif category == "RobuxSpent" then store = RobuxSpentStore
-		elseif category == "Level" then store = LevelStore
-		elseif category == "Score5x5" then store = Score5x5Store
+
+		-- ? CORRECCIÓN: Usamos las variables correctas (Store) y revisamos el espacio en el nombre
+		if category == "TimePlayed" or category == "Time Played" then 
+			store = TimePlayedStore 
+		elseif category == "Streaks" then 
+			store = StreakStore
+		elseif category == "RobuxSpent" or category == "Robux Spent" then -- Aceptamos con y sin espacio
+			store = RobuxSpentStore -- ? AQUÍ ESTABA EL ERROR (Antes decía ODS)
+		elseif category == "Level" then 
+			store = LevelStore
+		elseif category == "Score5x5" or category == "5x5 Score" then 
+			store = Score5x5Store
 		end
 
 		local topScores = {}
@@ -557,8 +607,14 @@ if GetTopScoresFunc then
 			for _, entry in ipairs(pages:GetCurrentPage()) do
 				local name = "[Error]"
 				pcall(function() name = Players:GetNameFromUserIdAsync(entry.key) end)
-				table.insert(topScores, {name = name, value = entry.value, rank = rank, userId = entry.key})
-				rank = rank + 1
+
+				local userIdNum = tonumber(entry.key) or 0
+
+				-- Filtro para ocultar errores y al dueño
+				if name ~= "[Error]" and name ~= "OFFICIE_ROBLOX" and userIdNum > 0 then
+					table.insert(topScores, {name = name, value = entry.value, rank = rank, userId = entry.key})
+					rank = rank + 1
+				end
 			end
 		end
 		return topScores
@@ -575,9 +631,11 @@ if GetStatsFunc then
 			GamesPlayed = player:GetAttribute("GamesPlayed") or 0,
 			TimePlayed = totalTime,
 			TotalCoins = player:GetAttribute("TotalCoins") or 0,
+			TotalDiamonds = player:GetAttribute("TotalDiamonds") or 0, -- ¡AGREGADO!
 			TotalFruitGems = player:GetAttribute("TotalFruitGems") or 0,
 			TotalRobuxSpent = player:GetAttribute("TotalRobuxSpent") or 0,
 			HighScore5x5 = player:GetAttribute("HighScore5x5") or 0,
+
 			TitlesCount = (function() 
 				local c = 0
 				for n,v in pairs(player:GetAttributes()) do 
@@ -590,11 +648,22 @@ if GetStatsFunc then
 end
 
 -- 7. LÓGICA DE MULTIPLICADORES (GAMEPASSES)
+-- Agregamos los precios para poder sumar al "Total Spent" si lo compran desde la web
+local GAMEPASS_DATA = {
+	{Id = 1612413325, Price = 149, Name = "x2 Coins"},
+	{Id = 1613811032, Price = 249, Name = "x2 Gems"},
+	{Id = 1609347878, Price = 249, Name = "x2 XP"},
+	{Id = 1614668850, Price = 149, Name = "x2 Fruits"},
+	{Id = 1605082468, Price = 199, Name = "VIP"}
+}
+
+-- Mantenemos referencia rápida para el gameplay
 local PASS_IDS = {
 	Coins = 1612413325,
 	Gems = 1613811032,
 	XP = 1609347878,
-	Fruits = 1614668850
+	Fruits = 1614668850,
+	VIP = 1605082468
 }
 
 -- Detectar compra en el SERVIDOR para activarlo al instante
@@ -659,6 +728,10 @@ if AddDiamondEvent then
 		local leaderstats = player:FindFirstChild("leaderstats")
 		if leaderstats and leaderstats:FindFirstChild("Diamonds") then
 			leaderstats.Diamonds.Value = leaderstats.Diamonds.Value + amount
+
+			-- ? NUEVO: Actualizar el Total Histórico en tiempo real
+			local t = player:GetAttribute("TotalDiamonds") or 0
+			player:SetAttribute("TotalDiamonds", t + amount)
 		end
 	end)
 end

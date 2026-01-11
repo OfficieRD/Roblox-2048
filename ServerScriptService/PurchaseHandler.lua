@@ -10,7 +10,7 @@ local PRODUCTS = {
 	[3467195412] = {Type = "Coins", Amount = 5000},
 	[3467195674] = {Type = "Coins", Amount = 15000},
 	[3467195950] = {Type = "Coins", Amount = 25000},
-	[9240572528] = {Type = "Coins", Amount = 50000},
+	[3467196173] = {Type = "Coins", Amount = 50000},
 	[3467196400] = {Type = "Coins", Amount = 100000},
 
 	-- DIAMANTES
@@ -67,6 +67,10 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
 			elseif productData.Type == "Diamonds" then
 				if leaderstats:FindFirstChild("Diamonds") then
 					leaderstats.Diamonds.Value += productData.Amount
+
+					-- ? ACTUALIZAR TOTAL HISTÓRICO
+					local current = player:GetAttribute("TotalDiamonds") or 0
+					player:SetAttribute("TotalDiamonds", current + productData.Amount)
 				end
 
 				-- C) Fruit Gems

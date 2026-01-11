@@ -94,7 +94,8 @@ ClaimEvent.OnServerEvent:Connect(function(player)
 	local dayInCycle = ((streak - 1) % 30) + 1
 
 	-- RECOMPENSAS
-	local rewardAmt = 1500 + (dayInCycle * 500) -- BUFF
+	-- Fórmula corregida: 1000 base + (500 * día 1) = 1500
+	local rewardAmt = 1000 + (dayInCycle * 500) 
 	local rewardType = "Coins"
 
 	if dayInCycle % 7 == 0 then rewardType = "Gems"; rewardAmt = 50 + (dayInCycle * 10)

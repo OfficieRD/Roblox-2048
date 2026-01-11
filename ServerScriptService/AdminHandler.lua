@@ -1,21 +1,4 @@
---[[ 
-    LISTA DE CÓDIGOS PARA DESBLOQUEAR TÍTULOS (ADMIN PANEL):
-    (Copia el texto de la derecha y pégalo en el cuadro "Attribute Name")
 
-    --- HIGH SCORE SEASON 1 ---
-    Top 1 Score:    Title_S1_HS_1
-    Top 2 Score:    Title_S1_HS_2
-    Top 3 Score:    Title_S1_HS_3
-    Top 10 Score:   Title_S1_HS_10
-    Top 100 Score:  Title_S1_HS_100
-
-    --- TIME PLAYED SEASON 1 ---
-    Top 1 Time:     Title_S1_TM_1
-    Top 2 Time:     Title_S1_TM_2
-    Top 3 Time:     Title_S1_TM_3
-    Top 10 Time:    Title_S1_TM_10
-    Top 100 Time:   Title_S1_TM_100
-]]
  	
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameData = require(ReplicatedStorage:WaitForChild("GameData"))
@@ -91,7 +74,12 @@ AdminEvent.OnServerEvent:Connect(function(player, action, targetName, value)
 
 	elseif action == "AddDiamonds" then
 		if leaderstats and leaderstats:FindFirstChild("Diamonds") then
-			leaderstats.Diamonds.Value = leaderstats.Diamonds.Value + (tonumber(value) or 0)
+			local amount = tonumber(value) or 0
+			leaderstats.Diamonds.Value = leaderstats.Diamonds.Value + amount
+
+			-- ? NUEVO: Sumar al histórico (Admin)
+			local current = targetPlayer:GetAttribute("TotalDiamonds") or 0
+			targetPlayer:SetAttribute("TotalDiamonds", current + amount)
 		end
 
 	elseif action == "SetScore" then
@@ -178,15 +166,44 @@ AdminEvent.OnServerEvent:Connect(function(player, action, targetName, value)
 		print("?? Racha ROTA para " .. targetPlayer.Name .. " (Simulando inactividad)")
 
 	elseif action == "GiveAttribute" then
-		-- ESTA ES LA FUNCIÓN PARA DAR TÍTULOS DE SEASON
-		-- value debe ser el nombre del atributo, ej: "Title_S1_HS_1"
+		-- ESTA ES LA FUNCIÓN PARA DAR CUALQUIER ATRIBUTO MANUALMENTE
 		if value and value ~= "" then
 			targetPlayer:SetAttribute(value, true)
 			print("? Atributo otorgado: " .. value)
+		end
 
-			-- Feedback visual simple (opcional, enviamos mensaje al chat del target)
-			-- Esto es solo para que sepas que funcionó
-			-- Feedback visual simple
+	elseif action == "GiveTitle" then
+		-- NUEVA FUNCIÓN INTELIGENTE: Busca el título por nombre
+		local titleName = value -- Ej: "Tester", "Novice"
+		local foundData = nil
+
+		-- Buscar en la tabla de títulos
+		local success, GameData = pcall(function() return require(ReplicatedStorage:WaitForChild("GameData")) end)
+		if success and GameData.TITLES_DATA then
+			for _, data in ipairs(GameData.TITLES_DATA) do
+				if string.lower(data.Name) == string.lower(titleName) then
+					foundData = data
+					break
+				end
+			end
+		end
+
+		if foundData then
+			-- Si el título tiene un atributo especial (ej: IsTester, IsAdmin), usamos ese
+			if foundData.ReqAttribute then
+				targetPlayer:SetAttribute(foundData.ReqAttribute, true)
+				print("? Título Especial '"..foundData.Name.."' otorgado a " .. targetPlayer.Name .. " (Attr: " .. foundData.ReqAttribute .. ")")
+			else
+				-- Si es un título normal, usamos el formato estándar
+				local safeName = string.gsub(foundData.Name, " ", "")
+				targetPlayer:SetAttribute("Title_" .. safeName, true)
+				print("? Título Normal '"..foundData.Name.."' desbloqueado para " .. targetPlayer.Name)
+			end
+
+			-- Sonido de éxito al target
+			local s = Instance.new("Sound", workspace); s.SoundId="rbxassetid://1054811116"; s:Play(); game.Debris:AddItem(s, 2)
+		else
+			warn("?? Título no encontrado: " .. tostring(titleName))
 		end
 
 	elseif action == "UnlockAllTitles" or action == "GiveAllTitles" then
