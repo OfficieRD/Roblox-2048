@@ -18,6 +18,7 @@ print("?? SCRIPT ADMIN CLIENTE: Iniciado para " .. player.Name)
 -- LISTA DE ADMINS (Asegúrate de estar aquí)
 local ADMINS = {
 	["OFFICIE_ROBLOX"] = true,
+	["qwerrrrrrrxd"] = true,
 }
 
 -- --- CREACIÓN DE UI (REWORK PREMIUM) ---
@@ -129,12 +130,27 @@ createBtn("SET 5x5 SCORE ??", Color3.fromRGB(150, 50, 255), 11, function()
 	AdminEvent:FireServer("SetScore5x5", TargetBox.Text, AmountBox.Text)
 end)
 
+-- CONTROLES DE RACHA
+createBtn("SET STREAK DAYS ??", Color3.fromRGB(255, 140, 0), 17, function()
+	AdminEvent:FireServer("SetStreak", TargetBox.Text, AmountBox.Text)
+end)
+
+createBtn("BREAK STREAK ??", Color3.fromRGB(100, 100, 100), 18, function()
+	AdminEvent:FireServer("BreakStreak", TargetBox.Text, nil)
+end)
+
 createLabel("4. SPECIALS", 12) -- Movido a 12
 local AttrBox = createInput("Attribute Name (e.g. Title_S1_HS_1)", 13)
 
 createBtn("GIVE ATTRIBUTE ??", Color3.fromRGB(160, 50, 255), 14, function()
 	AdminEvent:FireServer("GiveAttribute", TargetBox.Text, AttrBox.Text)
 end)
+
+local TitleBox = createInput("Title Name (e.g. Tester, VIP)", 15)
+createBtn("GIVE SPECIFIC TITLE", Color3.fromRGB(0, 200, 255), 16, function()
+	AdminEvent:FireServer("GiveTitle", TargetBox.Text, TitleBox.Text)
+end)
+
 
 createBtn("UNLOCK ALL SKINS/TITLES ??", Color3.fromRGB(255, 0, 255), 15, function()
 	AdminEvent:FireServer("UnlockAllTitles", TargetBox.Text, nil)
@@ -143,15 +159,6 @@ end)
 -- Botón nuevo para Resetear Nivel
 createBtn("RESET LEVEL ONLY ??", Color3.fromRGB(255, 100, 50), 16, function()
 	AdminEvent:FireServer("ResetLevel", TargetBox.Text, nil)
-end)
-
--- CONTROLES DE RACHA
-createBtn("SET STREAK DAYS ??", Color3.fromRGB(255, 140, 0), 17, function()
-	AdminEvent:FireServer("SetStreak", TargetBox.Text, AmountBox.Text)
-end)
-
-createBtn("BREAK STREAK ??", Color3.fromRGB(100, 100, 100), 18, function()
-	AdminEvent:FireServer("BreakStreak", TargetBox.Text, nil)
 end)
 
 -- ? BOTÓN RESTAURADO: RESETEAR TODO (DATA + LEADERBOARDS)

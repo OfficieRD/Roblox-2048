@@ -13,6 +13,19 @@ local GuiService = game:GetService("GuiService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
+-- ? DESACTIVAR BOTÓN DE RESET (FIX UI DESAPARECE)
+task.spawn(function()
+	local StarterGui = game:GetService("StarterGui")
+	local retries = 0
+	repeat
+		local success = pcall(function() 
+			StarterGui:SetCore("ResetButtonCallback", false) 
+		end)
+		if not success then task.wait(0.5) end
+		retries = retries + 1
+	until success or retries > 20
+end)
+
 -------------------------------------------------------------------------
 -- 1. CONFIGURACIÓN GLOBAL Y VISUAL
 -------------------------------------------------------------------------
@@ -470,7 +483,7 @@ CTitle.ZIndex = 1601
 
 -- Texto de Like + Favorite
 local InfoLabel = Instance.new("TextLabel", CodesFrame)
-InfoLabel.Text = "? Favorite + ?? Like for 1,000 coins!"
+InfoLabel.Text = "? Favorite + ?? Like FOR MORE CODES!"
 InfoLabel.Size = UDim2.new(0.9, 0, 0.1, 0); InfoLabel.Position = UDim2.new(0.05, 0, 0.25, 0)
 InfoLabel.BackgroundTransparency = 1; InfoLabel.TextColor3 = Color3.fromRGB(255, 255, 100); InfoLabel.Font = Enum.Font.GothamBold; InfoLabel.TextScaled = true
 InfoLabel.ZIndex = 1601
@@ -1502,7 +1515,16 @@ applySkinColors = function() -- ?? Asegúrate que NO tenga "local" al principio
 
 	-- Aplicar colores a los otros frames
 	-- ?? CORRECCIÓN: El menú SIEMPRE mantiene el color original (Default), no cambia con la skin.
-	if MenuFrame then MenuFrame.BackgroundColor3 = DEFAULT_THEME_COLORS.Bg end
+	-- Aplicar colores a los otros frames
+	-- ?? CORRECCIÓN: Respetar Dark Mode si está activo, si no usar Default
+	if MenuFrame then 
+		local isDarkNow = player:GetAttribute("SavedDarkMode") == true
+		if isDarkNow then
+			MenuFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25) -- Color Oscuro
+		else
+			MenuFrame.BackgroundColor3 = DEFAULT_THEME_COLORS.Bg -- Color Claro
+		end
+	end
 
 	-- El tablero sí cambia
 	if BoardFrame then BoardFrame.BackgroundColor3 = BOARD_COLOR end
@@ -2148,9 +2170,10 @@ toggleMenuButtons = function(visible)
 	if LeaderboardButton then LeaderboardButton.Visible = visible end
 	if MenuTitle then MenuTitle.Visible = visible end
 
-	-- NUEVO: Ocultar la barra de estadísticas global (Monedas/Diamantes/Frutas)
+	-- MANTENER VISIBLE: Barra de estadísticas global (Monedas/Diamantes/Frutas)
+	-- Ya no la ocultamos con 'visible', forzamos que se vea para que aparezca sobre los menús
 	local gStats = ScreenGui:FindFirstChild("GlobalStats")
-	if gStats then gStats.Visible = visible end
+	if gStats then gStats.Visible = true end
 end
 
 -------------------------------------------------------------------------
@@ -2602,7 +2625,6 @@ end)
 MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(playerWhoPurchased, passId, wasPurchased)
 
 	if playerWhoPurchased == player and wasPurchased == true then
-		print("? GamePass Comprado ID: " .. tostring(passId))
 
 		-- Sonido de éxito
 		local s = Instance.new("Sound", workspace); s.SoundId="rbxassetid://2865227271"; s:Play(); game.Debris:AddItem(s, 2)
@@ -2635,7 +2657,6 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(playerWhoPurc
 		end
 
 	else
-		print("? Compra cancelada o fallida para ID:", passId)
 	end
 end)
 
@@ -2826,10 +2847,15 @@ end)
 -------------------------------------------------------------------------
 if player then
 	player:GetAttributeChangedSignal("CurrentSkin"):Connect(function()
-		-- Llamamos a la función de pintar (debe existir en el script)
+		-- 1. ACTUALIZAR VARIABLE LOCAL (¡Esto es lo que faltaba!)
+		local newVal = player:GetAttribute("CurrentSkin")
+		if newVal and newVal ~= "" then
+			currentSkin = newVal
+		end
+
+		-- 2. LLAMAR AL PINTOR
 		if applySkinColors then
 			applySkinColors()
-			print("?? Skin actualizada visualmente por carga de datos.")
 		end
 	end)
 end
